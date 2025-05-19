@@ -1,4 +1,4 @@
-package com.turinmachin.unilife.image;
+package com.turinmachin.unilife.image.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

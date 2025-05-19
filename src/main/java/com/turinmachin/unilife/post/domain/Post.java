@@ -1,10 +1,10 @@
-package com.turinmachin.unilife.post;
+package com.turinmachin.unilife.post.domain;
 
-import com.turinmachin.unilife.comment.Comment;
-import com.turinmachin.unilife.degree.Degree;
-import com.turinmachin.unilife.image.Image;
-import com.turinmachin.unilife.university.University;
-import com.turinmachin.unilife.user.User;
+import com.turinmachin.unilife.comment.domain.Comment;
+import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.image.domain.Image;
+import com.turinmachin.unilife.university.domain.University;
+import com.turinmachin.unilife.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

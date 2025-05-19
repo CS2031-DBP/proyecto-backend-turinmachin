@@ -1,6 +1,7 @@
-package com.turinmachin.unilife.post;
+package com.turinmachin.unilife.post.domain;
 
-import com.turinmachin.unilife.user.User;
+import com.turinmachin.unilife.post.infrastructure.VoteTypeConverter;
+import com.turinmachin.unilife.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.EmbeddedId;

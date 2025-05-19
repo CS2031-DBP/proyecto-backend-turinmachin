@@ -1,7 +1,7 @@
-package com.turinmachin.unilife.comment;
+package com.turinmachin.unilife.comment.domain;
 
-import com.turinmachin.unilife.post.Post;
-import com.turinmachin.unilife.user.User;
+import com.turinmachin.unilife.post.domain.Post;
+import com.turinmachin.unilife.user.domain.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -1,7 +1,7 @@
-package com.turinmachin.unilife.degree;
+package com.turinmachin.unilife.degree.domain;
 
-import com.turinmachin.unilife.university.University;
-import com.turinmachin.unilife.user.User;
+import com.turinmachin.unilife.university.domain.University;
+import com.turinmachin.unilife.user.domain.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

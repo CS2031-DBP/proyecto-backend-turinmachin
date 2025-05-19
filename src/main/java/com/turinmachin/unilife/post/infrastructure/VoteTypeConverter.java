@@ -1,5 +1,6 @@
-package com.turinmachin.unilife.post;
+package com.turinmachin.unilife.post.infrastructure;
 
+import com.turinmachin.unilife.post.domain.VoteType;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

@@ -1,7 +1,7 @@
-package com.turinmachin.unilife.university;
+package com.turinmachin.unilife.university.domain;
 
-import com.turinmachin.unilife.degree.Degree;
-import com.turinmachin.unilife.post.Post;
+import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.post.domain.Post;
 import jakarta.persistence.*;
 import lombok.Data;
 

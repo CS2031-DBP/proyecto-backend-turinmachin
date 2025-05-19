@@ -1,4 +1,4 @@
-package com.turinmachin.unilife.user;
+package com.turinmachin.unilife.user.domain;
 
 public enum Role {
     ADMIN,

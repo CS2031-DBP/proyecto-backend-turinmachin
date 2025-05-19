@@ -1,9 +1,9 @@
-package com.turinmachin.unilife.user;
+package com.turinmachin.unilife.user.domain;
 
-import com.turinmachin.unilife.degree.Degree;
-import com.turinmachin.unilife.image.Image;
-import com.turinmachin.unilife.post.Post;
-import com.turinmachin.unilife.university.University;
+import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.image.domain.Image;
+import com.turinmachin.unilife.post.domain.Post;
+import com.turinmachin.unilife.university.domain.University;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;

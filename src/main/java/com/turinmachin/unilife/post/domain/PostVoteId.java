@@ -1,4 +1,4 @@
-package com.turinmachin.unilife.post;
+package com.turinmachin.unilife.post.domain;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;

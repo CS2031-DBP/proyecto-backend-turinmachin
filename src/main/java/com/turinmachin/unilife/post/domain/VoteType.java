@@ -1,4 +1,4 @@
-package com.turinmachin.unilife.post;
+package com.turinmachin.unilife.post.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
