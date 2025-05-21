@@ -1,19 +1,32 @@
 package com.turinmachin.unilife.post.domain;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.Id;
+
 import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.image.domain.Image;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.user.domain.User;
-import jakarta.persistence.*;
-import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.OrderColumn;
+import lombok.Data;
 
 @Data
 @Entity
@@ -39,7 +52,7 @@ public class Post {
     private University university;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = true)
     private Degree degree;
 
     @ElementCollection
@@ -59,5 +72,13 @@ public class Post {
     @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
+
+    public Integer getScore() {
+        return votes.stream()
+                .map(PostVote::getValue)
+                .map(VoteType::getValue)
+                .map(s -> (int) s)
+                .reduce(0, Integer::sum);
+    }
 
 }

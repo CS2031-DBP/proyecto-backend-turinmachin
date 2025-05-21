@@ -1,23 +1,41 @@
 package com.turinmachin.unilife.user.domain;
 
-import com.turinmachin.unilife.degree.domain.Degree;
-import com.turinmachin.unilife.image.domain.Image;
-import com.turinmachin.unilife.post.domain.Post;
-import com.turinmachin.unilife.university.domain.University;
-import jakarta.persistence.*;
-import lombok.Data;
-import org.hibernate.annotations.ColumnDefault;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.image.domain.Image;
+import com.turinmachin.unilife.post.domain.Post;
+import com.turinmachin.unilife.university.domain.University;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Data
 @Entity
@@ -31,6 +49,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String username;
 
+    @Column(nullable = true)
     private String displayName;
 
     @Column(nullable = false, unique = true)
@@ -39,33 +58,32 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private UUID verificationId;
 
-    @ColumnDefault("false")
-    @Column(nullable = false)
-    private Boolean verified = false;
-
-    @Column
+    @Column(nullable = true)
     private String bio;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = true)
     private University university;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = true)
     private Degree degree;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = true)
     private Image profilePicture;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    // PERF: remove FetchType.EAGER to prevent unnecessary fetching
+    // Non-trivial because it causes errors with ModelMapper on getStreak() and
+    // getLastStreakDate()
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("createdAt DESC")
     private List<Post> posts = new ArrayList<>();
 
@@ -77,11 +95,84 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    // Agregar lógica de pre persist, para comprobar que un usuario sin universidad no pueda estar en una carrera.
+    public boolean getVerified() {
+        return verificationId == null;
+    }
+
+    public Integer getStreak() {
+        LocalDate expectedDate = LocalDate.now(ZoneOffset.UTC);
+        int streak = 0;
+
+        for (Post post : posts) {
+            LocalDate postDate = post.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate();
+
+            if (postDate.isAfter(expectedDate)) {
+                continue;
+            }
+
+            if (postDate.equals(expectedDate)) {
+                streak++;
+                expectedDate = expectedDate.minusDays(1);
+            } else {
+                break;
+            }
+        }
+
+        return streak;
+    }
+
+    public LocalDate getLastStreakDate() {
+        return Optional.ofNullable(posts)
+                .flatMap(posts -> posts.stream().findFirst())
+                .map(post -> post.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate())
+                .orElse(null);
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (degree != null && university == null) {
+            if (university == null) {
+                throw new IllegalStateException("User cannot have a degree without a university");
+            }
+
+            if (!university.getDegrees().contains(degree)) {
+                throw new IllegalStateException("User has degree not in university");
+            }
+        }
+
+        if (university != null && !university.ownsEmail(email)) {
+            throw new IllegalStateException("User email is not their university's");
+        }
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        User other = (User) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
 }
