@@ -1,0 +1,79 @@
+package com.turinmachin.unilife.degree.application;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.turinmachin.unilife.common.domain.ListMapper;
+import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.degree.domain.DegreeService;
+import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
+import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
+import com.turinmachin.unilife.degree.dto.UpdateDegreeDto;
+import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/degrees")
+public class DegreeController {
+
+    @Autowired
+    private DegreeService degreeService;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private ListMapper listMapper;
+
+    @GetMapping
+    public List<DegreeResponseDto> getAllDegrees() {
+        List<Degree> degrees = degreeService.getAllDegrees();
+        return listMapper.map(degrees, DegreeResponseDto.class).toList();
+    }
+
+    @GetMapping("/{id}")
+    public DegreeResponseDto getDegree(@PathVariable UUID id) {
+        Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
+        return modelMapper.map(degree, DegreeResponseDto.class);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public DegreeResponseDto createDegree(@Valid @RequestBody CreateDegreeDto dto) {
+        Degree degree = degreeService.createDegree(dto);
+        return modelMapper.map(degree, DegreeResponseDto.class);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public DegreeResponseDto updateDegree(@PathVariable UUID id, @Valid @RequestBody UpdateDegreeDto dto) {
+        Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
+        Degree updatedDegree = degreeService.updateDegree(degree, dto);
+        return modelMapper.map(updatedDegree, DegreeResponseDto.class);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void deleteDegree(@PathVariable UUID id) {
+        Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
+        degreeService.deleteDegree(degree);
+    }
+
+}
