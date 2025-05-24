@@ -6,6 +6,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.UUID;
+
 
 @Service
 @Transactional
@@ -17,6 +20,8 @@ public class CommentService {
     @Autowired
     private ModelMapper modelMapper;
 
-
+    public Optional<Comment> getPostCommentById(UUID postId, UUID id) {
+        return commentRepository.findByIdAndPostId(id, postId);
+    }
 
 }
