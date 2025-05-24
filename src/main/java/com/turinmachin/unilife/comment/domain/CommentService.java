@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.comment.domain;
 
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
+import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
 import com.turinmachin.unilife.comment.infrastructure.CommentRepository;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.user.domain.User;
@@ -31,6 +32,11 @@ public class CommentService {
         Comment comment = modelMapper.map(commentDto, Comment.class);
         comment.setAuthor(author);
         comment.setPost(post);
+        return commentRepository.save(comment);
+    }
+
+    public Comment updateComment(Comment comment, UpdateCommentDto update) {
+        comment.setContent(update.getContent());
         return commentRepository.save(comment);
     }
 
