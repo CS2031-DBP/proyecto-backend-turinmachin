@@ -1,8 +1,12 @@
 package com.turinmachin.unilife.post.domain;
 
+import com.turinmachin.unilife.image.domain.Image;
 import com.turinmachin.unilife.image.domain.ImageService;
+import com.turinmachin.unilife.post.dto.CreatePostDto;
 import com.turinmachin.unilife.post.infrastructure.PostRepository;
 import com.turinmachin.unilife.post.infrastructure.PostVoteRepository;
+import com.turinmachin.unilife.user.domain.User;
+import com.turinmachin.unilife.user.exception.UserWithoutUniversityException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +46,23 @@ public class PostService {
 
     public Optional<Post> getPostById(UUID id) {
         return postRepository.findById(id);
+    }
+
+    public Post createPost(CreatePostDto dto, User author) throws IOException {
+        if (author.getUniversity() == null) {
+            throw new UserWithoutUniversityException();
+        }
+
+        Post post = modelMapper.map(dto, Post.class);
+        post.setAuthor(author);
+        post.setUniversity(author.getUniversity());
+        post.setDegree(author.getDegree());
+        post.setTags(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
+
+        List<Image> images = imageService.createImageBatch(dto.getImages());
+        post.setImages(images);
+
+        return postRepository.save(post);
     }
 
 
