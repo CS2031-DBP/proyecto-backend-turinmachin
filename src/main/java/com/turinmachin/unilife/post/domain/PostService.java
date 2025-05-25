@@ -3,6 +3,7 @@ package com.turinmachin.unilife.post.domain;
 import com.turinmachin.unilife.image.domain.Image;
 import com.turinmachin.unilife.image.domain.ImageService;
 import com.turinmachin.unilife.post.dto.CreatePostDto;
+import com.turinmachin.unilife.post.dto.UpdatePostDto;
 import com.turinmachin.unilife.post.infrastructure.PostRepository;
 import com.turinmachin.unilife.post.infrastructure.PostVoteRepository;
 import com.turinmachin.unilife.user.domain.User;
@@ -63,6 +64,24 @@ public class PostService {
         post.setImages(images);
 
         return postRepository.save(post);
+    }
+
+    public Post updatePost(Post post, UpdatePostDto dto) {
+        post.setContent(dto.getContent());
+        post.setTags(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
+
+        // TODO: support updating post images
+
+        return postRepository.save(post);
+    }
+
+    public void deletePost(Post post) {
+        imageService.deleteImageBatch(post.getImages());
+        postRepository.delete(post);
+    }
+
+    public Optional<PostVote> getPostVote(UUID postId, UUID userId) {
+        return postVoteRepository.findById(new PostVoteId(postId, userId));
     }
 
 
