@@ -1,0 +1,85 @@
+package com.turinmachin.unilife.university.domain;
+
+import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.degree.domain.DegreeService;
+import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
+import com.turinmachin.unilife.university.dto.CreateUniversityDto;
+import com.turinmachin.unilife.university.dto.DegreeAlreadyPresent;
+import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
+import com.turinmachin.unilife.university.exception.UniversityNameConflictException;
+import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@Transactional
+public class UniversityService {
+
+    @Autowired
+    private UniversityRepository universityRepository;
+
+    @Autowired
+    private DegreeService degreeService;
+
+    // TODO: use UserService instead of UserRepository directly
+    // Non-trivial because doing so creates a circular dependency
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public List<University> getAllUniversities() {
+        return universityRepository.findAll();
+    }
+
+    public Optional<University> getUniversityById(UUID id) {
+        return universityRepository.findById(id);
+    }
+
+    public University createUniversity(CreateUniversityDto dto) {
+        if (universityRepository.existsByName(dto.getName())) {
+            throw new UniversityNameConflictException();
+        }
+
+        University university = modelMapper.map(dto, University.class);
+
+        List<Degree> degrees = dto.getDegreeIds()
+                .stream()
+                .map(id -> degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new))
+                .toList();
+        university.setDegrees(degrees);
+
+        return universityRepository.save(university);
+
+    }
+
+    public University updateUniversity(University university, UpdateUniversityDto dto) {
+        if (universityRepository.existsByName(dto.getName())) {
+            throw new UniversityNameConflictException();
+        }
+
+        university.setName(dto.getName());
+        university.setEmailDomains(dto.getEmailDomains());
+
+        return universityRepository.save(university);
+    }
+
+    public University addDegreeToUniversity(University university, Degree degree) {
+        if (university.getDegrees().contains(degree)) {
+            throw new DegreeAlreadyPresent();
+        }
+        university.getDegrees().add(degree);
+        return universityRepository.save(university);
+    }
+
+    public University removeDegreeFromUniversity(University university, Degree degree) {
+        university.getDegrees().remove(degree);
+        return universityRepository.save(university);
+    }
+
+}
