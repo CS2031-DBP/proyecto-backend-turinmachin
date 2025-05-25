@@ -1,5 +1,6 @@
 package com.turinmachin.unilife.post.domain;
 
+import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.image.domain.Image;
 import com.turinmachin.unilife.image.domain.ImageService;
 import com.turinmachin.unilife.post.dto.CreatePostDto;
@@ -82,6 +83,34 @@ public class PostService {
 
     public Optional<PostVote> getPostVote(UUID postId, UUID userId) {
         return postVoteRepository.findById(new PostVoteId(postId, userId));
+    }
+
+    public PostVote setPostVote(Post post, User user, VoteType voteType) {
+        PostVoteId voteId = new PostVoteId(post.getId(), user.getId());
+
+        PostVote vote = postVoteRepository.findById(voteId)
+                .orElseGet(() -> {
+                    PostVote newVote = new PostVote();
+                    newVote.setId(voteId);
+                    newVote.setPost(post);
+                    newVote.setAuthor(user);
+                    return newVote;
+                });
+
+        if (vote.getValue() == voteType) {
+            throw new ConflictException("Vote already present");
+        }
+
+        vote.setValue(voteType);
+        return postVoteRepository.save(vote);
+    }
+
+    public void removePostVote(PostVote vote) {
+        postVoteRepository.delete(vote);
+    }
+
+    public void deletePostsByUniversityId(UUID universityId) {
+        postRepository.deleteByUniversityId(universityId);
     }
 
 
