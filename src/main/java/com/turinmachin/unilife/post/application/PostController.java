@@ -8,8 +8,10 @@ import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
 import com.turinmachin.unilife.comment.exception.CommentNotFoundException;
 import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.common.exception.ForbiddenException;
+import com.turinmachin.unilife.common.exception.NotFoundException;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.post.domain.PostService;
+import com.turinmachin.unilife.post.domain.PostVote;
 import com.turinmachin.unilife.post.domain.VoteType;
 import com.turinmachin.unilife.post.dto.CreatePostDto;
 import com.turinmachin.unilife.post.dto.PostResponseDto;
@@ -176,6 +178,38 @@ public class PostController {
         }
 
         postService.deletePost(post);
+    }
+
+    @DeleteMapping("/{id}/votes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public void deletePostVote(@PathVariable UUID id, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        PostVote vote = postService
+                .getPostVote(id, user.getId())
+                .orElseThrow(() -> new NotFoundException("Post or vote not found"));
+
+        postService.removePostVote(vote);
+    }
+
+    @DeleteMapping("/{id}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public void deletePostComment(@PathVariable UUID id, @PathVariable UUID commentId, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        Comment comment = commentService
+                .getPostCommentById(id, commentId)
+                .orElseThrow(CommentNotFoundException::new);
+
+        if (user.getRole() == Role.USER && !user.equals(comment.getAuthor())) {
+            throw new ForbiddenException();
+        }
+
+        commentService.deleteComment(comment);
     }
 
 }
