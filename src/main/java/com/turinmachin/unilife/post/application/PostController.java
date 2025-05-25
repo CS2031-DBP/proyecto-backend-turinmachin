@@ -3,12 +3,16 @@ package com.turinmachin.unilife.post.application;
 import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.comment.domain.CommentService;
 import com.turinmachin.unilife.comment.dto.CommentResponseDto;
+import com.turinmachin.unilife.comment.dto.CreateCommentDto;
 import com.turinmachin.unilife.comment.exception.CommentNotFoundException;
 import com.turinmachin.unilife.common.domain.ListMapper;
+import com.turinmachin.unilife.common.exception.ForbiddenException;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.post.domain.PostService;
+import com.turinmachin.unilife.post.domain.VoteType;
 import com.turinmachin.unilife.post.dto.CreatePostDto;
 import com.turinmachin.unilife.post.dto.PostResponseDto;
+import com.turinmachin.unilife.post.dto.UpdatePostDto;
 import com.turinmachin.unilife.post.exception.PostNotFoundException;
 import com.turinmachin.unilife.post.infrastructure.PostSpecifications;
 import com.turinmachin.unilife.user.domain.User;
@@ -87,6 +91,46 @@ public class PostController {
 
         Post post = postService.createPost(dto, user);
         return modelMapper.map(post, PostResponseDto.class);
+    }
+
+    @PostMapping("/{id}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public CommentResponseDto createPostComment(@PathVariable UUID id, @Valid @RequestBody CreateCommentDto dto,
+                                                Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        Post post = postService.getPostById(id).orElseThrow(PostNotFoundException::new);
+        Comment comment = commentService.createComment(dto, user, post);
+
+        return modelMapper.map(comment, CommentResponseDto.class);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public PostResponseDto updatePost(@PathVariable UUID id, @Valid @RequestBody UpdatePostDto dto,
+                                      Authentication authentication) {
+        Post post = postService.getPostById(id).orElseThrow(PostNotFoundException::new);
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        if (!user.equals(post.getAuthor())) {
+            throw new ForbiddenException();
+        }
+
+        Post updatedPost = postService.updatePost(post, dto);
+        return modelMapper.map(updatedPost, PostResponseDto.class);
+    }
+
+    @PutMapping("/{id}/upvotes")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public void addPostUpvote(@PathVariable UUID id, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        Post post = postService.getPostById(id).orElseThrow(PostNotFoundException::new);
+        postService.setPostVote(post, user, VoteType.UPVOTE);
     }
 
 }
