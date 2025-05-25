@@ -4,6 +4,7 @@ import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.comment.domain.CommentService;
 import com.turinmachin.unilife.comment.dto.CommentResponseDto;
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
+import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
 import com.turinmachin.unilife.comment.exception.CommentNotFoundException;
 import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.common.exception.ForbiddenException;
@@ -15,6 +16,7 @@ import com.turinmachin.unilife.post.dto.PostResponseDto;
 import com.turinmachin.unilife.post.dto.UpdatePostDto;
 import com.turinmachin.unilife.post.exception.PostNotFoundException;
 import com.turinmachin.unilife.post.infrastructure.PostSpecifications;
+import com.turinmachin.unilife.user.domain.Role;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import jakarta.validation.Valid;
@@ -131,6 +133,49 @@ public class PostController {
 
         Post post = postService.getPostById(id).orElseThrow(PostNotFoundException::new);
         postService.setPostVote(post, user, VoteType.UPVOTE);
+    }
+
+    @PutMapping("/{id}/downvotes")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public void addPostDownvote(@PathVariable UUID id, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        Post post = postService.getPostById(id).orElseThrow(PostNotFoundException::new);
+        postService.setPostVote(post, user, VoteType.DOWNVOTE);
+    }
+
+    @PutMapping("/{id}/comments/{commentId}")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public CommentResponseDto updatePostComment(@PathVariable UUID id, @PathVariable UUID commentId,
+                                                @Valid @RequestBody UpdateCommentDto dto,
+                                                Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        Comment comment = commentService.getPostCommentById(id, commentId).orElseThrow(CommentNotFoundException::new);
+
+        if (!user.equals(comment.getAuthor())) {
+            throw new ForbiddenException();
+        }
+
+        Comment updatedComment = commentService.updateComment(comment, dto);
+        return modelMapper.map(updatedComment, CommentResponseDto.class);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public void deletePost(@PathVariable UUID id, Authentication authentication) {
+        Post post = postService.getPostById(id).orElseThrow(PostNotFoundException::new);
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        if (user.getRole() == Role.USER && !user.equals(post.getAuthor())) {
+            throw new ForbiddenException();
+        }
+
+        postService.deletePost(post);
     }
 
 }
