@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +29,7 @@ import com.turinmachin.unilife.university.exception.UniversityWithoutDegreeExcep
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.UpdateUserDto;
 import com.turinmachin.unilife.user.dto.UpdateUserPasswordDto;
+import com.turinmachin.unilife.user.event.SendVerificationEmailEvent;
 import com.turinmachin.unilife.user.exception.EmailConflictException;
 import com.turinmachin.unilife.user.exception.OnlyAdminException;
 import com.turinmachin.unilife.user.exception.UserNotVerifiedException;
@@ -55,6 +57,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -171,7 +176,7 @@ public class UserService implements UserDetailsService {
             user.setDegree(null);
         }
 
-        // TODO: publish verification email event
+        eventPublisher.publishEvent(new SendVerificationEmailEvent(user));
         return userRepository.save(user);
     }
 
