@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.turinmachin.unilife.image.exception.EmptyImageException;
+import com.turinmachin.unilife.image.exception.ImageTooLargeException;
 
 @Service
 public class StorageService {
@@ -21,6 +24,14 @@ public class StorageService {
     private String bucketName;
 
     public String uploadFile(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new EmptyImageException();
+        }
+
+        if (file.getSize() > 5242880) {
+            throw new ImageTooLargeException();
+        }
+
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
