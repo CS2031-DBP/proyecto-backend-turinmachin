@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
 import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
 import com.turinmachin.unilife.comment.infrastructure.CommentRepository;
-import com.turinmachin.unilife.common.exception.NotFoundException;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.user.domain.User;
 
@@ -35,11 +34,14 @@ public class CommentService {
         comment.setAuthor(author);
         comment.setPost(post);
 
-        if (commentDto.getParentId() != null) {
-            Comment parent = commentRepository.findByIdAndPostId(commentDto.getParentId(), post.getId())
-                    .orElseThrow(() -> new NotFoundException("Parent comment not found"));
-            comment.setParent(parent);
-        }
+        return commentRepository.save(comment);
+    }
+
+    public Comment createCommentReply(CreateCommentDto commentDto, User author, Comment parent) {
+        Comment comment = modelMapper.map(commentDto, Comment.class);
+        comment.setAuthor(author);
+        comment.setPost(parent.getPost());
+        comment.setParent(parent);
 
         return commentRepository.save(comment);
     }

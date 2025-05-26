@@ -101,7 +101,7 @@ public class PostController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_USER')")
     public CommentResponseDto createPostComment(@PathVariable UUID id, @Valid @RequestBody CreateCommentDto dto,
-                                                Authentication authentication) {
+            Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
@@ -111,10 +111,25 @@ public class PostController {
         return modelMapper.map(comment, CommentResponseDto.class);
     }
 
+    @PostMapping("/{id}/comments/{commentId}/replies")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public CommentResponseDto createPostCommentReply(@PathVariable UUID id, @PathVariable UUID commentId,
+            @Valid @RequestBody CreateCommentDto dto,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.checkUserVerified(user);
+
+        Comment parent = commentService.getPostCommentById(id, commentId).orElseThrow(CommentNotFoundException::new);
+        Comment comment = commentService.createCommentReply(dto, user, parent);
+
+        return modelMapper.map(comment, CommentResponseDto.class);
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_USER')")
     public PostResponseDto updatePost(@PathVariable UUID id, @Valid @RequestBody UpdatePostDto dto,
-                                      Authentication authentication) {
+            Authentication authentication) {
         Post post = postService.getPostById(id).orElseThrow(PostNotFoundException::new);
         User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
@@ -150,8 +165,8 @@ public class PostController {
     @PutMapping("/{id}/comments/{commentId}")
     @PreAuthorize("hasRole('ROLE_USER')")
     public CommentResponseDto updatePostComment(@PathVariable UUID id, @PathVariable UUID commentId,
-                                                @Valid @RequestBody UpdateCommentDto dto,
-                                                Authentication authentication) {
+            @Valid @RequestBody UpdateCommentDto dto,
+            Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
