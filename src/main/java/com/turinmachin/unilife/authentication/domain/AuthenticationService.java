@@ -6,9 +6,12 @@ import com.turinmachin.unilife.authentication.exception.InvalidCredentialsExcept
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
+import com.turinmachin.unilife.user.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class AuthenticationService {
@@ -33,5 +36,10 @@ public class AuthenticationService {
         JwtAuthResponseDto response = new JwtAuthResponseDto();
         response.setToken(jwtService.generateToken(user));
         return response;
+    }
+
+    public User verifyUser(UUID verificationId) {
+        User user = userService.getUserByVerificationId(verificationId).orElseThrow(UserNotFoundException::new);
+        return userService.verifyUser(user);
     }
 }
