@@ -1,18 +1,20 @@
 package com.turinmachin.unilife.comment.domain;
 
-import com.turinmachin.unilife.comment.dto.CreateCommentDto;
-import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
-import com.turinmachin.unilife.comment.infrastructure.CommentRepository;
-import com.turinmachin.unilife.post.domain.Post;
-import com.turinmachin.unilife.user.domain.User;
-import jakarta.transaction.Transactional;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import com.turinmachin.unilife.comment.dto.CreateCommentDto;
+import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
+import com.turinmachin.unilife.comment.infrastructure.CommentRepository;
+import com.turinmachin.unilife.common.exception.NotFoundException;
+import com.turinmachin.unilife.post.domain.Post;
+import com.turinmachin.unilife.user.domain.User;
 
+import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
@@ -32,6 +34,13 @@ public class CommentService {
         Comment comment = modelMapper.map(commentDto, Comment.class);
         comment.setAuthor(author);
         comment.setPost(post);
+
+        if (commentDto.getParentId() != null) {
+            Comment parent = commentRepository.findByIdAndPostId(commentDto.getParentId(), post.getId())
+                    .orElseThrow(() -> new NotFoundException("Parent comment not found"));
+            comment.setParent(parent);
+        }
+
         return commentRepository.save(comment);
     }
 
@@ -43,4 +52,5 @@ public class CommentService {
     public void deleteComment(Comment comment) {
         commentRepository.delete(comment);
     }
+
 }
