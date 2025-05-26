@@ -71,5 +71,6 @@ build/
 ### VS Code ###
 .vscode/
 
+.env
 .envrc
 /bin/
