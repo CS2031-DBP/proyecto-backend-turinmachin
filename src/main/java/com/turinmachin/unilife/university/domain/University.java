@@ -47,6 +47,9 @@ public class University {
     @OrderBy("createdAt DESC")
     private List<Post> posts = new ArrayList<>();
 
+    @Column(nullable = false)
+    private Boolean active = true;
+
     public boolean ownsEmail(String email) {
         String domain = email.substring(email.indexOf('@') + 1);
         return emailDomains.contains(domain);

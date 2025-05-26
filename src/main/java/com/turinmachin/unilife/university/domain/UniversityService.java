@@ -1,5 +1,13 @@
 package com.turinmachin.unilife.university.domain;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
@@ -8,14 +16,8 @@ import com.turinmachin.unilife.university.dto.DegreeAlreadyPresent;
 import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
 import com.turinmachin.unilife.university.exception.UniversityNameConflictException;
 import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
-import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
@@ -27,18 +29,15 @@ public class UniversityService {
     @Autowired
     private DegreeService degreeService;
 
-    // TODO: use UserService instead of UserRepository directly
-    // Non-trivial because doing so creates a circular dependency
-
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<University> getAllUniversities() {
-        return universityRepository.findAll();
+    public List<University> getAllActiveUniversities() {
+        return universityRepository.findByActiveTrue();
     }
 
-    public Optional<University> getUniversityById(UUID id) {
-        return universityRepository.findById(id);
+    public Optional<University> getActiveUniversityById(UUID id) {
+        return universityRepository.findByIdAndActiveTrue(id);
     }
 
     public University createUniversity(CreateUniversityDto dto) {
@@ -79,6 +78,11 @@ public class UniversityService {
 
     public University removeDegreeFromUniversity(University university, Degree degree) {
         university.getDegrees().remove(degree);
+        return universityRepository.save(university);
+    }
+
+    public University deactivateUniversity(University university) {
+        university.setActive(false);
         return universityRepository.save(university);
     }
 
