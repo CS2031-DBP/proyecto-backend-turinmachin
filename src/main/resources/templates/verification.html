@@ -1,0 +1,21 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <h1>Verifica tu correo</h1>
+    <p>
+      Tu ID de verificación de UniLife es
+      <strong th:text="${verification_id}"></strong>.
+    </p>
+    <p></p>
+    <p>
+      <em>
+        (Nota: Este código se usa en el endpoint
+        <code>POST /auth/verify</code>. Cuando UniLife tenga backend, este
+        correo contendrá un link de verificación en lugar del código.)
+      </em>
+    </p>
+  </body>
+</html>
