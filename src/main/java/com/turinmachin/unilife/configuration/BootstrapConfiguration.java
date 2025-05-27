@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BootstrapConfiguration {
 
-    private Logger logger = LoggerFactory.getLogger(BootstrapConfiguration.class);
+    private final Logger logger = LoggerFactory.getLogger(BootstrapConfiguration.class);
 
     @Value("${bootstrap.admin.email}")
     private String adminEmail;
