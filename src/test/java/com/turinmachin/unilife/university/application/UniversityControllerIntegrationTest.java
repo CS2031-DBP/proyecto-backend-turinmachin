@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -221,6 +222,38 @@ public class UniversityControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").value(university1.getId().toString()))
                 .andExpect(jsonPath("$.name").value(university1.getName()))
                 .andExpect(jsonPath("$.degrees.length()").value(3));
+
+    }
+
+    @Test
+    @Order(6)
+    public void RemoveUniversityDegreeTest() throws Exception {
+
+        mockMvc.perform(delete("/universities/{id}/degrees/{degreeId}", university1.getId(), degree3.getId())
+                        .header("Authorization", userAuth))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/universities/{id}/degrees/{degreeId}", university1.getId(), degree3.getId())
+                        .header("Authorization", adminAuth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(university1.getId().toString()))
+                .andExpect(jsonPath("$.name").value(university1.getName()))
+                .andExpect(jsonPath("$.degrees.length()").value(2));
+
+    }
+
+    @Test
+    @Order(7)
+    public void DeleteUniversityTest() throws Exception {
+        mockMvc.perform(delete("/universities/{id}", university1.getId())
+                        .header("Authorization", userAuth))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/universities/{id}", university1.getId()) // Con fines demostrativos, te queremos UTEC <3
+                        .header("Authorization", adminAuth))
+                .andExpect(status().isNoContent());
+
+        assertEquals(false, university1.getActive());
 
     }
 
