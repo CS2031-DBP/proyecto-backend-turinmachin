@@ -1,15 +1,16 @@
 package com.turinmachin.unilife.degree.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.turinmachin.unilife.PostgresContainerConfig;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
+import com.turinmachin.unilife.degree.infrastructure.DegreeRepository;
 import com.turinmachin.unilife.jwt.domain.JwtService;
-import com.turinmachin.unilife.university.domain.University;
-import com.turinmachin.unilife.university.dto.CreateUniversityDto;
-import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
 import com.turinmachin.unilife.user.domain.User;
+import com.turinmachin.unilife.user.domain.UserService;
+import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,8 +54,16 @@ public class DegreeControllerIntegrationTest {
     @Autowired
     private DegreeService degreeService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private DegreeRepository degreeRepository;
+
     private User admin;
+    private User user;
     private String adminAuth;
+    private String userAuth;
     private Degree degree1;
     private Degree degree2;
 
@@ -92,34 +103,53 @@ public class DegreeControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").value(degree2.getId().toString()));
     }
 
-    /*@Test
-    @Order(1)
+    @Test
+    @Order(3)
     public void CreateDegreeTest() throws Exception {
+
+        RegisterUserDto userDto = new RegisterUserDto();
+        userDto.setUsername("juan");
+        userDto.setEmail("juan@mail.com");
+        userDto.setPassword("1234");
+        userDto.setDisplayName("Juan");
+        user = userService.createUser(userDto);
+        user = userService.verifyUser(user);
+
+        userAuth = "Bearer " + jwtService.generateToken(user);
+
+        CreateDegreeDto degreeDto = new CreateDegreeDto();
+        degreeDto.setName("SI");
+
+        mockMvc.perform(post("/degrees")
+                        .header("Authorization", userAuth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(degreeDto)))
+                .andExpect(status().isForbidden());
 
         admin = userRepository.findAll().getFirst();
         assertNotNull(admin);
         adminAuth = "Bearer " + jwtService.generateToken(admin);
 
-        CreateDegreeDto dto1 = new CreateDegreeDto();
-        dto1.setName("CS");
-
-        mockMvc.perform(post("/degrees")
-                .header("Authorization", adminAuth)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto1)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value(dto1.getName()));
-
-        CreateDegreeDto dto2 = new CreateDegreeDto();
-        dto2.setName("DS");
-
-        mockMvc.perform(post("/degrees")
+        MvcResult result = mockMvc.perform(post("/degrees")
                         .header("Authorization", adminAuth)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto2)))
+                        .content(objectMapper.writeValueAsString(degreeDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value(dto2.getName()));
+                .andExpect(jsonPath("$.name").value(degreeDto.getName()))
+                .andReturn();
 
-    }*/
+        String body = result.getResponse().getContentAsString();
+        UUID id = UUID.fromString(JsonPath.parse(body).read("$.id"));
+
+        Optional<Degree> createdDegree = degreeRepository.findById(id);
+        Assertions.assertTrue(createdDegree.isPresent());
+
+    }
+
+    @Test
+    @Order(4)
+    public void UpdateDegreeTest() throws Exception {
+
+    }
 
 }

@@ -177,7 +177,7 @@ public class PostControllerIntegrationTest {
     @Test
     @Order(3)
     public void testCreatePost() throws Exception {
-        auth1 = "Bearer " + jwtService.generateToken(user1);
+//        auth1 = "Bearer " + jwtService.generateToken(user1);
 
         // Unverified user
         mockMvc.perform(multipart("/posts")
