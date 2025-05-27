@@ -19,34 +19,14 @@ public class PostVoteId implements Serializable {
     private UUID authorId;
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((postId == null) ? 0 : postId.hashCode());
-        result = prime * result + ((authorId == null) ? 0 : authorId.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PostVoteId that = (PostVoteId) o;
+        return Objects.equals(postId, that.postId) && Objects.equals(authorId, that.authorId);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        PostVoteId other = (PostVoteId) obj;
-        if (postId == null) {
-            if (other.postId != null)
-                return false;
-        } else if (!postId.equals(other.postId))
-            return false;
-        if (authorId == null) {
-            if (other.authorId != null)
-                return false;
-        } else if (!authorId.equals(other.authorId))
-            return false;
-        return true;
+    public int hashCode() {
+        return Objects.hash(postId, authorId);
     }
-
 }
