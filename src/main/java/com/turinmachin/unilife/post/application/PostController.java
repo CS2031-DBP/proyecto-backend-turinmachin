@@ -104,6 +104,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}/upvotes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
     public void addPostUpvote(@PathVariable UUID id, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
@@ -114,6 +115,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}/downvotes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
     public void addPostDownvote(@PathVariable UUID id, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
