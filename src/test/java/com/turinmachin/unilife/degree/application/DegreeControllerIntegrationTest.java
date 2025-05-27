@@ -6,6 +6,7 @@ import com.turinmachin.unilife.PostgresContainerConfig;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
+import com.turinmachin.unilife.degree.dto.UpdateDegreeDto;
 import com.turinmachin.unilife.degree.infrastructure.DegreeRepository;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
@@ -26,8 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -150,6 +150,34 @@ public class DegreeControllerIntegrationTest {
     @Order(4)
     public void UpdateDegreeTest() throws Exception {
 
+        UpdateDegreeDto updateDegreeDto = new UpdateDegreeDto();
+        updateDegreeDto.setName("Computer Science");
+
+        mockMvc.perform(put("/degrees/{id}", degree1.getId())
+                .header("Authorization", userAuth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDegreeDto)))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(put("/degrees/{id}", degree1.getId())
+                        .header("Authorization", adminAuth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDegreeDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(updateDegreeDto.getName()));
+
+    }
+
+    @Test
+    @Order(5)
+    public void DeleteDegreeTest() throws Exception {
+        mockMvc.perform(delete("/degrees/{id}", degree1.getId())
+                        .header("Authorization", userAuth))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/degrees/{id}", degree1.getId())
+                        .header("Authorization", adminAuth))
+                .andExpect(status().isNoContent());
     }
 
 }
