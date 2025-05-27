@@ -22,6 +22,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -44,6 +45,7 @@ public class Post {
     private String content;
 
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable
     @OrderColumn
     private List<FileInfo> files = new ArrayList<>();
 
