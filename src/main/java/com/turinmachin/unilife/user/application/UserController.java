@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -43,9 +45,9 @@ public class UserController {
     private ModelMapper modelMapper;
 
     @GetMapping
-    public List<UserResponseDto> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return users.stream().map(user -> modelMapper.map(user, UserResponseDto.class)).toList();
+    public List<UserResponseDto> getAllUsers(Pageable pageable) {
+        Page<User> users = userService.getAllUsers(pageable);
+        return users.map(user -> modelMapper.map(user, UserResponseDto.class)).toList();
     }
 
     @GetMapping("/@self")

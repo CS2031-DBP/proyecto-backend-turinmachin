@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,17 +58,15 @@ public class PostController {
     public List<PostResponseDto> getAllPosts(
             @RequestParam(required = false) UUID universityId,
             @RequestParam(required = false) List<String> tags,
-            @RequestParam(required = false) UUID authorId) {
+            @RequestParam(required = false) UUID authorId,
+            Pageable pageable) {
         Specification<Post> spec = Specification
                 .where(PostSpecifications.hasUniversityId(universityId))
                 .and(PostSpecifications.hasAuthorId(authorId))
                 .and(PostSpecifications.hasTags(tags));
 
-        List<Post> posts = postService.getPostsWithSpec(spec);
-        return posts.stream().map(post -> modelMapper.map(post, PostResponseDto.class)).toList();
-    }
-
-    public void foo() {
+        Page<Post> posts = postService.getPostsWithSpec(spec, pageable);
+        return posts.map(post -> modelMapper.map(post, PostResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")

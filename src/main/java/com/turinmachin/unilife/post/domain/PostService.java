@@ -12,6 +12,9 @@ import com.turinmachin.unilife.user.exception.UserWithoutUniversityException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 
 @Service
 @Transactional
@@ -42,8 +44,14 @@ public class PostService {
         return postRepository.findAll(Sort.by("createdAt").descending());
     }
 
-    public List<Post> getPostsWithSpec(Specification<Post> spec) {
-        return postRepository.findAll(spec, Sort.by("createdAt").descending());
+    public Page<Post> getPostsWithSpec(Specification<Post> spec, Pageable pageable) {
+        if (pageable.getSort().isUnsorted()) {
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+        return postRepository.findAll(spec, pageable);
     }
 
     public Optional<Post> getPostById(UUID id) {
@@ -112,6 +120,5 @@ public class PostService {
     public void deletePostsByUniversityId(UUID universityId) {
         postRepository.deleteByUniversityId(universityId);
     }
-
 
 }
