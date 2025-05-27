@@ -12,6 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
 @Entity
 public class PostVote {
@@ -34,28 +36,14 @@ public class PostVote {
     private VoteType value;
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PostVote postVote = (PostVote) o;
+        return Objects.equals(id, postVote.id);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        PostVote other = (PostVote) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
-
 }
