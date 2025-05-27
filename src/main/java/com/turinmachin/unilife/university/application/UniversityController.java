@@ -26,6 +26,7 @@ import com.turinmachin.unilife.university.domain.UniversityService;
 import com.turinmachin.unilife.university.dto.AddDegreeToUniversityDto;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
 import com.turinmachin.unilife.university.dto.UniversityResponseDto;
+import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
 import com.turinmachin.unilife.university.exception.UniversityNotFoundException;
 
 import jakarta.validation.Valid;
@@ -66,8 +67,10 @@ public class UniversityController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UniversityResponseDto updateUniversity(@Valid @RequestBody CreateUniversityDto dto) {
-        University university = universityService.createUniversity(dto);
+    public UniversityResponseDto updateUniversity(@PathVariable UUID id, @Valid @RequestBody UpdateUniversityDto dto) {
+        University university = universityService.getActiveUniversityById(id)
+                .orElseThrow(UniversityNotFoundException::new);
+        university = universityService.updateUniversity(university, dto);
         return modelMapper.map(university, UniversityResponseDto.class);
     }
 
