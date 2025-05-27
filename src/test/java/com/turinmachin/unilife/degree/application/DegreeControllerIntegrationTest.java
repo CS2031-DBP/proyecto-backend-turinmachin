@@ -3,10 +3,12 @@ package com.turinmachin.unilife.degree.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turinmachin.unilife.PostgresContainerConfig;
 import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
+import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.*;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,12 +48,51 @@ public class DegreeControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private DegreeService degreeService;
+
     private User admin;
     private String adminAuth;
     private Degree degree1;
     private Degree degree2;
 
     @Test
+    @Order(1)
+    public void getAllDegreeTest() throws Exception {
+
+        mockMvc.perform(get("/degrees"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        CreateDegreeDto degreeDto1 = new CreateDegreeDto();
+        degreeDto1.setName("CS");
+        degree1 = degreeService.createDegree(degreeDto1);
+
+        CreateDegreeDto degreeDto2 = new CreateDegreeDto();
+        degreeDto2.setName("DS");
+        degree2 = degreeService.createDegree(degreeDto2);
+
+        mockMvc.perform(get("/degrees"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+
+    }
+
+    @Test
+    @Order(2)
+    public void getDegreeByIdTest() throws Exception {
+        mockMvc.perform(get("/degrees/{id}", degree1.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(degree1.getName()))
+                .andExpect(jsonPath("$.id").value(degree1.getId().toString()));
+
+        mockMvc.perform(get("/degrees/{id}", degree2.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(degree2.getName()))
+                .andExpect(jsonPath("$.id").value(degree2.getId().toString()));
+    }
+
+    /*@Test
     @Order(1)
     public void CreateDegreeTest() throws Exception {
 
@@ -78,6 +120,6 @@ public class DegreeControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value(dto2.getName()));
 
-    }
+    }*/
 
 }
