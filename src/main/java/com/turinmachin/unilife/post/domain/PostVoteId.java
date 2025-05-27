@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.post.domain;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.Embeddable;
