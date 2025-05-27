@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.UpdateUserDto;
@@ -43,13 +42,10 @@ public class UserController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private ListMapper listMapper;
-
     @GetMapping
     public List<UserResponseDto> getAllUsers() {
-        List<User> users = userService.getAllVerifiedUsers();
-        return listMapper.map(users, UserResponseDto.class).toList();
+        List<User> users = userService.getAllUsers();
+        return users.stream().map(user -> modelMapper.map(user, UserResponseDto.class)).toList();
     }
 
     @GetMapping("/@self")
@@ -61,7 +57,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserResponseDto getUserById(@PathVariable UUID id) {
-        User user = userService.getVerifiedUserById(id).orElseThrow(UserNotFoundException::new);
+        User user = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
         return modelMapper.map(user, UserResponseDto.class);
     }
 

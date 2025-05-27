@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
@@ -37,13 +36,10 @@ public class DegreeController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private ListMapper listMapper;
-
     @GetMapping
     public List<DegreeResponseDto> getAllDegrees() {
         List<Degree> degrees = degreeService.getAllDegrees();
-        return listMapper.map(degrees, DegreeResponseDto.class).toList();
+        return degrees.stream().map(degree -> modelMapper.map(degree, DegreeResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")

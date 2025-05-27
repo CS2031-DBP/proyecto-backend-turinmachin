@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
@@ -44,13 +43,10 @@ public class UniversityController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private ListMapper listMapper;
-
     @GetMapping
     public List<UniversityResponseDto> getUniversities() {
         List<University> universities = universityService.getAllActiveUniversities();
-        return listMapper.map(universities, UniversityResponseDto.class).toList();
+        return universities.stream().map(uni -> modelMapper.map(uni, UniversityResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")

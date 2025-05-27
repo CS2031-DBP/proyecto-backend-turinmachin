@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
-import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.post.domain.PostVote;
 import com.turinmachin.unilife.post.dto.PostResponseDto;
@@ -50,11 +49,6 @@ public class BeanUtilsConfiguration {
                 .addMappings(mapper -> mapper.skip(University::setDegrees));
 
         return modelMapper;
-    }
-
-    @Bean
-    public ListMapper listMapper(ModelMapper modelMapper) {
-        return new ListMapper(modelMapper);
     }
 
     @Bean

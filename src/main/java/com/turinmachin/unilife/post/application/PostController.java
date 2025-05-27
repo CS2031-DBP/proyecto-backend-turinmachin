@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.common.exception.ForbiddenException;
 import com.turinmachin.unilife.common.exception.NotFoundException;
 import com.turinmachin.unilife.post.domain.Post;
@@ -53,9 +52,6 @@ public class PostController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private ListMapper listMapper;
-
     @GetMapping
     public List<PostResponseDto> getAllPosts(
             @RequestParam(required = false) UUID universityId,
@@ -67,7 +63,7 @@ public class PostController {
                 .and(PostSpecifications.hasTags(tags));
 
         List<Post> posts = postService.getPostsWithSpec(spec);
-        return listMapper.map(posts, PostResponseDto.class).toList();
+        return posts.stream().map(post -> modelMapper.map(post, PostResponseDto.class)).toList();
     }
 
     public void foo() {

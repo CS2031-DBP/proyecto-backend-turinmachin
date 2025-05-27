@@ -24,7 +24,6 @@ import com.turinmachin.unilife.comment.dto.CommentResponseDto;
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
 import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
 import com.turinmachin.unilife.comment.exception.CommentNotFoundException;
-import com.turinmachin.unilife.common.domain.ListMapper;
 import com.turinmachin.unilife.common.exception.ForbiddenException;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.post.domain.PostService;
@@ -51,13 +50,10 @@ public class CommentController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private ListMapper listMapper;
-
     @GetMapping
     public List<CommentResponseDto> getPostComments(@PathVariable UUID postId) {
         Post post = postService.getPostById(postId).orElseThrow(PostNotFoundException::new);
-        return listMapper.map(post.getComments(), CommentResponseDto.class).toList();
+        return post.getComments().stream().map(thing -> modelMapper.map(thing, CommentResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")
