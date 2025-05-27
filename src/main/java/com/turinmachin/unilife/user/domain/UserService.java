@@ -21,8 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.degree.domain.Degree;
-import com.turinmachin.unilife.image.domain.Image;
-import com.turinmachin.unilife.image.domain.ImageService;
+import com.turinmachin.unilife.fileinfo.domain.FileInfo;
+import com.turinmachin.unilife.fileinfo.domain.FileInfoService;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.domain.UniversityService;
 import com.turinmachin.unilife.university.exception.UniversityNotFoundException;
@@ -54,7 +54,7 @@ public class UserService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final ImageService imageService;
+    private final FileInfoService fileInfoService;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -214,20 +214,20 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateUserProfilePicture(User user, MultipartFile file) throws IOException {
-        Image oldPicture = user.getProfilePicture();
-        Image newPicture = imageService.createImage(file);
+        FileInfo oldPicture = user.getProfilePicture();
+        FileInfo newPicture = fileInfoService.createFile(file);
 
         user.setProfilePicture(newPicture);
         user = userRepository.save(user);
 
         if (oldPicture != null) {
-            imageService.deleteImage(oldPicture);
+            fileInfoService.deleteFile(oldPicture);
         }
         return user;
     }
 
     public void deleteUserProfilePicture(User user) {
-        Image oldPicture = user.getProfilePicture();
+        FileInfo oldPicture = user.getProfilePicture();
 
         if (oldPicture == null) {
             throw new ConflictException("User does not have a profile picture");
@@ -235,7 +235,7 @@ public class UserService implements UserDetailsService {
 
         user.setProfilePicture(null);
         userRepository.save(user);
-        imageService.deleteImage(oldPicture);
+        fileInfoService.deleteFile(oldPicture);
     }
 
     @Override

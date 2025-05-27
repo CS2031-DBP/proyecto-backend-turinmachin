@@ -1,4 +1,4 @@
-package com.turinmachin.unilife.image.domain;
+package com.turinmachin.unilife.fileinfo.domain;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Image {
+public class FileInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,11 +24,15 @@ public class Image {
     @Column(nullable = false)
     private String url;
 
+    @Column(nullable = false)
+    private String mediaType;
+
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Image image = (Image) o;
-        return Objects.equals(id, image.id);
+        if (o == null || getClass() != o.getClass())
+            return false;
+        FileInfo fileInfo = (FileInfo) o;
+        return Objects.equals(id, fileInfo.id);
     }
 
     @Override

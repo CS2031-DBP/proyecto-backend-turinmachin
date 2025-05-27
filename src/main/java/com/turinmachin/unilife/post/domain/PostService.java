@@ -1,8 +1,8 @@
 package com.turinmachin.unilife.post.domain;
 
 import com.turinmachin.unilife.common.exception.ConflictException;
-import com.turinmachin.unilife.image.domain.Image;
-import com.turinmachin.unilife.image.domain.ImageService;
+import com.turinmachin.unilife.fileinfo.domain.FileInfo;
+import com.turinmachin.unilife.fileinfo.domain.FileInfoService;
 import com.turinmachin.unilife.post.dto.CreatePostDto;
 import com.turinmachin.unilife.post.dto.UpdatePostDto;
 import com.turinmachin.unilife.post.infrastructure.PostRepository;
@@ -33,13 +33,9 @@ public class PostService {
 
     private final PostVoteRepository postVoteRepository;
 
-    private final ImageService imageService;
+    private final FileInfoService fileInfoService;
 
     private final ModelMapper modelMapper;
-
-    public List<Post> getAllPosts() {
-        return postRepository.findAll(Sort.by("createdAt").descending());
-    }
 
     public Page<Post> getPostsWithSpec(Specification<Post> spec, Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
@@ -66,8 +62,8 @@ public class PostService {
         post.setDegree(author.getDegree());
         post.setTags(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
 
-        List<Image> images = imageService.createImageBatch(dto.getImages());
-        post.setImages(images);
+        List<FileInfo> files = fileInfoService.createFileBatch(dto.getFiles());
+        post.setFiles(files);
 
         return postRepository.save(post);
     }
@@ -79,13 +75,13 @@ public class PostService {
         tags.clear();
         tags.addAll(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
 
-        // TODO: support updating post images
-
         return postRepository.save(post);
     }
 
     public void deletePost(Post post) {
-        imageService.deleteImageBatch(post.getImages());
+        fileInfoService.triggerFileBatchDeletion(post.getFiles());
+
+        post.getTags().clear();
         postRepository.delete(post);
     }
 

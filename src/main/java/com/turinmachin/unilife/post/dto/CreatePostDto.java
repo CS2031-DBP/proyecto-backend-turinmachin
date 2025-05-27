@@ -15,6 +15,6 @@ public class CreatePostDto {
 
     private List<String> tags = new ArrayList<>();
 
-    private List<MultipartFile> images = new ArrayList<>();
+    private List<MultipartFile> files = new ArrayList<>();
 
 }

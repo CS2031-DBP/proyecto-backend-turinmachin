@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import com.turinmachin.unilife.degree.dto.DegreeResponsePartialDto;
-import com.turinmachin.unilife.image.dto.ImageResponseDto;
+import com.turinmachin.unilife.fileinfo.dto.FileInfoResponseDto;
 import com.turinmachin.unilife.university.dto.UniversityResponseDto;
 import com.turinmachin.unilife.user.domain.Role;
 
@@ -21,7 +21,7 @@ public class UserResponseDto {
     private String bio;
     private UniversityResponseDto university;
     private DegreeResponsePartialDto degree;
-    private ImageResponseDto profilePicture;
+    private FileInfoResponseDto profilePicture;
     private Role role;
     private Integer streak;
     private LocalDate lastStreakDate;

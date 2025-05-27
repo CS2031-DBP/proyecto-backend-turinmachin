@@ -1,4 +1,4 @@
-package com.turinmachin.unilife.image.event;
+package com.turinmachin.unilife.fileinfo.event;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -9,14 +9,14 @@ import com.turinmachin.unilife.storage.domain.StorageService;
 
 @Component
 @RequiredArgsConstructor
-public class DeleteImageEventListener {
+public class DeleteFilesEventListener {
 
     private final StorageService storageService;
 
     @Async
     @EventListener
-    public void handleDeleteImageEvent(DeleteImagesEvent event) {
-        for (String key : event.getImageKeys()) {
+    public void handleDeleteFilesEvent(DeleteFilesEvent event) {
+        for (String key : event.getFileKeys()) {
             storageService.deleteFile(key);
         }
     }

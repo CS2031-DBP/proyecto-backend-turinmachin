@@ -12,7 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.turinmachin.unilife.degree.domain.Degree;
-import com.turinmachin.unilife.image.domain.Image;
+import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.university.domain.University;
 
@@ -70,7 +70,7 @@ public class User implements UserDetails {
 
     @ManyToOne
     @JoinColumn(nullable = true)
-    private Image profilePicture;
+    private FileInfo profilePicture;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

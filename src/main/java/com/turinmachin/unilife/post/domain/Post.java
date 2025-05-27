@@ -10,7 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.degree.domain.Degree;
-import com.turinmachin.unilife.image.domain.Image;
+import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.user.domain.User;
 
@@ -43,9 +43,9 @@ public class Post {
     @Column(nullable = false)
     private String content;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @OrderColumn
-    private List<Image> images = new ArrayList<>();
+    private List<FileInfo> files = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(nullable = false)
@@ -59,10 +59,10 @@ public class Post {
     @OrderBy("tags")
     private List<String> tags = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostVote> votes = new ArrayList<>();
 
     @CreationTimestamp
