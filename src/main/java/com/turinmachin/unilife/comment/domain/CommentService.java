@@ -3,8 +3,8 @@ package com.turinmachin.unilife.comment.domain;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
@@ -17,13 +17,12 @@ import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CommentService {
 
-    @Autowired
-    private CommentRepository commentRepository;
+    private final CommentRepository commentRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     public Optional<Comment> getPostCommentById(UUID postId, UUID id) {
         return commentRepository.findByIdAndPostId(id, postId);

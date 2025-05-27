@@ -1,6 +1,6 @@
 package com.turinmachin.unilife.image.event;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import com.turinmachin.unilife.storage.domain.StorageService;
 
 @Component
+@RequiredArgsConstructor
 public class DeleteImageEventListener {
 
-    @Autowired
-    private StorageService storageService;
+    private final StorageService storageService;
 
     @Async
     @EventListener

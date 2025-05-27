@@ -1,7 +1,7 @@
 package com.turinmachin.unilife.configuration;
 
 import com.turinmachin.unilife.jwt.application.JwtAuthenticatorFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,10 +22,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    @Autowired
-    private JwtAuthenticatorFilter jwtAuthenticatorFilter;
+    private final JwtAuthenticatorFilter jwtAuthenticatorFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

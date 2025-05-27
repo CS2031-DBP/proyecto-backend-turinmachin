@@ -10,8 +10,8 @@ import com.turinmachin.unilife.post.infrastructure.PostVoteRepository;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.exception.UserWithoutUniversityException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,19 +26,16 @@ import java.util.UUID;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostService {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
-    @Autowired
-    private PostVoteRepository postVoteRepository;
+    private final PostVoteRepository postVoteRepository;
 
-    @Autowired
-    private ImageService imageService;
+    private final ImageService imageService;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     public List<Post> getAllPosts() {
         return postRepository.findAll(Sort.by("createdAt").descending());

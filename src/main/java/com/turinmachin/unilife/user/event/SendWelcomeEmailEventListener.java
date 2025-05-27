@@ -2,16 +2,16 @@ package com.turinmachin.unilife.user.event;
 
 import com.turinmachin.unilife.email.domain.EmailService;
 import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SendWelcomeEmailEventListener {
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @Async
     @EventListener

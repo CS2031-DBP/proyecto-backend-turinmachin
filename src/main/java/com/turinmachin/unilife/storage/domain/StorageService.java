@@ -3,7 +3,7 @@ package com.turinmachin.unilife.storage.domain;
 import java.io.IOException;
 import java.net.URL;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,10 +15,10 @@ import com.turinmachin.unilife.image.exception.EmptyImageException;
 import com.turinmachin.unilife.image.exception.ImageTooLargeException;
 
 @Service
+@RequiredArgsConstructor
 public class StorageService {
 
-    @Autowired
-    private AmazonS3 s3Client;
+    private final AmazonS3 s3Client;
 
     @Value("${amazon-s3.bucket-name}")
     private String bucketName;

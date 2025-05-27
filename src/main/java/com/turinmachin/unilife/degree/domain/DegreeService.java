@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
@@ -17,13 +17,12 @@ import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class DegreeService {
 
-    @Autowired
-    private DegreeRepository degreeRepository;
+    private final DegreeRepository degreeRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     public List<Degree> getAllDegrees() {
         return degreeRepository.findAll();

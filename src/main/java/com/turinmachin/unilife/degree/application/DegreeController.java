@@ -3,8 +3,8 @@ package com.turinmachin.unilife.degree.application;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,13 +28,12 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/degrees")
+@RequiredArgsConstructor
 public class DegreeController {
 
-    @Autowired
-    private DegreeService degreeService;
+    private final DegreeService degreeService;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @GetMapping
     public List<DegreeResponseDto> getAllDegrees() {
