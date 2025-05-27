@@ -76,9 +76,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    // PERF: remove FetchType.EAGER to prevent unnecessary fetching
-    // Non-trivial because it causes errors with ModelMapper on getStreak() and
-    // getLastStreakDate()
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("createdAt DESC")
     private List<Post> posts = new ArrayList<>();
@@ -148,7 +145,8 @@ public class User implements UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         User user = (User) o;
         return Objects.equals(id, user.id);
     }
