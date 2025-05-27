@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.user.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -11,7 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -75,7 +81,7 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.[0].role").value("ADMIN"));
 
         admin = userRepository.findAll().getFirst();
-        Assertions.assertNotNull(admin);
+        assertNotNull(admin);
         adminAuth = "Bearer " + jwtService.generateToken(admin);
 
         RegisterUserDto dto1 = new RegisterUserDto();
@@ -144,9 +150,9 @@ public class UserControllerIntegrationTest {
         dto.setDisplayName("JuanElCrack");
 
         mockMvc.perform(put("/users/@self")
-                        .header("Authorization", auth1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .header("Authorization", auth1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bio").value(dto.getBio()))
                 .andExpect(jsonPath("$.displayName").value(dto.getDisplayName()));
@@ -157,24 +163,24 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     public void testUpdateSelfPassword() throws Exception {
         UpdateUserPasswordDto dto = new UpdateUserPasswordDto();
-        dto.setCurrentPassword("123");
         dto.setNewPassword("123456");
+        dto.setCurrentPassword("123");
 
         mockMvc.perform(patch("/users/@self/password")
-                        .header("Authorization", auth2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .header("Authorization", auth2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isUnauthorized());
 
         dto.setCurrentPassword("1234");
 
         mockMvc.perform(patch("/users/@self/password")
-                        .header("Authorization", auth2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .header("Authorization", auth2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNoContent());
 
         user2 = userRepository.findById(user2.getId()).orElseThrow();
@@ -182,15 +188,15 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     public void testUpdateSelfEmail() throws Exception {
         UpdateUserEmailDto dto = new UpdateUserEmailDto();
         dto.setEmail("juan.nuevo@mail.com");
 
         mockMvc.perform(patch("/users/@self/email")
-                        .header("Authorization", auth1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .header("Authorization", auth1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(dto.getEmail()));
 
@@ -199,7 +205,7 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     public void testDeleteSelf() throws Exception {
         mockMvc.perform(delete("/users/@self").header("Authorization", auth1))
                 .andExpect(status().isNoContent());
@@ -209,7 +215,7 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
-    @Order(6)
+    @Order(8)
     public void testDeleteUserById() throws Exception {
         // User with role < moderator
         mockMvc.perform(delete("/users/{id}", user2.getId()))
@@ -217,7 +223,7 @@ public class UserControllerIntegrationTest {
 
         // User with role >= moderator
         mockMvc.perform(delete("/users/{id}", user2.getId())
-                        .header("Authorization", adminAuth))
+                .header("Authorization", adminAuth))
                 .andExpect(status().isNoContent());
 
         Optional<User> newUser2 = userRepository.findById(user2.getId());
