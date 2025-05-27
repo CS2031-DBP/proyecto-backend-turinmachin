@@ -113,23 +113,20 @@ public class UserController {
         return modelMapper.map(user, UserResponseDto.class);
     }
 
-    // TODO: logical delete
-    // @DeleteMapping("/@self")
-    // @ResponseStatus(HttpStatus.NO_CONTENT)
-    // @PreAuthorize("hasRole('ROLE_USER')")
-    // public void deleteSelfUser(Authentication authentication) {
-    // User user = (User) authentication.getPrincipal();
-    // userService.deleteUser(user);
-    // }
+    @DeleteMapping("/@self")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public void deleteSelfUser(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        userService.deleteUser(user);
+    }
 
-    // TODO: logical delete
-    // @DeleteMapping("/{id}")
-    // @ResponseStatus(HttpStatus.NO_CONTENT)
-    // @PreAuthorize("hasRole('ROLE_MODERATOR')")
-    // public void deleteUser(@PathVariable UUID id) {
-    // User user =
-    // userService.getUserById(id).orElseThrow(UserNotFoundException::new);
-    // userService.deleteUser(user);
-    // }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_MODERATOR')")
+    public void deleteUser(@PathVariable UUID id) {
+        User user = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
+        userService.deleteUser(user);
+    }
 
 }
