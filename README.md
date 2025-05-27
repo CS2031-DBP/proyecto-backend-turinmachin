@@ -74,6 +74,8 @@ Adicionalmente, usamos **Postman** en el desarrollo del proyecto como cliente HT
 
 ## Modelo de entidades
 
+![Diagrama UML](https://raw.githubusercontent.com/CS2031-DBP/proyecto-backend-turinmachin/main/assets/diagrama_uml.png)
+
 A continuación describimos más detalladamente estas entidades.
 
 > [!NOTE]
@@ -191,7 +193,22 @@ Es una representación en nuestra propia BD de una imagen almacenada en Amazon S
 
 ### Niveles de testing
 
+Este backend está testeado con los siguientes tipos de testing:
+
+- **Testing unitario** para los repositorios de cada entidad. En particular, testeamos las queries personalizadas. (No es necesario testear los métodos provistos por defecto)
+- **Testing de integración** para cada controlador de la aplicación. El test de cada controlador aborda cada uno de sus endpoints.
+  - Las únicas excepciones a esto son `PUT /users/@self/picture` y `DELETE /users/@self/picture`, ya que evitamos testear el subido de archivos a Amazon S3.
+
 ### Resultados
+
+El testing implementado resultó útil para hallar errores en el proyecto. Por ejemplo:
+
+- Algunos endpoints de método `DELETE` retornaban `200 OK` en lugar de `204 No Content`
+- El endpoint de `PUT /universities/{id}`, cuando hicimos el test, creaba una universidad en lugar de actualizarla.
+- La actualización de los tags de un post causaba un error porque, en ese momento, el `List<String>` se estaba reemplazando completamente en cada actualización.
+- El mapeo de los votos de un post a su puntuación (para `PostResponseDto`) debía producir `null` si el request no era autenticado, pero estaba produciendo `0`.
+
+Todos estos fallos fueron corregidos a medida que desarrollamos los tests.
 
 ### Manejo de errores
 
@@ -210,9 +227,9 @@ El proyecto tiene muchas excepciones globales que se arrojan en diversos casos (
 UniLife emplea los siguientes mecanismos de seguridad:
 
 - **[JWT](https://jwt.io/)** como estándar para autenticar requests.
-- **BCrypt** (mediate `BCryptPasswordEncoder` de Spring Security) como algoritmo de hash para cifrar contraseñas antes de guardarlas en la base de datos.
+- **BCrypt** (mediate `BCryptPasswordEncoder`, de Spring Security) como algoritmo de hash para cifrar contraseñas antes de guardarlas en la base de datos.
 - Un sistema de **roles** para clasificar a los usuarios y determinar qué endpoints pueden utilizar.
-  - Cada usuario, como entidad, tiene un atributo `role`: `ADMIN`, `MODERATOR` o `USER`. La aplicación utiliza la anotación `@PreAuthorize` para permitir el acceso de cierto nivel de rol a las rutas que lo requieren.
+  - Cada usuario tiene un atributo `role`: `ADMIN`, `MODERATOR` o `USER`. La aplicación utiliza la anotación `@PreAuthorize` para permitir el acceso de cierto nivel de rol a las rutas que lo requieren.
 
 Además, la aplicación **usa UUIDs en lugar de Longs** como IDs de las entidades. Esto reduce la posibilidad de _descubrimiento accidental_ de recursos, ya que los UUIDs son mucho más impredecibles que un número auto-incrementado.
 
@@ -221,14 +238,14 @@ Además, la aplicación **usa UUIDs en lugar de Longs** como IDs de las entidade
 El backend de UniLife está protegido contra las siguientes vulnerabilidades:
 
 - **Inyección SQL**: Spring Data JPA parametriza los queries apropiadamente.
-- **CSRF**: El uso de JWT no usa cookies, sino un header.
-- **XSS**: Thymeleaf escapa el contenido de las variables que reemplaza en las plantillas.
+- **CSRF**: El uso de JWT no usa cookies, sino un header. Esto invalida automáticamente cualquier intento de CSRF.
+- **XSS**: Thymeleaf escapa el contenido de las variables que reemplaza en las plantillas: no es posible injectarles HTML.
 
 ## Eventos y asincronía
 
 La aplicación cuenta con los siguientes eventos:
 
-- `DeleteImagesEvent`: Se despacha para indicar la intención de **eliminar una o más imágenes** del almacenamiento en S3.
+- `DeleteFilesEvent`: Se despacha para indicar la intención de **eliminar una o más imágenes** del almacenamiento en S3.
   - Debe ser asincrónico porque puede demorar mucho, sobre todo cuando se eliminan múltiples imágenes a la vez. Además, no es necesario tener el resultado del eliminado.
 - `SendVerificationEmailEvent`: Se despacha para indicar que se le debe enviar un **correo de verificación** a un usuario.
   - Similarmente al evento anterior, debe ser asincrónico porque puede demorar mucho, y no se necesita de inmediato el resultado de enviar correos.
@@ -239,23 +256,30 @@ Cada uno de estos eventos tiene su respectivo _listener_ asíncrono.
 
 ## Uso de GitHub
 
+Los hitos importantes del proyecto fueron representados como [issues](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/issues?q=is%3Aissue%20state%3Aclosed) en el repositorio. Cada issue fue trabajado en su propia rama, y los cambios de cada rama fueron mergeados a la rama principal mediante [pull requests](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/pulls?q=is%3Apr+is%3Aclosed). Esto permitió a cada integrante del proyecto trabajar en sus propios tasks sin afectar al resto.
+
 ### GitHub Actions
+
+El repositorio cuenta con un [workflow](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/actions/workflows/deploy.yml) de GitHub Actions para desplegar el proyecto automáticamente al haber cambios en la rama principal.
 
 ## Conclusión
 
 ### Logros del proyecto
 
+A nivel de backend, hemos logrado lo siguiente:
+
+- Construir el backend de una plataforma social para universitarios.
+
 ### Aprendizajes clave
 
 - **Trabajo en equipo**
+-
 
 ### Trabajo futuro
 
 Tenemos en mente algunas adiciones que podríamos implementar a futuro en este backend.
 
 - **Chat en tiempo real:** Sería un añadido interesante a la plataforma una pequeña interfaz donde los usuarios puedan conversar en tiempo real. Podría darse mediante salas de chat públicas (por universidad, por ejemplo) y/o con mensajes privados entre usuarios.
-- **Sistemas de soft-deletion:** En su estado actual, el backend no tiene forma de "borrar" una universidad sin eliminar sus datos por completo de la BD. Esto implica, por ejemplo, que si se elimina una universidad, también deben eliminarse los posts sobre esa universidad. Sería conveniente que el sistema de "eliminar" universidades, en lugar de eliminarlas realmente de la BD, las marque como "deshabilitadas": una universidad eliminada ya no aparecería en la app, pero todavía podrían quedar posts sobre esa universidad.
--
 
 ## Apéndices
 
