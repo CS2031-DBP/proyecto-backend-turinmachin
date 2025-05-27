@@ -77,7 +77,10 @@ public class PostService {
 
     public Post updatePost(Post post, UpdatePostDto dto) {
         post.setContent(dto.getContent());
-        post.setTags(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
+
+        List<String> tags = post.getTags();
+        tags.clear();
+        tags.addAll(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
 
         // TODO: support updating post images
 
