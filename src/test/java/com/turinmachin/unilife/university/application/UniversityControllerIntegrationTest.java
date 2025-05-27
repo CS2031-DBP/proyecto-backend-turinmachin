@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -79,10 +80,9 @@ public class UniversityControllerIntegrationTest {
     private University university2;
     private University university3;
 
-
     @Test
     @Order(1)
-    public void GetAllUniversitiesTest() throws Exception {
+    public void getAllUniversitiesTest() throws Exception {
         mockMvc.perform(get("/universities"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
@@ -119,7 +119,7 @@ public class UniversityControllerIntegrationTest {
 
     @Test
     @Order(2)
-    public void GetUniversityByIdTest() throws Exception {
+    public void getUniversityByIdTest() throws Exception {
         mockMvc.perform(get("/universities/{id}", university1.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(university1.getId().toString()))
@@ -150,8 +150,7 @@ public class UniversityControllerIntegrationTest {
 
     @Test
     @Order(3)
-    public void CreateUniversityTest() throws Exception {
-
+    public void createUniversityTest() throws Exception {
         RegisterUserDto userDto = new RegisterUserDto();
         userDto.setUsername("juan");
         userDto.setEmail("juan@mail.com");
@@ -168,9 +167,9 @@ public class UniversityControllerIntegrationTest {
         createUniversityDto.setDegreeIds(List.of(degree1.getId(), degree3.getId()));
 
         mockMvc.perform(post("/universities")
-                        .header("Authorization", userAuth)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createUniversityDto)))
+                .header("Authorization", userAuth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createUniversityDto)))
                 .andExpect(status().isForbidden());
 
         admin = userRepository.findAll().getFirst();
@@ -178,9 +177,9 @@ public class UniversityControllerIntegrationTest {
         adminAuth = "Bearer " + jwtService.generateToken(admin);
 
         MvcResult result = mockMvc.perform(post("/universities")
-                        .header("Authorization", adminAuth)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createUniversityDto)))
+                .header("Authorization", adminAuth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createUniversityDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value(createUniversityDto.getName()))
                 .andExpect(jsonPath("$.emailDomains.length()").value(1))
@@ -204,7 +203,7 @@ public class UniversityControllerIntegrationTest {
 
     @Test
     @Order(5)
-    public void AddUniversityDegreeTest() throws Exception {
+    public void addUniversityDegreeTest() throws Exception {
         AddDegreeToUniversityDto addDegreeToUniversityDto = new AddDegreeToUniversityDto();
         addDegreeToUniversityDto.setDegreeId(degree3.getId());
 
@@ -227,14 +226,14 @@ public class UniversityControllerIntegrationTest {
 
     @Test
     @Order(6)
-    public void RemoveUniversityDegreeTest() throws Exception {
+    public void removeUniversityDegreeTest() throws Exception {
 
         mockMvc.perform(delete("/universities/{id}/degrees/{degreeId}", university1.getId(), degree3.getId())
-                        .header("Authorization", userAuth))
+                .header("Authorization", userAuth))
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(delete("/universities/{id}/degrees/{degreeId}", university1.getId(), degree3.getId())
-                        .header("Authorization", adminAuth))
+                .header("Authorization", adminAuth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(university1.getId().toString()))
                 .andExpect(jsonPath("$.name").value(university1.getName()))
@@ -244,16 +243,20 @@ public class UniversityControllerIntegrationTest {
 
     @Test
     @Order(7)
-    public void DeleteUniversityTest() throws Exception {
+    public void deleteUniversityTest() throws Exception {
         mockMvc.perform(delete("/universities/{id}", university1.getId())
-                        .header("Authorization", userAuth))
+                .header("Authorization", userAuth))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(delete("/universities/{id}", university1.getId()) // Con fines demostrativos, te queremos UTEC <3
-                        .header("Authorization", adminAuth))
+        mockMvc.perform(delete("/universities/{id}", university1.getId()) // Con fines demostrativos, te queremos UTEC
+                                                                          // <3
+                                                                          // Confirmo, te queremos mucho UTEC :D
+                                                                          // -- Diego Figueroa, José Daniel Grayson
+                .header("Authorization", adminAuth))
                 .andExpect(status().isNoContent());
 
-        assertEquals(false, university1.getActive());
+        university1 = universityRepository.findById(university1.getId()).orElseThrow();
+        Assertions.assertFalse(university1.getActive());
 
     }
 
