@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.university.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.turinmachin.unilife.PostgresContainerConfig;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
@@ -8,9 +9,12 @@ import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.domain.UniversityService;
+import com.turinmachin.unilife.university.dto.AddDegreeToUniversityDto;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
 import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
 import com.turinmachin.unilife.user.domain.User;
+import com.turinmachin.unilife.user.domain.UserService;
+import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +24,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,6 +64,9 @@ public class UniversityControllerIntegrationTest {
     @Autowired
     private DegreeService degreeService;
 
+    @Autowired
+    private UserService userService;
+
     private User user;
     private User admin;
     private String userAuth;
@@ -67,6 +76,7 @@ public class UniversityControllerIntegrationTest {
     private Degree degree3;
     private University university1;
     private University university2;
+    private University university3;
 
 
     @Test
@@ -137,28 +147,81 @@ public class UniversityControllerIntegrationTest {
 
     }
 
-    /*@Test
-    @Order(1)
+    @Test
+    @Order(3)
     public void CreateUniversityTest() throws Exception {
+
+        RegisterUserDto userDto = new RegisterUserDto();
+        userDto.setUsername("juan");
+        userDto.setEmail("juan@mail.com");
+        userDto.setPassword("1234");
+        userDto.setDisplayName("Juan");
+        user = userService.createUser(userDto);
+        user = userService.verifyUser(user);
+
+        userAuth = "Bearer " + jwtService.generateToken(user);
+
+        CreateUniversityDto createUniversityDto = new CreateUniversityDto();
+        createUniversityDto.setName("UTEC3");
+        createUniversityDto.setEmailDomains(List.of("utec3.edu.pe"));
+        createUniversityDto.setDegreeIds(List.of(degree1.getId(), degree3.getId()));
+
+        mockMvc.perform(post("/universities")
+                        .header("Authorization", userAuth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createUniversityDto)))
+                .andExpect(status().isForbidden());
 
         admin = userRepository.findAll().getFirst();
         assertNotNull(admin);
         adminAuth = "Bearer " + jwtService.generateToken(admin);
 
-        CreateUniversityDto dto1 = new CreateUniversityDto();
-        dto1.setName("UTEC");
-        dto1.setEmailDomains(List.of("utec.edu.pe"));
-        dto1.setDegreeIds(List.of());
+        MvcResult result = mockMvc.perform(post("/universities")
+                        .header("Authorization", adminAuth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createUniversityDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value(createUniversityDto.getName()))
+                .andExpect(jsonPath("$.emailDomains.length()").value(1))
+                .andExpect(jsonPath("$.emailDomains[0]").value(createUniversityDto.getEmailDomains().getFirst()))
+                .andExpect(jsonPath("$.degrees.length()").value(2))
+                .andExpect(jsonPath("$.degrees[0].id").value(degree1.getId().toString()))
+                .andExpect(jsonPath("$.degrees[0].name").value(degree1.getName()))
+                .andExpect(jsonPath("$.degrees[1].id").value(degree3.getId().toString()))
+                .andExpect(jsonPath("$.degrees[1].name").value(degree3.getName()))
+                .andReturn();
 
-        mockMvc.perform(post("/universities")
+        String body = result.getResponse().getContentAsString();
+        UUID id = UUID.fromString(JsonPath.parse(body).read("$.id"));
+
+        Optional<University> createdUniversity = universityRepository.findById(id);
+        Assertions.assertTrue(createdUniversity.isPresent());
+
+    }
+
+    // Update university está incompleto, se deja el test pendiente
+
+    @Test
+    @Order(5)
+    public void AddUniversityDegreeTest() throws Exception {
+        AddDegreeToUniversityDto addDegreeToUniversityDto = new AddDegreeToUniversityDto();
+        addDegreeToUniversityDto.setDegreeId(degree3.getId());
+
+        mockMvc.perform(patch("/universities/{id}/degrees", university1.getId())
+                .header("Authorization", userAuth)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(addDegreeToUniversityDto)))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(patch("/universities/{id}/degrees", university1.getId())
                 .header("Authorization", adminAuth)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto1)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value(dto1.getName()))
-                .andExpect(jsonPath("$.emailDomains[0]").value(dto1.getEmailDomains().getFirst()))
-                .andExpect(jsonPath("$.degrees").isArray());
+                .content(objectMapper.writeValueAsString(addDegreeToUniversityDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(university1.getId().toString()))
+                .andExpect(jsonPath("$.name").value(university1.getName()))
+                .andExpect(jsonPath("$.degrees.length()").value(3));
 
-    }*/
+    }
 
 }
