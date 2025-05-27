@@ -7,6 +7,7 @@ import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,16 +28,20 @@ public class BeanUtilsConfiguration {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
 
-        Converter<List<PostVote>, Short> votesToCurrentVote = v -> Optional
-                .ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                .map(auth -> (User) auth.getPrincipal())
-                .map(user -> v.getSource()
-                        .stream()
-                        .filter(vote -> vote.getAuthor().equals(user))
-                        .findFirst()
-                        .map(vote -> vote.getValue().getValue())
-                        .orElse((short) 0))
-                .orElse(null);
+        Converter<List<PostVote>, Short> votesToCurrentVote = v -> {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+                return null;
+            }
+
+            User user = (User) authentication.getPrincipal();
+            var votes = v.getSource();
+            return votes.stream()
+                    .filter(vote -> vote.getAuthor().equals(user))
+                    .findFirst()
+                    .map(vote -> vote.getValue().getValue())
+                    .orElse((short) 0);
+        };
 
         modelMapper.typeMap(Post.class, PostResponseDto.class)
                 .addMappings(mapper -> mapper.using(votesToCurrentVote).map(Post::getVotes,
