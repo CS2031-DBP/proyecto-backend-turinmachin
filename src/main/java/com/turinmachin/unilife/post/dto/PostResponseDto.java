@@ -1,7 +1,7 @@
 package com.turinmachin.unilife.post.dto;
 
 import com.turinmachin.unilife.comment.dto.CommentResponseDto;
-import com.turinmachin.unilife.degree.dto.DegreeResponsePartialDto;
+import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
 import com.turinmachin.unilife.fileinfo.dto.FileInfoResponseDto;
 import com.turinmachin.unilife.university.dto.UniversityResponseDto;
 import com.turinmachin.unilife.user.dto.UserResponseDto;
@@ -19,7 +19,7 @@ public class PostResponseDto {
     private String content;
     private List<FileInfoResponseDto> files;
     private UniversityResponseDto university;
-    private DegreeResponsePartialDto degree;
+    private DegreeResponseDto degree;
     private List<String> tags;
     private List<CommentResponseDto> comments;
     private Integer score;

@@ -1,6 +1,6 @@
 package com.turinmachin.unilife.university.dto;
 
-import com.turinmachin.unilife.degree.dto.DegreeResponsePartialDto;
+import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
 import lombok.Data;
 
 import java.util.List;
@@ -13,6 +13,6 @@ public class UniversityResponseDto {
     private String name;
     private String websiteUrl;
     private List<String> emailDomains;
-    private List<DegreeResponsePartialDto> degrees;
+    private List<DegreeResponseDto> degrees;
 
 }
