@@ -1,16 +1,15 @@
 package com.turinmachin.unilife.user.domain;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,6 +39,7 @@ import com.turinmachin.unilife.user.exception.UsernameConflictException;
 import com.turinmachin.unilife.user.infrastructure.UserRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
@@ -58,20 +58,12 @@ public class UserService implements UserDetailsService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public Page<User> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
-    }
-
-    public List<User> getAllVerifiedUsers() {
-        return userRepository.findByVerificationIdNull();
+    public Page<User> getAllUsersWithSpec(Specification<User> spec, Pageable pageable) {
+        return userRepository.findAll(spec, pageable);
     }
 
     public Optional<User> getUserById(UUID id) {
         return userRepository.findById(id);
-    }
-
-    public Optional<User> getVerifiedUserById(UUID id) {
-        return userRepository.findByIdAndVerificationIdNull(id);
     }
 
     public Optional<User> getUserByUsername(String username) {
@@ -84,10 +76,6 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> getUserByVerificationId(UUID verificationId) {
         return userRepository.findByVerificationId(verificationId);
-    }
-
-    public boolean userExistsByEmail(String email) {
-        return userRepository.existsByEmail(email);
     }
 
     public boolean userExistsByRole(Role role) {
