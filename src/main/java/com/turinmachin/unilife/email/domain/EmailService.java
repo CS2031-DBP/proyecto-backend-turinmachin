@@ -41,6 +41,7 @@ public class EmailService {
     @Async
     public void sendVerificationEmail(User user) throws MessagingException {
         Context context = new Context();
+        context.setVariable("username", user.getUsername());
         context.setVariable("verification_id", user.getVerificationId().toString());
 
         sendTemplatedEmail(user.getEmail(), "Tu verificación de UniLife", "verification", context);

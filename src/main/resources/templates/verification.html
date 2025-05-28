@@ -16,15 +16,15 @@
         </tr>
         <tr>
           <td style="color: #555555; font-size: 16px;">
-            <p>Hola,</p>
+            <p>Hola <strong th:text="${username}"></strong>,</p>
             <p>
-              Gracias por registrarte en <strong>UniLife</strong>. Para continuar, por favor utiliza el siguiente código de verificación:
+              Gracias por registrarte en <strong>UniLife</strong>. Para continuar, por favor utiliza la siguiente ID de verificación:
             </p>
             <p style="font-size: 24px; font-weight: bold; color: #007bff; text-align: center; margin: 30px 0;">
               <span th:text="${verification_id}"></span>
             </p>
             <p>
-              Este código es válido por tiempo limitado. Úsalo en el siguiente endpoint de la API:
+              Úsalo en el siguiente endpoint de la API:
               <code style="background-color: #eee; padding: 2px 4px; border-radius: 4px;">POST /auth/verify</code>
             </p>
             <p style="font-size: 14px; color: #888888;">
