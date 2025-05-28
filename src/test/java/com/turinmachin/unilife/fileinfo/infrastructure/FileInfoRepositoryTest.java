@@ -26,7 +26,7 @@ public class FileInfoRepositoryTest {
     private FileInfo fileInfo3;
 
     @BeforeEach
-    private void setup() {
+    public void setup() {
         fileInfo1 = new FileInfo();
         fileInfo1.setMediaType("image/png");
         fileInfo1.setKey("abc");
@@ -42,7 +42,7 @@ public class FileInfoRepositoryTest {
         fileInfo3 = new FileInfo();
         fileInfo3.setMediaType("video/mp4");
         fileInfo3.setKey("000");
-        fileInfo3.setUrl("https://coolcdn.com/good_afternoong.mp4");
+        fileInfo3.setUrl("https://coolcdn.com/good_afternoon.mp4");
         fileInfo3 = fileInfoRepository.save(fileInfo3);
     }
 
