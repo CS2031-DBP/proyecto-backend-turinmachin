@@ -149,13 +149,43 @@ public class CommentControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$.[0].id").value(comment1.getId().toString()))
-                .andExpect(jsonPath("$.[1].id").value(comment2.getId().toString()));
+                .andExpect(jsonPath("$.[0].content").value(comment1.getContent()))
+                .andExpect(jsonPath("$.[1].id").value(comment2.getId().toString()))
+                .andExpect(jsonPath("$.[1].content").value(comment2.getContent()));
 
         mockMvc.perform(get("/posts/{postId}/comments", post2.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$.[0].id").value(comment3.getId().toString()))
-                .andExpect(jsonPath("$.[1].id").value(comment4.getId().toString()));
+                .andExpect(jsonPath("$.[0].content").value(comment3.getContent()))
+                .andExpect(jsonPath("$.[1].id").value(comment4.getId().toString()))
+                .andExpect(jsonPath("$.[1].content").value(comment4.getContent()));
+
+    }
+
+    @Test
+    @Order(2)
+    public void getIndividualPostComments() throws Exception {
+
+        mockMvc.perform(get("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(comment1.getId().toString()))
+                .andExpect(jsonPath("$.content").value(comment1.getContent()));
+
+        mockMvc.perform(get("/posts/{postId}/comments/{id}", post1.getId(), comment2.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(comment2.getId().toString()))
+                .andExpect(jsonPath("$.content").value(comment2.getContent()));
+
+        mockMvc.perform(get("/posts/{postId}/comments/{id}", post2.getId(), comment3.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(comment3.getId().toString()))
+                .andExpect(jsonPath("$.content").value(comment3.getContent()));
+
+        mockMvc.perform(get("/posts/{postId}/comments/{id}", post2.getId(), comment4.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(comment4.getId().toString()))
+                .andExpect(jsonPath("$.content").value(comment4.getContent()));
 
     }
 
