@@ -16,6 +16,13 @@ public class PostSpecifications {
         return (root, query, cb) -> cb.equal(root.get("university").get("id"), universityId);
     }
 
+    public static Specification<Post> hasDegreeId(UUID degreeId) {
+        if (degreeId == null)
+            return (root, query, cb) -> null;
+
+        return (root, query, cb) -> cb.equal(root.get("degree").get("id"), degreeId);
+    }
+
     public static Specification<Post> hasAuthorId(UUID authorId) {
         if (authorId == null)
             return (root, query, cb) -> null;

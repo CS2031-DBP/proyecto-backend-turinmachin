@@ -55,11 +55,13 @@ public class PostController {
     @GetMapping
     public List<PostResponseDto> getAllPosts(
             @RequestParam(required = false) UUID universityId,
+            @RequestParam(required = false) UUID degreeId,
             @RequestParam(required = false) List<String> tags,
             @RequestParam(required = false) UUID authorId,
             Pageable pageable) {
         Specification<Post> spec = Specification
                 .where(PostSpecifications.hasUniversityId(universityId))
+                .and(PostSpecifications.hasDegreeId(degreeId))
                 .and(PostSpecifications.hasAuthorId(authorId))
                 .and(PostSpecifications.hasTags(tags));
 
