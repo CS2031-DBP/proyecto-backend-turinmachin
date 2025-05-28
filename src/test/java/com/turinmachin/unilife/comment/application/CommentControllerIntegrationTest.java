@@ -1,10 +1,12 @@
 package com.turinmachin.unilife.comment.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.turinmachin.unilife.PostgresContainerConfig;
 import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.comment.domain.CommentService;
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
+import com.turinmachin.unilife.comment.infrastructure.CommentRepository;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.post.domain.PostService;
@@ -21,12 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -63,22 +70,25 @@ public class CommentControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
     private User admin;
     private User user1;
     private User user2;
     private String adminAuth;
     private String userAuth1;
     private String userAuth2;
-    private String auth1;
-    private String auth2;
     private Post post1;
     private Post post2;
     private Comment comment1;
     private Comment comment2;
     private Comment comment3;
     private Comment comment4;
-    @Autowired
-    private CommentService commentService;
+    private Comment comment5;
 
     @Test
     @Order(1)
@@ -186,6 +196,37 @@ public class CommentControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(comment4.getId().toString()))
                 .andExpect(jsonPath("$.content").value(comment4.getContent()));
+
+    }
+
+    @Test
+    @Order(3)
+    public void testCreateComment() throws Exception {
+
+        CreateCommentDto commentDto = new CreateCommentDto();
+        commentDto.setContent("This is a new comment!");
+
+        mockMvc.perform(post("/posts/{postId}/comments", post1.getId())
+                        .header("Authorization", userAuth1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isForbidden());
+
+        user1 = userService.verifyUser(user1);
+
+        MvcResult result = mockMvc.perform(post("/posts/{postId}/comments", post1.getId())
+                        .header("Authorization", userAuth1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isCreated()).andReturn();
+
+        String body = result.getResponse().getContentAsString();
+        UUID id = UUID.fromString(JsonPath.parse(body).read("$.id"));
+
+        Optional<Comment> createdComment = commentRepository.findById(id);
+        Assertions.assertTrue(createdComment.isPresent());
+
+        comment5 = createdComment.get();
 
     }
 
