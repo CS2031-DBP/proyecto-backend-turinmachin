@@ -6,6 +6,7 @@ import com.turinmachin.unilife.PostgresContainerConfig;
 import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.comment.domain.CommentService;
 import com.turinmachin.unilife.comment.dto.CreateCommentDto;
+import com.turinmachin.unilife.comment.dto.UpdateCommentDto;
 import com.turinmachin.unilife.comment.infrastructure.CommentRepository;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.post.domain.Post;
@@ -35,6 +36,8 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -88,7 +91,6 @@ public class CommentControllerIntegrationTest {
     private Comment comment2;
     private Comment comment3;
     private Comment comment4;
-    private Comment comment5;
 
     @Test
     @Order(1)
@@ -226,7 +228,79 @@ public class CommentControllerIntegrationTest {
         Optional<Comment> createdComment = commentRepository.findById(id);
         Assertions.assertTrue(createdComment.isPresent());
 
-        comment5 = createdComment.get();
+    }
+
+    @Test
+    @Order(4)
+    public void testCreateCommentReply() throws Exception {
+
+        CreateCommentDto commentDto = new CreateCommentDto();
+        commentDto.setContent("This is a comment reply!");
+
+        mockMvc.perform(post("/posts/{postId}/comments/{id}/replies", post1.getId(), comment1.getId())
+                        .header("Authorization", userAuth2)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isForbidden());
+
+        user2 = userService.verifyUser(user2);
+
+        MvcResult result = mockMvc.perform(post("/posts/{postId}/comments/{id}/replies", post1.getId(), comment1.getId())
+                        .header("Authorization", userAuth2)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isCreated()).andReturn();
+
+        String body = result.getResponse().getContentAsString();
+        UUID id = UUID.fromString(JsonPath.parse(body).read("$.id"));
+
+        Optional<Comment> createdComment = commentRepository.findById(id);
+        Assertions.assertTrue(createdComment.isPresent());
+
+    }
+
+    @Test
+    @Order(5)
+    public void testUpdateComment() throws Exception {
+
+        UpdateCommentDto commentDto = new UpdateCommentDto();
+        commentDto.setContent("This is the updated comment!");
+
+        mockMvc.perform(patch("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isForbidden());
+
+        // no debería poder actualizarlo, pues user2 no es el autor.
+        mockMvc.perform(patch("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
+                        .header("Authorization", userAuth2)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isMethodNotAllowed());
+
+        // usuario original
+        mockMvc.perform(patch("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
+                        .header("Authorization", userAuth1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    @Order(6)
+    public void testDeleteComment() throws Exception {
+
+        mockMvc.perform(delete("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId()))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
+                        .header("Authorization", userAuth2))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
+                        .header("Authorization", userAuth1))
+                .andExpect(status().isOk());
 
     }
 
