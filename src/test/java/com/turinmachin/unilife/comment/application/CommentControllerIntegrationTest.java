@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -209,17 +210,17 @@ public class CommentControllerIntegrationTest {
         commentDto.setContent("This is a new comment!");
 
         mockMvc.perform(post("/posts/{postId}/comments", post1.getId())
-                        .header("Authorization", userAuth1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
+                .header("Authorization", userAuth1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isForbidden());
 
         user1 = userService.verifyUser(user1);
 
         MvcResult result = mockMvc.perform(post("/posts/{postId}/comments", post1.getId())
-                        .header("Authorization", userAuth1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
+                .header("Authorization", userAuth1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isCreated()).andReturn();
 
         String body = result.getResponse().getContentAsString();
@@ -238,14 +239,15 @@ public class CommentControllerIntegrationTest {
         commentDto.setContent("This is a comment reply!");
 
         mockMvc.perform(post("/posts/{postId}/comments/{id}/replies", post1.getId(), comment1.getId())
-                        .header("Authorization", userAuth2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
+                .header("Authorization", userAuth2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isForbidden());
 
         user2 = userService.verifyUser(user2);
 
-        MvcResult result = mockMvc.perform(post("/posts/{postId}/comments/{id}/replies", post1.getId(), comment1.getId())
+        MvcResult result = mockMvc
+                .perform(post("/posts/{postId}/comments/{id}/replies", post1.getId(), comment1.getId())
                         .header("Authorization", userAuth2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto)))
@@ -267,22 +269,22 @@ public class CommentControllerIntegrationTest {
         commentDto.setContent("This is the updated comment!");
 
         mockMvc.perform(patch("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isForbidden());
 
         // no debería poder actualizarlo, pues user2 no es el autor.
-        mockMvc.perform(patch("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
-                        .header("Authorization", userAuth2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
-                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
+                .header("Authorization", userAuth2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isForbidden());
 
         // usuario original
-        mockMvc.perform(patch("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
-                        .header("Authorization", userAuth1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
+        mockMvc.perform(put("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
+                .header("Authorization", userAuth1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isOk());
 
     }
@@ -295,12 +297,12 @@ public class CommentControllerIntegrationTest {
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(delete("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
-                        .header("Authorization", userAuth2))
+                .header("Authorization", userAuth2))
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(delete("/posts/{postId}/comments/{id}", post1.getId(), comment1.getId())
-                        .header("Authorization", userAuth1))
-                .andExpect(status().isOk());
+                .header("Authorization", userAuth1))
+                .andExpect(status().isNoContent());
 
     }
 
