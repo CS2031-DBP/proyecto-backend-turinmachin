@@ -122,19 +122,19 @@ public class PostControllerIntegrationTest {
         CreatePostDto postDto1 = new CreatePostDto();
         postDto1.setContent("This is post 1");
         postDto1.setTags(new ArrayList<>());
-        postDto1.setImages(new ArrayList<>());
+        postDto1.setFiles(new ArrayList<>());
         post1 = postService.createPost(postDto1, user1);
 
         CreatePostDto postDto2 = new CreatePostDto();
         postDto2.setContent("This is post 2");
         postDto2.setTags(List.of("foo", "bar"));
-        postDto2.setImages(new ArrayList<>());
+        postDto2.setFiles(new ArrayList<>());
         post2 = postService.createPost(postDto2, user1);
 
         CreatePostDto postDto3 = new CreatePostDto();
         postDto3.setContent("This is post 3");
         postDto3.setTags(List.of("foo", "baz"));
-        postDto3.setImages(new ArrayList<>());
+        postDto3.setFiles(new ArrayList<>());
         post3 = postService.createPost(postDto3, user2);
 
         mockMvc.perform(get("/posts"))
@@ -145,14 +145,14 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.[2].id").value(post1.getId().toString()));
 
         mockMvc.perform(get("/posts")
-                        .param("authorId", user1.getId().toString()))
+                .param("authorId", user1.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$.[0].id").value(post2.getId().toString()))
                 .andExpect(jsonPath("$.[1].id").value(post1.getId().toString()));
 
         mockMvc.perform(get("/posts")
-                        .param("authorId", user2.getId().toString()))
+                .param("authorId", user2.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$.[0].id").value(post3.getId().toString()));
@@ -177,21 +177,21 @@ public class PostControllerIntegrationTest {
     @Test
     @Order(3)
     public void testCreatePost() throws Exception {
-//        auth1 = "Bearer " + jwtService.generateToken(user1);
+        auth1 = "Bearer " + jwtService.generateToken(user1);
 
         // Unverified user
         mockMvc.perform(multipart("/posts")
-                        .header("Authorization", auth1)
-                        .param("content", "Hello, world!"))
+                .header("Authorization", auth1)
+                .param("content", "Hello, world!"))
                 .andExpect(status().isForbidden());
 
         user1 = userService.verifyUser(user1);
 
         // Now as verified user
         MvcResult result = mockMvc.perform(multipart("/posts")
-                        .header("Authorization", auth1)
-                        .param("content", "Hello, world!")
-                        .param("tags", "tag1", "tag2"))
+                .header("Authorization", auth1)
+                .param("content", "Hello, world!")
+                .param("tags", "tag1", "tag2"))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -213,27 +213,27 @@ public class PostControllerIntegrationTest {
 
         // Unauthenticated
         mockMvc.perform(put("/posts/{id}", post4.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isForbidden());
 
         auth2 = "Bearer " + jwtService.generateToken(user2);
 
         // Authenticated, non-author user
         mockMvc.perform(put("/posts/{id}", post4.getId())
-                        .header("Authorization", auth2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .header("Authorization", auth2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isForbidden());
 
         // Authenticated, author user
         mockMvc.perform(put("/posts/{id}", post4.getId())
-                        .header("Authorization", auth1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .header("Authorization", auth1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value(dto.getContent()))
-                .andExpect(jsonPath("$.tags.length()").value(2));
+                .andExpect(jsonPath("$.tags.length()").value(dto.getTags().size()));
     }
 
     @Test
@@ -244,7 +244,7 @@ public class PostControllerIntegrationTest {
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(put("/posts/{id}/upvotes", post4.getId())
-                        .header("Authorization", auth2))
+                .header("Authorization", auth2))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/posts/{id}", post4.getId()))
@@ -252,7 +252,7 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.score").value(1));
 
         mockMvc.perform(put("/posts/{id}/upvotes", post4.getId())
-                        .header("Authorization", auth1))
+                .header("Authorization", auth1))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/posts/{id}", post4.getId()))
@@ -268,7 +268,7 @@ public class PostControllerIntegrationTest {
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(put("/posts/{id}/downvotes", post4.getId())
-                        .header("Authorization", auth2))
+                .header("Authorization", auth2))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/posts/{id}", post4.getId()))
@@ -276,7 +276,7 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.score").value(0));
 
         mockMvc.perform(put("/posts/{id}/downvotes", post4.getId())
-                        .header("Authorization", auth1))
+                .header("Authorization", auth1))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/posts/{id}", post4.getId()))
@@ -292,7 +292,7 @@ public class PostControllerIntegrationTest {
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(delete("/posts/{id}/votes", post4.getId())
-                        .header("Authorization", auth2))
+                .header("Authorization", auth2))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/posts/{id}", post4.getId()))
@@ -300,7 +300,7 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.score").value(-1));
 
         mockMvc.perform(delete("/posts/{id}/votes", post4.getId())
-                        .header("Authorization", auth1))
+                .header("Authorization", auth1))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/posts/{id}", post4.getId()))
@@ -317,12 +317,12 @@ public class PostControllerIntegrationTest {
 
         // Authenticated, non-author user
         mockMvc.perform(delete("/posts/{id}", post4.getId())
-                        .header("Authorization", auth2))
+                .header("Authorization", auth2))
                 .andExpect(status().isForbidden());
 
         // Authenticated, author user
         mockMvc.perform(delete("/posts/{id}", post4.getId())
-                        .header("Authorization", auth1))
+                .header("Authorization", auth1))
                 .andExpect(status().isNoContent());
 
         admin = userRepository.findAll().getFirst();
@@ -331,7 +331,7 @@ public class PostControllerIntegrationTest {
 
         // Authenticated, non-author, role >= moderator
         mockMvc.perform(delete("/posts/{id}", post1.getId())
-                        .header("Authorization", adminAuth))
+                .header("Authorization", adminAuth))
                 .andExpect(status().isNoContent());
     }
 
