@@ -13,21 +13,58 @@ Integrantes de grupo:
 
 ## Índice
 
-1. [Introducción](#Introducción)
+- [Introducción](#introducción)
+  - [Objetivos](#objetivos)
+- [Identificación del problema](#identificación-del-problema)
+  - [Descripción del problema](#descripción-del-problema)
+  - [Justificación](#justificación)
+- [Descripción de la solución](#descripción-de-la-solución)
+  - [Funcionalidades implementadas](#funcionalidades-implementadas)
+  - [Tecnologías utilizadas](#tecnologías-utilizadas)
+- [Modelo de entidades](#modelo-de-entidades)
+- [Testing y manejo de errores](#testing-y-manejo-de-errores)
+  - [Niveles de testing](#niveles-de-testing)
+  - [Resultados](#resultados)
+  - [Manejo de errores](#manejo-de-errores)
+- [Medidas de seguridad implementadas](#medidas-de-seguridad-implementadas)
+  - [Seguridad de datos](#seguridad-de-datos)
+  - [Prevención de vulnerabilidades](#prevención-de-vulnerabilidades)
+- [Eventos y asincronía](#eventos-y-asincronía)
+- [Uso de GitHub](#uso-de-github)
+  - [GitHub Actions](#github-actions)
+- [Conclusión](#conclusión)
+  - [Logros del proyecto](#logros-del-proyecto)
+  - [Aprendizajes clave](#aprendizajes-clave)
+  - [Trabajo futuro](#trabajo-futuro)
+- [Apéndices](#apéndices)
+  - [Referencias](#referencias)
 
 ## Introducción
 
-El mundo universitario, en la actualidad, presenta algunos desafíos: la incertidumbre y desinformación al elegir una carrera o una universidad. Los alumnos se ven obligados a recurrir a familiares, graduados, conocidos o comentarios en redes sociales, que no siempre reflejan la información más actual o precisa de cada universidad o carrera. Hace falta información de **primera mano** y **honesta**. Además, existe una tendencia entre los estudiantes a formar una visión sesgada o estereotipada sobre carreras o universidades ajenas, basada en experiencias limitadas. Cada universidad vive en su propia **burbuja**.
+En el entorno universitario actual, los estudiantes tienden a relacionarse casi exclusivamente dentro de su propia universidad o carrera, lo que genera una especie de "burbuja académica". Esta falta de interacción entre instituciones limita el intercambio de ideas y refuerza estereotipos. Este proyecto surge como una respuesta a esa desconexión.
 
 ### Objetivos
 
-UniLife pretende cumplir los siguientes objetivos:
+El objetivo principal de este proyecto es **crear una plataforma social para universitarios**.
+
+- Hacer visible la vida universitaria entre instituciones.
+- Fomentar la interacción social saludable entre estudiantes de distintas universidades.
+- Ayudar a romper estereotipos y prejuicios entre universidades.
+- Ofrecer una plataforma donde futuros estudiantes puedan conocer el día a día de diversas universidades.
 
 ## Identificación del problema
 
+### Descripción del problema
+
+Muchos estudiantes universitarios permanecen encerrados en la dinámica interna de su institución, sin conocer lo que ocurre en otras universidades o carreras. Esta desconexión genera ideas erróneas, prejuicios y una visión limitada del mundo académico. A su vez, quienes están por ingresar a la universidad no siempre acceden a relatos auténticos y variados sobre lo que significa estudiar en distintos contextos.
+
+### Justificación
+
+Promover el contacto entre estudiantes de diferentes universidades contribuye a construir una comunidad académica más diversa, empática y menos prejuiciosa. Al romper las burbujas entre instituciones, se generan oportunidades de aprendizaje e interacción que representan importantes oportunidades no sólo meramente para el aspecto social y personal, sino también para el ámbito profesional.
+
 ## Descripción de la solución
 
-UniLife es una plataforma social al estilo de [Twitter/X](https://x.com) donde estudiantes universitarios pueden compartir mediante posts sus experiencias personales del día a día en sus universidades.
+UniLife es una plataforma social al estilo de [Twitter/X](https://x.com) donde estudiantes universitarios pueden compartir mediante posts sus experiencias personales del día a día en sus universidades. La plataforma es pública a nivel de lectura; planeamos que, en el frontend, se pueda ver el contenido sin crear una cuenta.
 
 ### Funcionalidades implementadas
 
@@ -35,17 +72,26 @@ En UniLife, un usuario tiene disponibles las siguientes funcionalidades:
 
 - **Posts**
   - Publicar, editar y borrar posts. Pueden incluir imágenes.
-  - Dar upvotes y downvotes a otros posts.
-  - Comentar otros posts.
+  - Dar **upvotes** y **downvotes** a otros posts.
+  - Comentar otros posts,
 - **Manejo de cuenta**
   - Actualizar información personal.
   - Establecer o borrar una foto de perfil.
+- **Exploración**
+  - Buscar posts por universidad, carrera, usuario y/o tags.
+  - Buscar usuarios por universidad y/o carrera.
+- **Sistema de racha**
+  - Un usuario tiene una **racha**: la cantidad de días contiguos en los que haya publicado algo.
+  - Eventualmente, usaremos push notifications para notificar a un usuario si, por ejemplo, está a punto de perder su racha.
 
-Además, UniLife cuenta con un sistema de **moderación**. Un usuario puede tener uno de 3 roles:
+Además, UniLife cuenta con un sistema de **moderación**. Un usuario tiene uno de 3 roles:
 
-- **Admin:** Reservado para nosotros, los creadores de la aplicación. Otorga control total sobre todos los endpoints y recursos.
-- **Moderador:** Puede borrar posts, comentarios y usuarios si detecta algún comportamiento indebido.
-- **Usuario:** Usuario regular de la plataforma; no puede editar ni borrar lo que no le pertenece.
+- **Admin:** Control total.
+- **Moderador:** Puede borrar posts, comentarios y usuarios.
+- **Usuario:** Usuario regular.
+- Un usuario de UniLife puede o puede no estar registrado como en una **universidad**. De ser así, puede también estar registrado como parte de una **carrera**. Sólo los usuarios que pertenezcan a alguna universidad pueden publicar posts, pero cualquier usuario puede dar votos y comentar otros posts.
+
+Cuando un usuario hace un post, este post automáticamente se considera como sobre la universidad del autor (y carrera, de estar el autor en una carrera).
 
 ### Tecnologías utilizadas
 
@@ -53,24 +99,16 @@ El backend de UniLife está programado en **Java 21** y usa las siguientes tecno
 
 - **Spring Boot Web**, como la base del servidor.
 - **Spring Boot Security**, para la capa de seguridad del backend.
-- **Spring Boot Validation**, para todo lo relacionado a lógica de validación.
 - **Spring Data JPA**, como ORM para interactuar con la base de datos.
-- **Spring Mail**, para enviar correos a los usuarios (verificación, bienvenida, etc.).
-- **Thymeleaf**, para gestionar las plantillas de correo.
-
-Además, el proyecto usa algunas líneas de **SQL** en algunos queries personalizados de JPA.
-
-Fuera del código fuente, UniLife usa las siguientes tecnologías:
-
+- **Spring Mail y Thymeleaf**, para gestionar y enviar correo electrónico.
+- **JUnit y Mockito**, para testing.
 - **JWT**, como estándar para el sistema de autenticación.
 - **PostgreSQL**, como gestor de base de datos para almacenar toda la información persistente de la aplicación.
 - **Docker** para empaquetar y desplegar la aplicación de forma reproducible.
-- **Amazon ECS**, como entorno de despliegue para la aplicación.
-- **Amazon RDS**, como proveedor de la base de datos.
-- **Amazon ECR**, como repositorio privado para las imágenes de Docker.
 - **Amazon S3**, como servicio de almacenamiento de imágenes y otros recursos.
+- **Amazon RDS, ECR y ECS**, como servicios para desplegar la aplicación.
 
-Adicionalmente, usamos **Postman** en el desarrollo del proyecto como cliente HTTP para probar los endpoints de la aplicación.
+Además, el proyecto usa algunas líneas de **SQL** para algunos queries personalizados de JPA.
 
 ## Modelo de entidades
 
@@ -188,6 +226,7 @@ Es una representación en nuestra propia BD de una imagen almacenada en Amazon S
 - **ID** (UUID, primary key, auto-generado): Identificador interno.
 - **Key** (string, único): Key de la imagen en S3.
 - **URL** (string): URL permanente de la imagen. Es provista por S3 al cargar la imagen.
+- **Media type** (string): Content-Type del archivo.
 
 ## Testing y manejo de errores
 
@@ -214,11 +253,12 @@ Todos estos fallos fueron corregidos a medida que desarrollamos los tests.
 
 El proyecto tiene muchas excepciones globales que se arrojan en diversos casos (usuario no encontrado, credenciales inválidas, usuario sin universidad, etc.); todas ellas derivan de la clases en `common/exception`. Estas corresponden a algunos códigos HTTP en el rango de los 4xx.
 
-- `NotFoundException`: 404 No encontrado -- ID de usuario/comentario/post no existente.
-- `ConflictException`: 409 Conflicto -- Email/username ya tomado, usuario ya verificado, etc.
-- `UnsupportedMediaTypeException`: 415 Tipo de medio no soportado -- Post contiene archivos no-imagen.
-- `ForbiddenException`: 403 Prohibido -- Usuario no verificado, usuario no pertenece a una universidad, etc.
-- `UnauthorizedException`: 401 No autorizado -- Credenciales inválidas o no reconocidas.
+- `NotFoundException`: 404 No encontrado
+- `ConflictException`: 409 Conflicto
+- `UnsupportedMediaTypeException`: 415 Tipo de medio no soportado
+- `ForbiddenException`: 403 Prohibido
+- `UnauthorizedException`: 401 No autorizado
+- ...etc.
 
 ## Medidas de seguridad implementadas
 
@@ -228,8 +268,7 @@ UniLife emplea los siguientes mecanismos de seguridad:
 
 - **[JWT](https://jwt.io/)** como estándar para autenticar requests.
 - **BCrypt** (mediate `BCryptPasswordEncoder`, de Spring Security) como algoritmo de hash para cifrar contraseñas antes de guardarlas en la base de datos.
-- Un sistema de **roles** para clasificar a los usuarios y determinar qué endpoints pueden utilizar.
-  - Cada usuario tiene un atributo `role`: `ADMIN`, `MODERATOR` o `USER`. La aplicación utiliza la anotación `@PreAuthorize` para permitir el acceso de cierto nivel de rol a las rutas que lo requieren.
+- Un sistema de **roles** con administradores, moderadores y usuarios. Usamos la anotación `@PreAuthorize` para permitir el acceso de cierto nivel de rol a las rutas que lo requieren.
 
 Además, la aplicación **usa UUIDs en lugar de Longs** como IDs de las entidades. Esto reduce la posibilidad de _descubrimiento accidental_ de recursos, ya que los UUIDs son mucho más impredecibles que un número auto-incrementado.
 
@@ -256,11 +295,11 @@ Cada uno de estos eventos tiene su respectivo _listener_ asíncrono.
 
 ## Uso de GitHub
 
-Los hitos importantes del proyecto fueron representados como [issues](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/issues?q=is%3Aissue%20state%3Aclosed) en el repositorio. Cada issue fue trabajado en su propia rama, y los cambios de cada rama fueron mergeados a la rama principal mediante [pull requests](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/pulls?q=is%3Apr+is%3Aclosed). Esto permitió a cada integrante del proyecto trabajar en sus propios tasks sin afectar al resto.
+Los hitos importantes del proyecto fueron representados como [issues](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/issues?q=is%3Aissue%20state%3Aclosed) en el repositorio. Los issues fueron asignados a distintos integrantes del grupo, fueron trabajados cada uno en su propia rama, y los cambios de cada rama fueron mergeados a la rama principal mediante [pull requests](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/pulls?q=is%3Apr+is%3Aclosed). Esto permitió a cada integrante del proyecto trabajar en sus propios tasks sin afectar al resto.
 
 ### GitHub Actions
 
-El repositorio cuenta con un [workflow](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/actions/workflows/deploy.yml) de GitHub Actions para desplegar el proyecto automáticamente al haber cambios en la rama principal.
+El repositorio cuenta con un [workflow](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/actions/workflows/deploy.yml) de GitHub Actions para testear, empaquetar y desplegar el proyecto automáticamente al haber cambios en la rama principal.
 
 ## Conclusión
 
@@ -269,18 +308,29 @@ El repositorio cuenta con un [workflow](https://github.com/CS2031-DBP/proyecto-b
 A nivel de backend, hemos logrado lo siguiente:
 
 - Construir el backend de una plataforma social para universitarios.
+- Implementar un sistema diseñado para exploración libre de diferentes ambientes universitarios y carreras.
+- Implementar medidas para retener a los usuarios y promover el uso frecuente de la app (sistema de racha).
 
 ### Aprendizajes clave
 
-- **Trabajo en equipo**
--
+A través de este proyecto hemos logrado algunos aprendizajes importantes:
+
+- Colaborar en equipo usando Git y GitHub.
+  - Uso de comandos de Git para manejar y mergear branches apropiadamente.
+- Planear y organizar flujos de trabajo para desarrollar software.
+- Comunicación efectiva (para dar a entender nuestras ideas dentro del equipo).
 
 ### Trabajo futuro
 
 Tenemos en mente algunas adiciones que podríamos implementar a futuro en este backend.
 
 - **Chat en tiempo real:** Sería un añadido interesante a la plataforma una pequeña interfaz donde los usuarios puedan conversar en tiempo real. Podría darse mediante salas de chat públicas (por universidad, por ejemplo) y/o con mensajes privados entre usuarios.
+- **Moderación con IA:** Sería útil aliviar la labor de los moderadores con algún tipo de IA que auto-modere el contenido en la plataforma.
 
 ## Apéndices
 
 Este proyecto se encuentra bajo la [licencia MIT](https://mit-license.org/).
+
+### Referencias
+
+- [Baeldung](https://www.baeldung.com/), por servir como guía para varios conceptos usados en el proyecto.
