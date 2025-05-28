@@ -138,8 +138,8 @@ Representa una cuenta en la plataforma.
 
 #### Relaciones
 
-- Un usuario **tiene una foto de perfil** (ManyToOne Image).
-  - _Nota: Aunque una foto de perfil le pertence a un solo usuario, implementamos esta relación como ManyToOne porque la entidad Image es genérica; no tiene un atributo que indique a "qué" le pertenece._
+- Un usuario **tiene una foto de perfil** (ManyToOne FileInfo).
+  - _Nota: Aunque una foto de perfil le pertence a un solo usuario, implementamos esta relación como ManyToOne porque la entidad FileInfo es genérica; no tiene un atributo que indique a "qué" le pertenece._
 - Un usuario **puede pertenecer a una universidad** (ManyToOne University).
 - Un usuario **puede estar cursando una carrera** (ManyToOne Degree).
 - Un usuario **es autor de varios posts** (OneToMany Post).
@@ -183,7 +183,7 @@ Representa una publicación en la plataforma.
 
 #### Relaciones
 
-- Un post **tiene varias imágenes** (OneToMany Image).
+- Un post **tiene varias imágenes** (OneToMany FileInfo).
 - Un post **es sobre una universidad** (ManyToOne University).
 - Un post **puede ser sobre una carrera** (ManyToOne Degree).
 - Un post **tiene varios comentarios** (OneToMany Comment).
@@ -221,13 +221,13 @@ Representa un comentario de un Post. Los comentarios pueden responder a otros co
 - Un comentario **tiene un autor** (ManyToOne User).
 - Un comentario **puede responder a otro comentario** (ManyToOne Comment).
 
-### Image
+### FileInfo
 
-Es una representación en nuestra propia BD de una imagen almacenada en Amazon S3.
+Es una representación en nuestra propia BD de un archivo almacenada en Amazon S3.
 
 - **ID** (UUID, primary key, auto-generado): Identificador interno.
-- **Key** (string, único): Key de la imagen en S3.
-- **URL** (string): URL permanente de la imagen. Es provista por S3 al cargar la imagen.
+- **Key** (string, único): Key del archivo en S3.
+- **URL** (string): URL permanente del archivo. Es provista por S3 al cargar el archivo.
 - **Media type** (string): Content-Type del archivo.
 
 ## Testing y manejo de errores
