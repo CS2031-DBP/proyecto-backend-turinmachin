@@ -1,6 +1,5 @@
 package com.turinmachin.unilife.user.infrastructure;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,13 +13,7 @@ import com.turinmachin.unilife.user.domain.User;
 
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
 
-    List<User> findByVerificationIdNull();
-
-    Optional<User> findByIdAndVerificationIdNull(UUID id);
-
     Optional<User> findByUsername(String username);
-
-    Optional<User> findByUsernameAndVerificationIdNull(String username);
 
     @NativeQuery("SELECT * FROM users WHERE username = ?1 OR email = ?1 LIMIT 1")
     Optional<User> findByUsernameOrEmail(String usernameOrEmail);

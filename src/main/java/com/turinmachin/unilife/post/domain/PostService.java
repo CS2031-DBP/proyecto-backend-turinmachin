@@ -113,8 +113,4 @@ public class PostService {
         postVoteRepository.delete(vote);
     }
 
-    public void deletePostsByUniversityId(UUID universityId) {
-        postRepository.deleteByUniversityId(universityId);
-    }
-
 }
