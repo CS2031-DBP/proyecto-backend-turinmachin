@@ -112,7 +112,9 @@ Además, el proyecto usa algunas líneas de **SQL** para algunos queries persona
 
 ## Modelo de entidades
 
-![Diagrama UML](https://raw.githubusercontent.com/CS2031-DBP/proyecto-backend-turinmachin/main/assets/diagrama_uml.png)
+![Diagrama UML](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/blob/main/assets/diagrama_uml.png?raw=true)
+
+_Nota: Si el diagrama no carga, la imagen está en [este enlace](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/blob/main/assets/diagrama_uml.png)_.
 
 A continuación describimos más detalladamente estas entidades.
 
