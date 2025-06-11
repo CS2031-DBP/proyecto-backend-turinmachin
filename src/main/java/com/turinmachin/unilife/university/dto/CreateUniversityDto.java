@@ -14,6 +14,8 @@ public class CreateUniversityDto {
     @NotBlank
     private String name;
 
+    private String shortName;
+
     @NotNull
     @Size(min = 1)
     private List<String> emailDomains;

@@ -11,6 +11,7 @@ public class UniversityResponseDto {
 
     private UUID id;
     private String name;
+    private String shortName;
     private String websiteUrl;
     private List<String> emailDomains;
     private List<DegreeResponseDto> degrees;

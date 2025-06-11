@@ -32,6 +32,9 @@ public class University {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(nullable = true, unique = true)
+    private String shortName;
+
     @Column(nullable = true)
     private String websiteUrl;
 
@@ -58,7 +61,8 @@ public class University {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         University that = (University) o;
         return Objects.equals(id, that.id);
     }

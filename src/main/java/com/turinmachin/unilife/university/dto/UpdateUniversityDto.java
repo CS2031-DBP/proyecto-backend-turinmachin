@@ -11,7 +11,9 @@ import java.util.List;
 public class UpdateUniversityDto {
 
     @NotBlank
-    public String name;
+    private String name;
+
+    private String shortName;
 
     @NotNull
     @Size(min = 1)
