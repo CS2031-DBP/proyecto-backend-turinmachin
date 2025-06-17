@@ -29,7 +29,7 @@ public class DegreeService {
     }
 
     public List<Degree> getDegreesByUniversityId(UUID universityId) {
-        return degreeRepository.findByUniversityId(universityId);
+        return degreeRepository.findByUniversitiesId(universityId);
     }
 
     public Optional<Degree> getDegreeById(UUID id) {

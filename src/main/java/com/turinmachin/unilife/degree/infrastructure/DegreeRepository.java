@@ -10,6 +10,6 @@ public interface DegreeRepository extends JpaRepository<Degree, UUID> {
 
     boolean existsByName(String name);
 
-    List<Degree> findByUniversityId(UUID universityId);
+    List<Degree> findByUniversitiesId(UUID universityId);
 
 }
