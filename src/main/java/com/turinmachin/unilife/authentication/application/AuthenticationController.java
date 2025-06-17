@@ -2,9 +2,11 @@ package com.turinmachin.unilife.authentication.application;
 
 import com.turinmachin.unilife.authentication.domain.AuthenticationService;
 import com.turinmachin.unilife.authentication.dto.JwtAuthLoginDto;
-import com.turinmachin.unilife.authentication.dto.JwtAuthResponseDto;
+import com.turinmachin.unilife.authentication.dto.LoginResponseDto;
+import com.turinmachin.unilife.authentication.dto.RegisterResponseDto;
 import com.turinmachin.unilife.authentication.dto.VerifyResendDto;
 import com.turinmachin.unilife.authentication.dto.VerifyUserDto;
+import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
@@ -27,6 +29,8 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
+    private final JwtService jwtService;
+
     private final UserService userService;
 
     private final ModelMapper modelMapper;
@@ -34,15 +38,18 @@ public class AuthenticationController {
     private final ApplicationEventPublisher eventPublisher;
 
     @PostMapping("/login")
-    public JwtAuthResponseDto login(@Valid @RequestBody JwtAuthLoginDto dto) {
-        return authenticationService.jwtLogin(dto);
+    public LoginResponseDto login(@Valid @RequestBody JwtAuthLoginDto dto) {
+        String token = authenticationService.jwtLogin(dto);
+        return new LoginResponseDto(token);
     }
 
     @PostMapping("/register")
-    public UserResponseDto register(@Valid @RequestBody RegisterUserDto dto) {
+    public RegisterResponseDto register(@Valid @RequestBody RegisterUserDto dto) {
         User createdUser = userService.createUser(dto);
         eventPublisher.publishEvent(new SendVerificationEmailEvent(createdUser));
-        return modelMapper.map(createdUser, UserResponseDto.class);
+
+        String token = jwtService.generateToken(createdUser);
+        return new RegisterResponseDto(createdUser.getId(), token);
     }
 
     @PostMapping("/verify")

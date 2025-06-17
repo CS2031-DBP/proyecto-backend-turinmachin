@@ -1,7 +1,6 @@
 package com.turinmachin.unilife.authentication.domain;
 
 import com.turinmachin.unilife.authentication.dto.JwtAuthLoginDto;
-import com.turinmachin.unilife.authentication.dto.JwtAuthResponseDto;
 import com.turinmachin.unilife.authentication.exception.InvalidCredentialsException;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
@@ -23,7 +22,7 @@ public class AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public JwtAuthResponseDto jwtLogin(JwtAuthLoginDto dto) {
+    public String jwtLogin(JwtAuthLoginDto dto) {
         User user = userService.getUserByUsernameOrEmail(dto.getUsername())
                 .orElseThrow(InvalidCredentialsException::new);
 
@@ -31,9 +30,7 @@ public class AuthenticationService {
             throw new InvalidCredentialsException();
         }
 
-        JwtAuthResponseDto response = new JwtAuthResponseDto();
-        response.setToken(jwtService.generateToken(user));
-        return response;
+        return jwtService.generateToken(user);
     }
 
     public User verifyUser(UUID verificationId) {
