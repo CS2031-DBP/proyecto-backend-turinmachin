@@ -101,9 +101,10 @@ public class UserController {
     @DeleteMapping("/@self/picture")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void deleteUserProfilePicture(Authentication authentication) throws IOException {
+    public UserResponseDto deleteUserProfilePicture(Authentication authentication) throws IOException {
         User user = (User) authentication.getPrincipal();
-        userService.deleteUserProfilePicture(user);
+        user = userService.deleteUserProfilePicture(user);
+        return modelMapper.map(user, UserResponseDto.class);
     }
 
     @PatchMapping("/@self/email")

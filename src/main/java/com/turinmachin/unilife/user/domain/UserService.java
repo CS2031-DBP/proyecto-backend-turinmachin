@@ -214,7 +214,7 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public void deleteUserProfilePicture(User user) {
+    public User deleteUserProfilePicture(User user) {
         FileInfo oldPicture = user.getProfilePicture();
 
         if (oldPicture == null) {
@@ -222,8 +222,9 @@ public class UserService implements UserDetailsService {
         }
 
         user.setProfilePicture(null);
-        userRepository.save(user);
+        user = userRepository.save(user);
         fileInfoService.deleteFile(oldPicture);
+        return user;
     }
 
     @Override
