@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.post.domain.Post;
 
 import jakarta.persistence.CascadeType;
@@ -16,7 +17,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import lombok.Data;
@@ -37,6 +40,10 @@ public class University {
 
     @Column(nullable = true)
     private String websiteUrl;
+
+    @ManyToOne
+    @JoinColumn(nullable = true)
+    private FileInfo picture;
 
     // These EAGERs are needed to prevent an error
     // https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex

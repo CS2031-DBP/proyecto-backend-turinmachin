@@ -1,14 +1,17 @@
 package com.turinmachin.unilife.university.application;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +30,7 @@ import com.turinmachin.unilife.university.dto.AddDegreeToUniversityDto;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
 import com.turinmachin.unilife.university.dto.UniversityResponseDto;
 import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
+import com.turinmachin.unilife.university.dto.UpdateUniversityPictureDto;
 import com.turinmachin.unilife.university.exception.UniversityNotFoundException;
 
 import jakarta.validation.Valid;
@@ -80,6 +84,29 @@ public class UniversityController {
                 .orElseThrow(UniversityNotFoundException::new);
         Degree degree = degreeService.getDegreeById(dto.getDegreeId()).orElseThrow(DegreeNotFoundException::new);
         university = universityService.addDegreeToUniversity(university, degree);
+        return modelMapper.map(university, UniversityResponseDto.class);
+    }
+
+    @PatchMapping("/{id}/picture")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public UniversityResponseDto updateUniversityPicture(@PathVariable UUID id,
+            @Valid @ModelAttribute UpdateUniversityPictureDto dto)
+            throws IOException {
+        University university = universityService.getActiveUniversityById(id)
+                .orElseThrow(UniversityNotFoundException::new);
+
+        university = universityService.updateUniversityPicture(university, dto.getPicture());
+        return modelMapper.map(university, UniversityResponseDto.class);
+    }
+
+    @DeleteMapping("/{id}/picture")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public UniversityResponseDto deleteUserProfilePicture(@PathVariable UUID id) throws IOException {
+        University university = universityService.getActiveUniversityById(id)
+                .orElseThrow(UniversityNotFoundException::new);
+
+        university = universityService.deleteUniversityPicture(university);
         return modelMapper.map(university, UniversityResponseDto.class);
     }
 
