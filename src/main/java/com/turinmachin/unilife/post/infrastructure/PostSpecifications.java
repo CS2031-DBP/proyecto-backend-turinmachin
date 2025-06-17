@@ -37,4 +37,8 @@ public class PostSpecifications {
         return (root, query, cb) -> root.join("tags", JoinType.LEFT).in(tags);
     }
 
+    public static Specification<Post> isActive() {
+        return (root, query, cb) -> cb.isTrue(root.get("active"));
+    }
+
 }

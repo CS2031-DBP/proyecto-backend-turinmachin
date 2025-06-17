@@ -23,6 +23,7 @@ public class PostResponseDto {
     private DegreeResponseDto degree;
     private List<String> tags;
     private Integer score;
+    private Integer totalComments;
     private Instant createdAt;
     private Instant updatedAt;
 

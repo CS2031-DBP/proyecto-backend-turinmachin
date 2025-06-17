@@ -47,8 +47,8 @@ public class PostService {
         return postRepository.findAll(spec, pageable);
     }
 
-    public Optional<Post> getPostById(UUID id) {
-        return postRepository.findById(id);
+    public Optional<Post> getActivePostById(UUID id) {
+        return postRepository.findByIdAndActiveTrue(id);
     }
 
     public Post createPost(CreatePostDto dto, User author) throws IOException {
@@ -78,11 +78,11 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public void deletePost(Post post) {
+    public Post deactivatePost(Post post) {
         fileInfoService.triggerFileBatchDeletion(post.getFiles());
 
-        post.getTags().clear();
-        postRepository.delete(post);
+        post.setActive(false);
+        return postRepository.save(post);
     }
 
     public Optional<PostVote> getPostVote(UUID postId, UUID userId) {

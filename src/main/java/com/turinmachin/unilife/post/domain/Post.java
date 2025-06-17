@@ -3,6 +3,7 @@ package com.turinmachin.unilife.post.domain;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -68,6 +69,9 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostVote> votes = new ArrayList<>();
 
+    @Column(nullable = false)
+    private Boolean active = true;
+
     @CreationTimestamp
     @Column(nullable = false)
     private Instant createdAt;
@@ -82,6 +86,23 @@ public class Post {
                 .map(VoteType::getValue)
                 .map(s -> (int) s)
                 .reduce(0, Integer::sum);
+    }
+
+    public Integer getTotalComments() {
+        int count = 0;
+        var stack = new Stack<List<Comment>>();
+        stack.push(comments);
+
+        while (!stack.empty()) {
+            List<Comment> top = stack.pop();
+            count += top.size();
+
+            for (Comment comment : top) {
+                stack.push(comment.getReplies());
+            }
+        }
+
+        return count;
     }
 
 }

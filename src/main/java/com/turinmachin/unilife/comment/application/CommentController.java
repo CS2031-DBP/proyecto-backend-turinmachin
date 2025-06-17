@@ -67,7 +67,7 @@ public class CommentController {
         User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Post post = postService.getPostById(postId).orElseThrow(PostNotFoundException::new);
+        Post post = postService.getActivePostById(postId).orElseThrow(PostNotFoundException::new);
         Comment comment = commentService.createComment(dto, user, post);
 
         return modelMapper.map(comment, CommentResponseDto.class);
