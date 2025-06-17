@@ -4,6 +4,7 @@ import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -11,12 +12,12 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -38,36 +39,33 @@ public class JwtService {
                 .compact();
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    public Optional<Claims> extractAllClaims(String jwtToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(jwtToken)
+                    .getBody();
+            return Optional.of(claims);
+        } catch (JwtException e) {
+            return Optional.empty();
+        }
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T> resolver) {
-        Claims claims = extractAllClaims(token);
+    private <T> T extractClaim(Claims claims, Function<Claims, T> resolver) {
         return resolver.apply(claims);
     }
 
-    public UUID extractId(String token) {
-        return UUID.fromString(extractClaim(token, Claims::getSubject));
-    }
-
-    public void validateToken(String jwt, UUID id) {
+    public Authentication getAuthentication(String jwtToken, Claims claims) {
+        UUID id = UUID.fromString(extractClaim(claims, Claims::getSubject));
         User user = userService.getUserById(id).orElseThrow(UnauthorizedException::new);
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-
-        var authToken = new UsernamePasswordAuthenticationToken(user, jwt, user.getAuthorities());
-
-        context.setAuthentication(authToken);
-        SecurityContextHolder.setContext(context);
+        return new UsernamePasswordAuthenticationToken(user, jwtToken, user.getAuthorities());
     }
 
     private Key getSigningKey() {
         byte[] bytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(bytes);
     }
+
 }
