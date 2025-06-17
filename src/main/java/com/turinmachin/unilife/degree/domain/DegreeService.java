@@ -28,6 +28,10 @@ public class DegreeService {
         return degreeRepository.findAll();
     }
 
+    public List<Degree> getDegreesByUniversityId(UUID universityId) {
+        return degreeRepository.findByUniversityId(universityId);
+    }
+
     public Optional<Degree> getDegreeById(UUID id) {
         return degreeRepository.findById(id);
     }

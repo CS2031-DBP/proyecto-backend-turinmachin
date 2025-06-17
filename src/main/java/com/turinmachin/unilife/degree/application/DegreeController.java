@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,8 +37,14 @@ public class DegreeController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public List<DegreeResponseDto> getAllDegrees() {
-        List<Degree> degrees = degreeService.getAllDegrees();
+    public List<DegreeResponseDto> getAllDegrees(@RequestParam(required = false) UUID universityId) {
+        List<Degree> degrees;
+
+        if (universityId != null) {
+            degrees = degreeService.getDegreesByUniversityId(universityId);
+        } else {
+            degrees = degreeService.getAllDegrees();
+        }
         return degrees.stream().map(degree -> modelMapper.map(degree, DegreeResponseDto.class)).toList();
     }
 
