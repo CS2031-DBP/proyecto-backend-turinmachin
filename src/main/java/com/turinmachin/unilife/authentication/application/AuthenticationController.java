@@ -39,17 +39,16 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public LoginResponseDto login(@Valid @RequestBody JwtAuthLoginDto dto) {
-        String token = authenticationService.jwtLogin(dto);
-        return new LoginResponseDto(token);
+        return authenticationService.jwtLogin(dto);
     }
 
     @PostMapping("/register")
-    public RegisterResponseDto register(@Valid @RequestBody RegisterUserDto dto) {
+    public LoginResponseDto register(@Valid @RequestBody RegisterUserDto dto) {
         User createdUser = userService.createUser(dto);
         eventPublisher.publishEvent(new SendVerificationEmailEvent(createdUser));
 
         String token = jwtService.generateToken(createdUser);
-        return new RegisterResponseDto(createdUser.getId(), token);
+        return new LoginResponseDto(token, modelMapper.map(createdUser, UserResponseDto.class));
     }
 
     @PostMapping("/verify")

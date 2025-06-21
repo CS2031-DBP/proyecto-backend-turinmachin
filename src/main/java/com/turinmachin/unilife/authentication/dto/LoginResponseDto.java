@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.authentication.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.turinmachin.unilife.user.dto.UserResponseDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,5 +12,6 @@ import lombok.Data;
 public class LoginResponseDto {
 
     private String token;
+    private UserResponseDto user;
 
 }
