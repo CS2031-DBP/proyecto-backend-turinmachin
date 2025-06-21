@@ -16,9 +16,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.common.exception.UnauthorizedException;
+import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.fileinfo.domain.FileInfoService;
@@ -202,6 +204,10 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateUserProfilePicture(User user, MultipartFile file) throws IOException {
+        if (!fileInfoService.isContentTypeImage(file.getContentType())) {
+            throw new UnsupportedMediaTypeException();
+        }
+
         FileInfo oldPicture = user.getProfilePicture();
         FileInfo newPicture = fileInfoService.createFile(file);
 
