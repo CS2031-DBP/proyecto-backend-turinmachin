@@ -54,19 +54,26 @@ public class PostController {
 
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) UUID universityId,
             @RequestParam(required = false) UUID degreeId,
             @RequestParam(required = false) List<String> tags,
             @RequestParam(required = false) UUID authorId,
             Pageable pageable) {
-        Specification<Post> spec = Specification
-                .where(PostSpecifications.hasUniversityId(universityId))
-                .and(PostSpecifications.hasDegreeId(degreeId))
-                .and(PostSpecifications.hasAuthorId(authorId))
-                .and(PostSpecifications.hasTags(tags))
-                .and(PostSpecifications.isActive());
+        Page<Post> posts;
 
-        Page<Post> posts = postService.getPostsWithSpec(spec, pageable);
+        if (query == null) {
+            Specification<Post> spec = Specification
+                    .where(PostSpecifications.hasUniversityId(universityId))
+                    .and(PostSpecifications.hasDegreeId(degreeId))
+                    .and(PostSpecifications.hasAuthorId(authorId))
+                    .and(PostSpecifications.hasTags(tags))
+                    .and(PostSpecifications.isActive());
+            posts = postService.getPostsWithSpec(spec, pageable);
+        } else {
+            posts = postService.omnisearch(query, authorId, universityId, degreeId, tags, pageable);
+        }
+
         return posts.map(post -> modelMapper.map(post, PostResponseDto.class));
     }
 

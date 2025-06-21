@@ -51,6 +51,11 @@ public class PostService {
         return postRepository.findByIdAndActiveTrue(id);
     }
 
+    public Page<Post> omnisearch(String query, UUID authorId, UUID universityId, UUID degreeId, List<String> tags,
+            Pageable pageable) {
+        return postRepository.omnisearch(query, authorId, universityId, degreeId, tags, pageable);
+    }
+
     public Post createPost(CreatePostDto dto, User author) throws IOException {
         if (author.getUniversity() == null) {
             throw new UserWithoutUniversityException();
