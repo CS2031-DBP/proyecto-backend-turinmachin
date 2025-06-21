@@ -1,8 +1,12 @@
 package com.turinmachin.unilife.fileinfo.domain;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -10,11 +14,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.storage.domain.StorageService;
+import com.turinmachin.unilife.thumbnail.domain.ThumbnailService;
 import com.turinmachin.unilife.fileinfo.event.DeleteFilesEvent;
 import com.turinmachin.unilife.fileinfo.infrastructure.FileInfoRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.coobird.thumbnailator.Thumbnails;
 
 @Service
 @Transactional
@@ -24,6 +30,8 @@ public class FileInfoService {
     private final FileInfoRepository fileInfoRepository;
 
     private final StorageService storageService;
+
+    private final ThumbnailService thumbnailService;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -39,6 +47,12 @@ public class FileInfoService {
         fileInfo.setKey(key);
         fileInfo.setUrl(url);
         fileInfo.setMediaType(file.getContentType());
+
+        if (isContentTypeImage(file.getContentType())) {
+            String blurDataUrl = thumbnailService.generateThumbnailDataUrl(file);
+            fileInfo.setBlurDataUrl(blurDataUrl);
+        }
+
         return fileInfoRepository.save(fileInfo);
     }
 
@@ -72,10 +86,16 @@ public class FileInfoService {
         eventPublisher.publishEvent(new DeleteFilesEvent(files.stream().map(FileInfo::getKey).toList()));
     }
 
+    public boolean isContentTypeImage(String contentType) {
+        return contentType.startsWith("image/");
+    }
+
+    public boolean isContentTypeVideo(String contentType) {
+        return contentType.startsWith("video/");
+    }
+
     public boolean isContentTypeValid(String contentType) {
-        return contentType != null
-                && (contentType.startsWith("image/")
-                        || contentType.startsWith("video/"));
+        return contentType != null && (isContentTypeImage(contentType) || isContentTypeVideo(contentType));
     }
 
 }

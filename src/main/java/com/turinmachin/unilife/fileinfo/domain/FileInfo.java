@@ -24,6 +24,9 @@ public class FileInfo {
     @Column(nullable = false)
     private String url;
 
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String blurDataUrl;
+
     @Column(nullable = false)
     private String mediaType;
 

@@ -10,5 +10,6 @@ public class FileInfoResponseDto {
 
     private String url;
     private String mediaType;
+    private String blurDataUrl;
 
 }
