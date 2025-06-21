@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
+import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
 import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.domain.UniversityService;
@@ -78,13 +79,16 @@ public class UniversityController {
 
     @PatchMapping("/{id}/degrees")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UniversityResponseDto addUniversityDegree(@PathVariable UUID id,
+    public List<DegreeResponseDto> addUniversityDegree(@PathVariable UUID id,
             @Valid @RequestBody AddDegreeToUniversityDto dto) {
         University university = universityService.getActiveUniversityById(id)
                 .orElseThrow(UniversityNotFoundException::new);
         Degree degree = degreeService.getDegreeById(dto.getDegreeId()).orElseThrow(DegreeNotFoundException::new);
         university = universityService.addDegreeToUniversity(university, degree);
-        return modelMapper.map(university, UniversityResponseDto.class);
+
+        return university.getDegrees().stream()
+                .map(d -> modelMapper.map(d, DegreeResponseDto.class))
+                .toList();
     }
 
     @PatchMapping("/{id}/picture")

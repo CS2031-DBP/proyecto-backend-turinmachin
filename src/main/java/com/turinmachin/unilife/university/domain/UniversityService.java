@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.turinmachin.unilife.common.exception.ConflictException;
+import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
@@ -20,9 +20,11 @@ import com.turinmachin.unilife.university.dto.CreateUniversityDto;
 import com.turinmachin.unilife.university.dto.DegreeAlreadyPresent;
 import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
 import com.turinmachin.unilife.university.exception.UniversityNameConflictException;
+import com.turinmachin.unilife.university.exception.UniversityShortNameConflictException;
 import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
@@ -50,6 +52,10 @@ public class UniversityService {
             throw new UniversityNameConflictException();
         }
 
+        if (universityRepository.existsByShortName(dto.getShortName())) {
+            throw new UniversityShortNameConflictException();
+        }
+
         University university = modelMapper.map(dto, University.class);
 
         List<Degree> degrees = dto.getDegreeIds()
@@ -63,11 +69,16 @@ public class UniversityService {
     }
 
     public University updateUniversity(University university, UpdateUniversityDto dto) {
-        if (universityRepository.existsByName(dto.getName())) {
+        if (universityRepository.existsByNameAndIdNot(dto.getName(), university.getId())) {
             throw new UniversityNameConflictException();
         }
 
+        if (universityRepository.existsByShortNameAndIdNot(dto.getShortName(), university.getId())) {
+            throw new UniversityShortNameConflictException();
+        }
+
         university.setName(dto.getName());
+        university.setShortName(dto.getShortName());
         university.setEmailDomains(dto.getEmailDomains());
 
         return universityRepository.save(university);
@@ -92,6 +103,10 @@ public class UniversityService {
     }
 
     public University updateUniversityPicture(University university, MultipartFile file) throws IOException {
+        if (!fileInfoService.isContentTypeImage(file.getContentType())) {
+            throw new UnsupportedMediaTypeException();
+        }
+
         FileInfo oldPicture = university.getPicture();
         FileInfo newPicture = fileInfoService.createFile(file);
 
