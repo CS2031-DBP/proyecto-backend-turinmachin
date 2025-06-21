@@ -20,7 +20,6 @@ import com.turinmachin.unilife.fileinfo.infrastructure.FileInfoRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.coobird.thumbnailator.Thumbnails;
 
 @Service
 @Transactional
