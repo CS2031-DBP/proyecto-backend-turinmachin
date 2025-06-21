@@ -1,8 +1,11 @@
 package com.turinmachin.unilife.thumbnail.domain;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,16 +18,27 @@ import net.coobird.thumbnailator.Thumbnails;
 @RequiredArgsConstructor
 public class ThumbnailService {
 
-    @Value("${thumbnail.size}")
-    private int thumbnailSize;
+    @Value("${thumbnail.max-size}")
+    private int maxSize;
+
+    @Value("${thumbnail.reduction}")
+    private double reduction;
+
+    @Value("${thumbnail.quality}")
+    private double quality;
 
     public ByteArrayOutputStream generateThumbnailOutputStream(MultipartFile file) throws IOException {
         var thumbnailOutput = new ByteArrayOutputStream();
 
-        Thumbnails.of(file.getInputStream())
-                .size(180, 180)
+        BufferedImage image = ImageIO.read(file.getInputStream());
+
+        int thumbnailWidth = (int) (image.getWidth() * reduction);
+        int thumbnailHeight = (int) (image.getWidth() * reduction);
+
+        Thumbnails.of(image)
+                .size(Math.min(thumbnailWidth, maxSize), Math.min(thumbnailHeight, maxSize))
                 .outputFormat("jpg")
-                .outputQuality(0.8)
+                .outputQuality(quality)
                 .toOutputStream(thumbnailOutput);
 
         return thumbnailOutput;
