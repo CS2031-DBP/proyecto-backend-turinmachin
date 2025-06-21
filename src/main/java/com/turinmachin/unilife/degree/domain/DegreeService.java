@@ -46,11 +46,13 @@ public class DegreeService {
     }
 
     public Degree updateDegree(Degree degree, UpdateDegreeDto dto) {
-        if (degreeRepository.existsByName(dto.getName())) {
+        if (degreeRepository.existsByNameAndIdNot(dto.getName(), degree.getId())) {
             throw new DegreeNameConflictException();
         }
 
         degree.setName(dto.getName());
+        degree.setShortName(dto.getShortName());
+
         return degreeRepository.save(degree);
     }
 
