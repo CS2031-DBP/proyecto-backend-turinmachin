@@ -10,7 +10,11 @@ public interface DegreeRepository extends JpaRepository<Degree, UUID> {
 
     boolean existsByName(String name);
 
+    boolean existsByShortName(String shortName);
+
     boolean existsByNameAndIdNot(String name, UUID id);
+
+    boolean existsByShortNameAndIdNot(String shortName, UUID id);
 
     List<Degree> findByUniversitiesId(UUID universityId);
 

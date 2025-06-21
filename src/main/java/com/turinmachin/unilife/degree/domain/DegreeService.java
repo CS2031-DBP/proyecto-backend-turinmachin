@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
 import com.turinmachin.unilife.degree.dto.UpdateDegreeDto;
 import com.turinmachin.unilife.degree.exception.DegreeNameConflictException;
+import com.turinmachin.unilife.degree.exception.DegreeShortNameConflictException;
 import com.turinmachin.unilife.degree.infrastructure.DegreeRepository;
 
 import jakarta.transaction.Transactional;
@@ -41,6 +42,10 @@ public class DegreeService {
             throw new DegreeNameConflictException();
         }
 
+        if (degreeRepository.existsByShortName(dto.getShortName())) {
+            throw new DegreeShortNameConflictException();
+        }
+
         Degree degree = modelMapper.map(dto, Degree.class);
         return degreeRepository.save(degree);
     }
@@ -48,6 +53,10 @@ public class DegreeService {
     public Degree updateDegree(Degree degree, UpdateDegreeDto dto) {
         if (degreeRepository.existsByNameAndIdNot(dto.getName(), degree.getId())) {
             throw new DegreeNameConflictException();
+        }
+
+        if (degreeRepository.existsByShortNameAndIdNot(dto.getShortName(), degree.getId())) {
+            throw new DegreeShortNameConflictException();
         }
 
         degree.setName(dto.getName());
