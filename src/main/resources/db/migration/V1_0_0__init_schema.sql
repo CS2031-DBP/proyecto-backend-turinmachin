@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS university (
 
 CREATE TABLE IF NOT EXISTS university_email_domains (
   university_id UUID NOT NULL REFERENCES university (id) ON DELETE CASCADE,
-  email_domains VARCHAR(255),
+  email_domains VARCHAR(255) UNIQUE,
   PRIMARY KEY (university_id, email_domains)
 );
 
