@@ -31,9 +31,11 @@ public class ThumbnailService {
         var thumbnailOutput = new ByteArrayOutputStream();
 
         BufferedImage image = ImageIO.read(file.getInputStream());
+        if (image == null)
+            return null;
 
         int thumbnailWidth = (int) (image.getWidth() * reduction);
-        int thumbnailHeight = (int) (image.getWidth() * reduction);
+        int thumbnailHeight = (int) (image.getHeight() * reduction);
 
         Thumbnails.of(image)
                 .size(Math.min(thumbnailWidth, maxSize), Math.min(thumbnailHeight, maxSize))
@@ -46,8 +48,16 @@ public class ThumbnailService {
     }
 
     public String generateThumbnailDataUrl(MultipartFile file) throws IOException {
-        byte[] thumbnailBytes = generateThumbnailOutputStream(file).toByteArray();
+        ByteArrayOutputStream outputStream = generateThumbnailOutputStream(file);
+        if (outputStream == null)
+            return null;
+
+        byte[] thumbnailBytes = outputStream.toByteArray();
+
+        if (thumbnailBytes == null)
+            return null;
+
         String thumbnailData = Base64.getEncoder().encodeToString(thumbnailBytes);
-        return "data:image/jpeg;base64" + thumbnailData;
+        return "data:image/jpeg;base64," + thumbnailData;
     }
 }
