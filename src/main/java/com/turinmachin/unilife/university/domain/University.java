@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.email.EmailUtils;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.post.domain.Post;
 
@@ -62,8 +63,7 @@ public class University {
     private Boolean active = true;
 
     public boolean ownsEmail(String email) {
-        String domain = email.substring(email.indexOf('@') + 1);
-        return emailDomains.contains(domain);
+        return emailDomains.contains(EmailUtils.extractDomain(email));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.user.domain;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,18 +17,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.degree.domain.Degree;
+import com.turinmachin.unilife.email.EmailUtils;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.fileinfo.domain.FileInfoService;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.domain.UniversityService;
-import com.turinmachin.unilife.university.exception.UniversityNotFoundException;
-import com.turinmachin.unilife.university.exception.UniversityNotOwnEmailException;
 import com.turinmachin.unilife.university.exception.UniversityWithoutDegreeException;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.UpdateUserDto;
@@ -101,6 +100,12 @@ public class UserService implements UserDetailsService {
 
     public User verifyUser(User user) {
         user.setVerificationId(null);
+
+        // Assigns the user to its university automatically
+        String emailDomain = EmailUtils.extractDomain(user.getEmail());
+        Optional<University> university = universityService.getActiveUniversityByEmailDomain(emailDomain);
+        user.setUniversity(university.orElse(null));
+
         return userRepository.save(user);
     }
 
@@ -114,56 +119,34 @@ public class UserService implements UserDetailsService {
         user.setDisplayName(dto.getDisplayName());
         user.setBio(dto.getBio());
 
-        UUID userUniversityId = Optional.ofNullable(user.getUniversity()).map(University::getId).orElse(null);
+        if (!user.getEmail().equalsIgnoreCase(dto.getEmail())) {
+            // Update email
+            user.setEmail(dto.getEmail());
+            user.setVerificationId(UUID.randomUUID());
+            user.setUniversity(null);
+            user.setDegree(null);
+            eventPublisher.publishEvent(new SendVerificationEmailEvent(user));
+        } else {
+            // Update degree
+            UUID userDegreeId = Optional.ofNullable(user.getDegree()).map(Degree::getId).orElse(null);
 
-        if (!Objects.equals(dto.getUniversityId(), userUniversityId)) {
-            Optional<University> newUniversity = Optional.ofNullable(dto.getUniversityId())
-                    .map(id -> universityService.getActiveUniversityById(id)
-                            .orElseThrow(UniversityNotFoundException::new));
-
-            newUniversity.ifPresent(uni -> {
-                if (!uni.ownsEmail(user.getEmail())) {
-                    throw new UniversityNotOwnEmailException();
-                }
-            });
-
-            user.setUniversity(newUniversity.orElse(null));
-        }
-
-        UUID userDegreeId = Optional.ofNullable(user.getDegree()).map(Degree::getId).orElse(null);
-
-        if (!Objects.equals(dto.getDegreeId(), userDegreeId)) {
-            Optional<Degree> newDegree = Optional
-                    .ofNullable(dto.getDegreeId())
-                    .map(degreeId -> Optional
-                            .ofNullable(user.getUniversity())
-                            .orElseThrow(UserWithoutUniversityException::new)
-                            .getDegrees()
+            if (!Objects.equals(dto.getDegreeId(), userDegreeId)) {
+                if (dto.getDegreeId() == null) {
+                    user.setDegree(null);
+                } else if (user.getUniversity() == null) {
+                    throw new UserWithoutUniversityException();
+                } else {
+                    Degree newDegree = user.getUniversity().getDegrees()
                             .stream()
                             .filter(d -> d.getId().equals(dto.getDegreeId()))
                             .findFirst()
-                            .orElseThrow(UniversityWithoutDegreeException::new));
+                            .orElseThrow(UniversityWithoutDegreeException::new);
 
-            user.setDegree(newDegree.orElse(null));
+                    user.setDegree(newDegree);
+                }
+            }
         }
 
-        return userRepository.save(user);
-    }
-
-    public User updateUserEmail(User user, String email) {
-        if (user.getEmail().equals(email)) {
-            return user;
-        }
-
-        user.setEmail(email);
-        user.setVerificationId(UUID.randomUUID());
-
-        if (user.getUniversity() != null && !user.getUniversity().ownsEmail(email)) {
-            user.setUniversity(null);
-            user.setDegree(null);
-        }
-
-        eventPublisher.publishEvent(new SendVerificationEmailEvent(user));
         return userRepository.save(user);
     }
 
@@ -199,8 +182,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public int detachUniversity(UUID universityId) {
-        return userRepository.detachUniversity(universityId);
+    public int detachUniversity(University university) {
+        return userRepository.detachUniversity(university.getId());
     }
 
     public User updateUserProfilePicture(User user, MultipartFile file) throws IOException {
@@ -237,6 +220,35 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return getUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+    }
+
+    @Transactional
+    public void syncUniversityAssociations(University university) {
+        List<User> toDeassociate = userRepository.findAllByUniversity(university).stream()
+                .filter(user -> !university.ownsEmail(user.getEmail()))
+                .toList();
+
+        for (User user : toDeassociate) {
+            user.setUniversity(null);
+            user.setDegree(null);
+        }
+
+        userRepository.saveAll(toDeassociate);
+
+        List<User> toAssociate = userRepository.findAllByVerificationIdIsNullAndUniversityIsNull()
+                .stream()
+                .filter(user -> university.ownsEmail(user.getEmail()))
+                .toList();
+
+        for (User user : toAssociate) {
+            user.setUniversity(university);
+        }
+
+        userRepository.saveAll(toAssociate);
+    }
+
+    public void syncDegreeRemoval(University university, Degree degree) {
+        userRepository.syncDegreeRemoval(university.getId(), degree.getId());
     }
 
 }

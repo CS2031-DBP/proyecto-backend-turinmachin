@@ -47,6 +47,10 @@ public class UniversityService {
         return universityRepository.findByIdAndActiveTrue(id);
     }
 
+    public Optional<University> getActiveUniversityByEmailDomain(String emailDomain) {
+        return universityRepository.findByEmailDomainsContaining(emailDomain);
+    }
+
     public University createUniversity(CreateUniversityDto dto) {
         if (universityRepository.existsByName(dto.getName())) {
             throw new UniversityNameConflictException();
@@ -65,7 +69,6 @@ public class UniversityService {
         university.setDegrees(degrees);
 
         return universityRepository.save(university);
-
     }
 
     public University updateUniversity(University university, UpdateUniversityDto dto) {

@@ -22,4 +22,6 @@ public interface UniversityRepository extends JpaRepository<University, UUID> {
 
     Optional<University> findByIdAndActiveTrue(UUID id);
 
+    Optional<University> findByEmailDomainsContaining(String emailDomain);
+
 }

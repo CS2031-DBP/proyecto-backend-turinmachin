@@ -3,8 +3,6 @@ package com.turinmachin.unilife.authentication.application;
 import com.turinmachin.unilife.authentication.domain.AuthenticationService;
 import com.turinmachin.unilife.authentication.dto.JwtAuthLoginDto;
 import com.turinmachin.unilife.authentication.dto.LoginResponseDto;
-import com.turinmachin.unilife.authentication.dto.RegisterResponseDto;
-import com.turinmachin.unilife.authentication.dto.VerifyResendDto;
 import com.turinmachin.unilife.authentication.dto.VerifyUserDto;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
@@ -14,12 +12,13 @@ import com.turinmachin.unilife.user.dto.UserResponseDto;
 import com.turinmachin.unilife.user.event.SendVerificationEmailEvent;
 import com.turinmachin.unilife.user.event.SendWelcomeEmailEvent;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
-import com.turinmachin.unilife.user.exception.UserNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -52,17 +51,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify")
-    public UserResponseDto verifyUser(@Valid @RequestBody VerifyUserDto dto) {
-        User user = authenticationService.verifyUser(dto.getVerificationId());
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public UserResponseDto verifyUser(@Valid @RequestBody VerifyUserDto dto, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        authenticationService.tryVerifyUser(user, dto.getVerificationId());
+
         eventPublisher.publishEvent(new SendWelcomeEmailEvent(user));
         return modelMapper.map(user, UserResponseDto.class);
     }
 
     @PostMapping("/verify-resend")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void resendWelcomeEmail(@Valid @RequestBody VerifyResendDto dto) {
-        User user = userService.getUserByUsernameOrEmail(dto.getUsername()).orElseThrow(UserNotFoundException::new);
-
+    public void resendWelcomeEmail(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
         if (user.getVerified()) {
             throw new UserAlreadyVerifiedException();
         }

@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.UpdateUserDto;
-import com.turinmachin.unilife.user.dto.UpdateUserEmailDto;
 import com.turinmachin.unilife.user.dto.UpdateUserPasswordDto;
 import com.turinmachin.unilife.user.dto.UpdateUserProfilePictureDto;
 import com.turinmachin.unilife.user.dto.UpdateUserRoleDto;
@@ -72,6 +71,12 @@ public class UserController {
         return modelMapper.map(user, UserResponseDto.class);
     }
 
+    @GetMapping("/username/{username}")
+    public UserResponseDto getUserByUsername(@PathVariable String username) {
+        User user = userService.getUserByUsername(username).orElseThrow(UserNotFoundException::new);
+        return modelMapper.map(user, UserResponseDto.class);
+    }
+
     @PutMapping("/@self")
     @PreAuthorize("hasRole('ROLE_USER')")
     public UserResponseDto updateUser(@Valid @RequestBody UpdateUserDto dto, Authentication authentication) {
@@ -101,18 +106,9 @@ public class UserController {
     @DeleteMapping("/@self/picture")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public UserResponseDto deleteUserProfilePicture(Authentication authentication) throws IOException {
+    public void deleteUserProfilePicture(Authentication authentication) throws IOException {
         User user = (User) authentication.getPrincipal();
-        user = userService.deleteUserProfilePicture(user);
-        return modelMapper.map(user, UserResponseDto.class);
-    }
-
-    @PatchMapping("/@self/email")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public UserResponseDto updateUserEmail(@Valid @RequestBody UpdateUserEmailDto dto, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        user = userService.updateUserEmail(user, dto.getEmail());
-        return modelMapper.map(user, UserResponseDto.class);
+        userService.deleteUserProfilePicture(user);
     }
 
     @PatchMapping("/{id}/role")
