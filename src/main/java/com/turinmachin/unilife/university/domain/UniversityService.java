@@ -3,7 +3,9 @@ package com.turinmachin.unilife.university.domain;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,6 @@ import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.fileinfo.domain.FileInfoService;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
-import com.turinmachin.unilife.university.dto.DegreeAlreadyPresent;
 import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
 import com.turinmachin.unilife.university.exception.UniversityNameConflictException;
 import com.turinmachin.unilife.university.exception.UniversityShortNameConflictException;
@@ -40,7 +41,7 @@ public class UniversityService {
     private final ModelMapper modelMapper;
 
     public List<University> getAllActiveUniversities() {
-        return universityRepository.findByActiveTrue();
+        return universityRepository.findByActiveTrueOrderByName();
     }
 
     public Optional<University> getActiveUniversityById(UUID id) {
@@ -56,16 +57,16 @@ public class UniversityService {
             throw new UniversityNameConflictException();
         }
 
-        if (universityRepository.existsByShortName(dto.getShortName())) {
+        if (dto.getShortName() != null && universityRepository.existsByShortName(dto.getShortName())) {
             throw new UniversityShortNameConflictException();
         }
 
         University university = modelMapper.map(dto, University.class);
 
-        List<Degree> degrees = dto.getDegreeIds()
+        Set<Degree> degrees = dto.getDegreeIds()
                 .stream()
                 .map(id -> degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new))
-                .toList();
+                .collect(Collectors.toSet());
         university.setDegrees(degrees);
 
         return universityRepository.save(university);
@@ -76,27 +77,25 @@ public class UniversityService {
             throw new UniversityNameConflictException();
         }
 
-        if (universityRepository.existsByShortNameAndIdNot(dto.getShortName(), university.getId())) {
+        if (dto.getShortName() != null
+                && universityRepository.existsByShortNameAndIdNot(dto.getShortName(), university.getId())) {
             throw new UniversityShortNameConflictException();
         }
 
         university.setName(dto.getName());
         university.setShortName(dto.getShortName());
+        university.setWebsiteUrl(dto.getWebsiteUrl());
         university.setEmailDomains(dto.getEmailDomains());
 
-        return universityRepository.save(university);
-    }
+        university.getDegrees().removeIf(degree -> !dto.getDegreeIds().contains(degree.getId()));
 
-    public University addDegreeToUniversity(University university, Degree degree) {
-        if (university.getDegrees().contains(degree)) {
-            throw new DegreeAlreadyPresent();
+        for (UUID newDegreeId : dto.getDegreeIds()) {
+            Degree newDegree = degreeService.getDegreeById(newDegreeId).orElseThrow(DegreeNotFoundException::new);
+            if (!university.getDegrees().contains(newDegree)) {
+                university.getDegrees().add(newDegree);
+            }
         }
-        university.getDegrees().add(degree);
-        return universityRepository.save(university);
-    }
 
-    public University removeDegreeFromUniversity(University university, Degree degree) {
-        university.getDegrees().remove(degree);
         return universityRepository.save(university);
     }
 

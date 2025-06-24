@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Data
 public class UpdateUniversityDto {
@@ -15,8 +16,13 @@ public class UpdateUniversityDto {
 
     private String shortName;
 
+    private String websiteUrl;
+
     @NotNull
     @Size(min = 1)
-    private List<String> emailDomains;
+    private Set<String> emailDomains;
+
+    @NotNull
+    private Set<UUID> degreeIds;
 
 }

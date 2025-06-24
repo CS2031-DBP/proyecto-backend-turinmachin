@@ -26,11 +26,11 @@ public class DegreeService {
     private final ModelMapper modelMapper;
 
     public List<Degree> getAllDegrees() {
-        return degreeRepository.findAll();
+        return degreeRepository.findAllByOrderByName();
     }
 
     public List<Degree> getDegreesByUniversityId(UUID universityId) {
-        return degreeRepository.findByUniversitiesId(universityId);
+        return degreeRepository.findByUniversitiesIdOrderByName(universityId);
     }
 
     public Optional<Degree> getDegreeById(UUID id) {
@@ -42,7 +42,7 @@ public class DegreeService {
             throw new DegreeNameConflictException();
         }
 
-        if (degreeRepository.existsByShortName(dto.getShortName())) {
+        if (dto.getShortName() != null && degreeRepository.existsByShortName(dto.getShortName())) {
             throw new DegreeShortNameConflictException();
         }
 
@@ -55,7 +55,8 @@ public class DegreeService {
             throw new DegreeNameConflictException();
         }
 
-        if (degreeRepository.existsByShortNameAndIdNot(dto.getShortName(), degree.getId())) {
+        if (dto.getShortName() != null
+                && degreeRepository.existsByShortNameAndIdNot(dto.getShortName(), degree.getId())) {
             throw new DegreeShortNameConflictException();
         }
 

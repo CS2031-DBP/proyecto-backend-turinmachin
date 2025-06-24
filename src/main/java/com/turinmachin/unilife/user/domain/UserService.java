@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.user.domain;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -245,6 +246,20 @@ public class UserService implements UserDetailsService {
         }
 
         userRepository.saveAll(toAssociate);
+    }
+
+    @Transactional
+    public void removeInvalidDegrees(University university) {
+        List<User> associatedUsers = userRepository.findAllByUniversity(university);
+        List<User> toSave = new ArrayList<>();
+
+        for (User user : associatedUsers) {
+            if (user.getDegree() != null && !university.getDegrees().contains(user.getDegree())) {
+                user.setDegree(null);
+            }
+        }
+
+        userRepository.saveAll(toSave);
     }
 
     public void syncDegreeRemoval(University university, Degree degree) {

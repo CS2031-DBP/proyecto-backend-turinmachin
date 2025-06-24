@@ -27,7 +27,6 @@ import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
 import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.domain.UniversityService;
-import com.turinmachin.unilife.university.dto.AddDegreeToUniversityDto;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
 import com.turinmachin.unilife.university.dto.UniversityResponseDto;
 import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
@@ -86,21 +85,8 @@ public class UniversityController {
                 .orElseThrow(UniversityNotFoundException::new);
         university = universityService.updateUniversity(university, dto);
         userService.syncUniversityAssociations(university);
+        userService.removeInvalidDegrees(university);
         return modelMapper.map(university, UniversityResponseDto.class);
-    }
-
-    @PatchMapping("/{id}/degrees")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<DegreeResponseDto> addUniversityDegree(@PathVariable UUID id,
-            @Valid @RequestBody AddDegreeToUniversityDto dto) {
-        University university = universityService.getActiveUniversityById(id)
-                .orElseThrow(UniversityNotFoundException::new);
-        Degree degree = degreeService.getDegreeById(dto.getDegreeId()).orElseThrow(DegreeNotFoundException::new);
-        university = universityService.addDegreeToUniversity(university, degree);
-
-        return university.getDegrees().stream()
-                .map(d -> modelMapper.map(d, DegreeResponseDto.class))
-                .toList();
     }
 
     @PatchMapping("/{id}/picture")
@@ -123,19 +109,6 @@ public class UniversityController {
                 .orElseThrow(UniversityNotFoundException::new);
 
         university = universityService.deleteUniversityPicture(university);
-        return modelMapper.map(university, UniversityResponseDto.class);
-    }
-
-    @DeleteMapping("/{id}/degrees/{degreeId}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UniversityResponseDto removeUniversityDegree(@PathVariable UUID id,
-            @PathVariable UUID degreeId) {
-        University university = universityService.getActiveUniversityById(id)
-                .orElseThrow(UniversityNotFoundException::new);
-        Degree degree = degreeService.getDegreeById(degreeId).orElseThrow(DegreeNotFoundException::new);
-
-        university = universityService.removeDegreeFromUniversity(university, degree);
-        userService.syncDegreeRemoval(university, degree);
         return modelMapper.map(university, UniversityResponseDto.class);
     }
 

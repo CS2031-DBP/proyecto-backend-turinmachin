@@ -1,8 +1,10 @@
 package com.turinmachin.unilife.university.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import com.turinmachin.unilife.degree.domain.Degree;
@@ -49,10 +51,10 @@ public class University {
     // These EAGERs are needed to prevent an error
     // https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> emailDomains = new ArrayList<>();
+    private Set<String> emailDomains = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Degree> degrees = new ArrayList<>();
+    private Set<Degree> degrees = new HashSet<>();
 
     // If a university is deleted, all its associated posts will be deleted too
     @OneToMany(mappedBy = "university", cascade = CascadeType.ALL)
