@@ -18,7 +18,7 @@ public interface UniversityRepository extends JpaRepository<University, UUID> {
 
     boolean existsByShortNameAndIdNot(String shortName, UUID id);
 
-    List<University> findByActiveTrue();
+    List<University> findByActiveTrueOrderByName();
 
     Optional<University> findByIdAndActiveTrue(UUID id);
 
