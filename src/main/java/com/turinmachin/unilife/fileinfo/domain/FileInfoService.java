@@ -1,20 +1,16 @@
 package com.turinmachin.unilife.fileinfo.domain;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.storage.domain.StorageService;
 import com.turinmachin.unilife.thumbnail.domain.ThumbnailService;
+import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.fileinfo.event.DeleteFilesEvent;
 import com.turinmachin.unilife.fileinfo.infrastructure.FileInfoRepository;
 
