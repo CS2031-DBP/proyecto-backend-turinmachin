@@ -22,6 +22,7 @@ import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
 import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
+import com.turinmachin.unilife.degree.dto.DegreeWithStatsDto;
 import com.turinmachin.unilife.degree.dto.UpdateDegreeDto;
 import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
 
@@ -49,9 +50,8 @@ public class DegreeController {
     }
 
     @GetMapping("/{id}")
-    public DegreeResponseDto getDegree(@PathVariable UUID id) {
-        Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
-        return modelMapper.map(degree, DegreeResponseDto.class);
+    public DegreeWithStatsDto getDegree(@PathVariable UUID id) {
+        return degreeService.getDegreeWithStatsById(id).orElseThrow(DegreeNotFoundException::new);
     }
 
     @PostMapping

@@ -104,7 +104,7 @@ public class UserService implements UserDetailsService {
 
         // Assigns the user to its university automatically
         String emailDomain = EmailUtils.extractDomain(user.getEmail());
-        Optional<University> university = universityService.getActiveUniversityByEmailDomain(emailDomain);
+        Optional<University> university = universityService.getUniversityByEmailDomain(emailDomain);
         user.setUniversity(university.orElse(null));
 
         return userRepository.save(user);

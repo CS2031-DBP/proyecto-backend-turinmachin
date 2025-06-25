@@ -19,6 +19,7 @@ import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.fileinfo.domain.FileInfoService;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
+import com.turinmachin.unilife.university.dto.UniversityWithStatsDto;
 import com.turinmachin.unilife.university.dto.UpdateUniversityDto;
 import com.turinmachin.unilife.university.exception.UniversityNameConflictException;
 import com.turinmachin.unilife.university.exception.UniversityShortNameConflictException;
@@ -40,15 +41,19 @@ public class UniversityService {
 
     private final ModelMapper modelMapper;
 
-    public List<University> getAllActiveUniversities() {
+    public List<University> getAllUniversities() {
         return universityRepository.findByActiveTrueOrderByName();
     }
 
-    public Optional<University> getActiveUniversityById(UUID id) {
+    public Optional<University> getUniversityById(UUID id) {
         return universityRepository.findByIdAndActiveTrue(id);
     }
 
-    public Optional<University> getActiveUniversityByEmailDomain(String emailDomain) {
+    public Optional<UniversityWithStatsDto> getUniversityWithStatsById(UUID id) {
+        return universityRepository.findWithStatsById(id);
+    }
+
+    public Optional<University> getUniversityByEmailDomain(String emailDomain) {
         return universityRepository.findByEmailDomainsContaining(emailDomain);
     }
 

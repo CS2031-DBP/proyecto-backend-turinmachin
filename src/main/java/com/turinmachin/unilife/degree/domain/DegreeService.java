@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
+import com.turinmachin.unilife.degree.dto.DegreeWithStatsDto;
 import com.turinmachin.unilife.degree.dto.UpdateDegreeDto;
 import com.turinmachin.unilife.degree.exception.DegreeNameConflictException;
 import com.turinmachin.unilife.degree.exception.DegreeShortNameConflictException;
@@ -35,6 +36,10 @@ public class DegreeService {
 
     public Optional<Degree> getDegreeById(UUID id) {
         return degreeRepository.findById(id);
+    }
+
+    public Optional<DegreeWithStatsDto> getDegreeWithStatsById(UUID id) {
+        return degreeRepository.findWithStatsById(id);
     }
 
     public Degree createDegree(CreateDegreeDto dto) {
