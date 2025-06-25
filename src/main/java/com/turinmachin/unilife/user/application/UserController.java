@@ -46,7 +46,7 @@ public class UserController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public List<UserResponseDto> getAllUsers(
+    public Page<UserResponseDto> getAllUsers(
             @RequestParam(required = false) UUID universityId,
             @RequestParam(required = false) UUID degreeId,
             Pageable pageable) {
@@ -55,7 +55,7 @@ public class UserController {
                 .and(UserSpecifications.hasDegreeId(degreeId));
 
         Page<User> users = userService.getAllUsersWithSpec(spec, pageable);
-        return users.map(user -> modelMapper.map(user, UserResponseDto.class)).toList();
+        return users.map(user -> modelMapper.map(user, UserResponseDto.class));
     }
 
     @GetMapping("/@self")
