@@ -51,12 +51,18 @@ public class UniversityController {
     }
 
     @GetMapping("/{id}")
-    public UniversityWithStatsDto getUniversity(@PathVariable UUID id) {
+    public UniversityResponseDto getUniversity(@PathVariable UUID id) {
+        University university = universityService.getUniversityById(id).orElseThrow(UniversityNotFoundException::new);
+        return modelMapper.map(university, UniversityResponseDto.class);
+    }
+
+    @GetMapping("/with-stats/{id}")
+    public UniversityWithStatsDto getUniversityWithStats(@PathVariable UUID id) {
         return universityService.getUniversityWithStatsById(id).orElseThrow(UniversityNotFoundException::new);
     }
 
     @GetMapping("/domain/{emailDomain}")
-    public UniversityResponseDto getUniversity(@PathVariable String emailDomain) {
+    public UniversityResponseDto getUniversityByEmailDomain(@PathVariable String emailDomain) {
         University university = universityService.getUniversityByEmailDomain(emailDomain)
                 .orElseThrow(UniversityNotFoundException::new);
         return modelMapper.map(university, UniversityResponseDto.class);
