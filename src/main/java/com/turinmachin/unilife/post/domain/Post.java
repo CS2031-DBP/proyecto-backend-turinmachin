@@ -81,7 +81,7 @@ public class Post {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    public Integer getScore() {
+    public int getScore() {
         return votes.stream()
                 .map(PostVote::getValue)
                 .map(VoteType::getValue)
@@ -89,21 +89,8 @@ public class Post {
                 .reduce(0, Integer::sum);
     }
 
-    public Integer getTotalComments() {
-        int count = 0;
-        var stack = new Stack<List<Comment>>();
-        stack.push(comments);
-
-        while (!stack.empty()) {
-            List<Comment> top = stack.pop();
-            count += top.size();
-
-            for (Comment comment : top) {
-                stack.push(comment.getReplies());
-            }
-        }
-
-        return count;
+    public int getTotalComments() {
+        return getComments().size();
     }
 
     @Override
