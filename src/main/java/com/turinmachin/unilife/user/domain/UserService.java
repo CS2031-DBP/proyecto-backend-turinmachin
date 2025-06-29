@@ -1,6 +1,8 @@
 package com.turinmachin.unilife.user.domain;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +41,7 @@ import com.turinmachin.unilife.user.exception.OnlyAdminException;
 import com.turinmachin.unilife.user.exception.UserNotVerifiedException;
 import com.turinmachin.unilife.user.exception.UserWithoutUniversityException;
 import com.turinmachin.unilife.user.exception.UsernameConflictException;
+import com.turinmachin.unilife.user.exception.VerificationEmailCooldownException;
 import com.turinmachin.unilife.user.infrastructure.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -47,6 +51,9 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
+
+    @Value("${cooldown.verification-resend}")
+    private Duration verificationEmailCooldown;
 
     private final UserRepository userRepository;
 
@@ -264,6 +271,23 @@ public class UserService implements UserDetailsService {
 
     public void syncDegreeRemoval(University university, Degree degree) {
         userRepository.syncDegreeRemoval(university.getId(), degree.getId());
+    }
+
+    public void sendVerificationEmail(User user) {
+        Instant now = Instant.now();
+
+        if (user.getLastVerificationEmailSent() != null) {
+            Instant lastSent = user.getLastVerificationEmailSent();
+
+            if (now.isBefore(lastSent.plus(verificationEmailCooldown))) {
+                throw new VerificationEmailCooldownException();
+            }
+        }
+
+        eventPublisher.publishEvent(new SendVerificationEmailEvent(user));
+
+        user.setLastVerificationEmailSent(now);
+        userRepository.save(user);
     }
 
 }

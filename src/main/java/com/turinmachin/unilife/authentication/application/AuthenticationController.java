@@ -44,7 +44,7 @@ public class AuthenticationController {
     @PostMapping("/register")
     public LoginResponseDto register(@Valid @RequestBody RegisterUserDto dto) {
         User createdUser = userService.createUser(dto);
-        eventPublisher.publishEvent(new SendVerificationEmailEvent(createdUser));
+        userService.sendVerificationEmail(createdUser);
 
         String token = jwtService.generateToken(createdUser);
         return new LoginResponseDto(token, modelMapper.map(createdUser, UserResponseDto.class));
@@ -63,13 +63,13 @@ public class AuthenticationController {
     @PostMapping("/verify-resend")
     @PreAuthorize("hasRole('ROLE_USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void resendWelcomeEmail(Authentication authentication) {
+    public void resendVerificationEmail(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         if (user.getVerified()) {
             throw new UserAlreadyVerifiedException();
         }
 
-        eventPublisher.publishEvent(new SendVerificationEmailEvent(user));
+        userService.sendVerificationEmail(user);
     }
 
 }
