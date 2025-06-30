@@ -30,11 +30,11 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
         String jwtToken = resolveToken(request);
 
         if (StringUtils.hasText(jwtToken)) {
-            Optional<Claims> claims = jwtService.extractAllClaims(jwtToken);
-            if (claims.isPresent()) {
-                Authentication authentication = jwtService.getAuthentication(jwtToken, claims.get());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+            Optional<Claims> maybeClaims = jwtService.extractAllClaims(jwtToken);
+            Optional<Authentication> maybeAuth = maybeClaims
+                    .flatMap(claims -> jwtService.getAuthentication(jwtToken, claims));
+
+            maybeAuth.ifPresent(SecurityContextHolder.getContext()::setAuthentication);
         }
 
         filterChain.doFilter(request, response);

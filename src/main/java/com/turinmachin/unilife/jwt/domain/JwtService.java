@@ -56,11 +56,10 @@ public class JwtService {
         return resolver.apply(claims);
     }
 
-    public Authentication getAuthentication(String jwtToken, Claims claims) {
+    public Optional<Authentication> getAuthentication(String jwtToken, Claims claims) {
         UUID id = UUID.fromString(extractClaim(claims, Claims::getSubject));
-        User user = userService.getUserById(id).orElseThrow(UnauthorizedException::new);
-
-        return new UsernamePasswordAuthenticationToken(user, jwtToken, user.getAuthorities());
+        Optional<User> maybeUser = userService.getUserById(id);
+        return maybeUser.map(user -> new UsernamePasswordAuthenticationToken(user, jwtToken, user.getAuthorities()));
     }
 
     private Key getSigningKey() {
