@@ -48,13 +48,13 @@ public class CommentController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public List<CommentResponseDto> getPostComments(@PathVariable UUID postId) {
-        Post post = postService.getPostById(postId).orElseThrow(PostNotFoundException::new);
-        return post.getComments().stream().map(thing -> modelMapper.map(thing, CommentResponseDto.class)).toList();
+    public List<CommentResponseDto> getAllPostComments(@PathVariable UUID postId) {
+        List<Comment> comments = commentService.getAllPostComments(postId);
+        return comments.stream().map(thing -> modelMapper.map(thing, CommentResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")
-    public CommentResponseDto getPostComments(@PathVariable UUID postId, @PathVariable UUID id) {
+    public CommentResponseDto getPostComment(@PathVariable UUID postId, @PathVariable UUID id) {
         Comment comment = commentService.getPostCommentById(postId, id).orElseThrow(CommentNotFoundException::new);
         return modelMapper.map(comment, CommentResponseDto.class);
     }
@@ -67,7 +67,7 @@ public class CommentController {
         User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Post post = postService.getPostById(postId).orElseThrow(PostNotFoundException::new);
+        Post post = postService.getActivePostById(postId).orElseThrow(PostNotFoundException::new);
         Comment comment = commentService.createComment(dto, user, post);
 
         return modelMapper.map(comment, CommentResponseDto.class);

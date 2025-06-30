@@ -80,6 +80,9 @@ public class User implements UserDetails {
     @OrderBy("createdAt DESC")
     private List<Post> posts = new ArrayList<>();
 
+    @Column(nullable = true)
+    private Instant lastVerificationEmailSent;
+
     @CreationTimestamp
     @Column(nullable = false)
     private Instant createdAt;

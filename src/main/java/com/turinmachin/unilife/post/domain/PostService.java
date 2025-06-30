@@ -51,8 +51,13 @@ public class PostService {
         return postRepository.findAll(spec, pageable);
     }
 
-    public Optional<Post> getPostById(UUID id) {
-        return postRepository.findById(id);
+    public Optional<Post> getActivePostById(UUID id) {
+        return postRepository.findByIdAndActiveTrue(id);
+    }
+
+    public Page<Post> omnisearch(String query, UUID authorId, UUID universityId, UUID degreeId, List<String> tags,
+            Pageable pageable) {
+        return postRepository.omnisearch(query, authorId, universityId, degreeId, tags, pageable);
     }
 
     public Post createPost(CreatePostDto dto, User author) throws IOException {
@@ -86,11 +91,11 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public void deletePost(Post post) {
+    public Post deactivatePost(Post post) {
         fileInfoService.triggerFileBatchDeletion(post.getFiles());
 
-        post.getTags().clear();
-        postRepository.delete(post);
+        post.setActive(false);
+        return postRepository.save(post);
     }
 
     public Optional<PostVote> getPostVote(UUID postId, UUID userId) {

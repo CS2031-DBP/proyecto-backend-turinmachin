@@ -1,7 +1,7 @@
 package com.turinmachin.unilife.user.infrastructure;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
@@ -40,13 +40,13 @@ public class UserRepositoryTest {
     @BeforeEach
     public void setup() {
         university1 = new University();
-        university1.setEmailDomains(List.of("uni1.com"));
+        university1.setEmailDomains(Set.of("uni1.com"));
         university1.setName("University 1");
         university1.setWebsiteUrl("https://website1.com");
         university1 = universityRepository.save(university1);
 
         university2 = new University();
-        university2.setEmailDomains(List.of("uni2.com"));
+        university2.setEmailDomains(Set.of("uni2.com"));
         university2.setName("University 2");
         university2.setWebsiteUrl("https://website2.com");
         university2 = universityRepository.save(university2);

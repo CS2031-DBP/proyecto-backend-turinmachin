@@ -12,7 +12,6 @@ import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.post.domain.Post;
 import com.turinmachin.unilife.post.domain.PostService;
 import com.turinmachin.unilife.post.dto.CreatePostDto;
-import com.turinmachin.unilife.post.infrastructure.PostRepository;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
 import com.turinmachin.unilife.user.domain.User;
@@ -63,9 +62,6 @@ public class CommentControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
     private UniversityRepository universityRepository;
 
     @Autowired
@@ -80,10 +76,8 @@ public class CommentControllerIntegrationTest {
     @Autowired
     private CommentRepository commentRepository;
 
-    private User admin;
     private User user1;
     private User user2;
-    private String adminAuth;
     private String userAuth1;
     private String userAuth2;
     private Post post1;

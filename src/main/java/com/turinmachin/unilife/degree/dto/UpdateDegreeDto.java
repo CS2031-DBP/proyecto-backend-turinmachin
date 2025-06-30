@@ -9,4 +9,6 @@ public class UpdateDegreeDto {
     @NotBlank
     private String name;
 
+    private String shortName;
+
 }

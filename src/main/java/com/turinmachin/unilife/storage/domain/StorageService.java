@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.turinmachin.unilife.fileinfo.exception.EmptyFileException;
-import com.turinmachin.unilife.fileinfo.exception.FileTooLargeException;
 
 @Service
 @RequiredArgsConstructor
@@ -25,10 +24,6 @@ public class StorageService {
     public String uploadFile(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new EmptyFileException();
-        }
-
-        if (file.getSize() > 5242880) {
-            throw new FileTooLargeException();
         }
 
         ObjectMetadata metadata = new ObjectMetadata();

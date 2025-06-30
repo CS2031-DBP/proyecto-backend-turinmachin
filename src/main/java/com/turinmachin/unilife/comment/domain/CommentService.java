@@ -1,5 +1,6 @@
 package com.turinmachin.unilife.comment.domain;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +28,10 @@ public class CommentService {
     private final ModelMapper modelMapper;
 
     private final PerspectiveService perspectiveService;
+
+    public List<Comment> getAllPostComments(UUID postId) {
+        return commentRepository.findByPostIdAndParentNullOrderByCreatedAtDesc(postId);
+    }
 
     public Optional<Comment> getPostCommentById(UUID postId, UUID id) {
         return commentRepository.findByIdAndPostId(id, postId);

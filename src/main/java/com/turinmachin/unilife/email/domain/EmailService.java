@@ -4,6 +4,8 @@ import com.turinmachin.unilife.user.domain.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -21,6 +23,9 @@ public class EmailService {
     private final JavaMailSender mailSender;
 
     private final SpringTemplateEngine templateEngine;
+
+    @Value("${deployment.frontend.url}")
+    private String frontendUrl;
 
     @Async
     public void sendTemplatedEmail(String to, String subject, String templateName, Context context)
@@ -40,9 +45,11 @@ public class EmailService {
 
     @Async
     public void sendVerificationEmail(User user) throws MessagingException {
+        String verificationUrl = frontendUrl + "/verify?vid=" + user.getVerificationId();
+
         Context context = new Context();
         context.setVariable("username", user.getUsername());
-        context.setVariable("verification_id", user.getVerificationId().toString());
+        context.setVariable("verification_url", verificationUrl);
 
         sendTemplatedEmail(user.getEmail(), "Tu verificación de UniLife", "verification", context);
     }

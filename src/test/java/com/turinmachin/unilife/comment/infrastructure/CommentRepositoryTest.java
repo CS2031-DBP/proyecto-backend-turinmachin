@@ -2,6 +2,7 @@ package com.turinmachin.unilife.comment.infrastructure;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,7 @@ public class CommentRepositoryTest {
     @BeforeEach
     public void setup() {
         university = new University();
-        university.setEmailDomains(List.of("uni1.com"));
+        university.setEmailDomains(Set.of("uni1.com"));
         university.setName("University 1");
         university.setWebsiteUrl("https://website1.com");
         university = universityRepository.save(university);

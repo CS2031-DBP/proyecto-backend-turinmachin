@@ -1,14 +1,14 @@
 package com.turinmachin.unilife.university.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
-public class AddDegreeToUniversityDto {
+public class UpdateUniversityPictureDto {
 
     @NotNull
-    private UUID degreeId;
+    private MultipartFile picture;
 
 }

@@ -9,7 +9,6 @@ import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.domain.UniversityService;
-import com.turinmachin.unilife.university.dto.AddDegreeToUniversityDto;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
 import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
 import com.turinmachin.unilife.user.domain.User;
@@ -26,12 +25,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -78,7 +75,6 @@ public class UniversityControllerIntegrationTest {
     private Degree degree3;
     private University university1;
     private University university2;
-    private University university3;
 
     @Test
     @Order(1)
@@ -101,14 +97,14 @@ public class UniversityControllerIntegrationTest {
 
         CreateUniversityDto createUniversityDto1 = new CreateUniversityDto();
         createUniversityDto1.setName("UTEC");
-        createUniversityDto1.setEmailDomains(List.of("utec.edu.pe"));
-        createUniversityDto1.setDegreeIds(List.of(degree1.getId(), degree2.getId()));
+        createUniversityDto1.setEmailDomains(Set.of("utec.edu.pe"));
+        createUniversityDto1.setDegreeIds(Set.of(degree1.getId(), degree2.getId()));
         university1 = universityService.createUniversity(createUniversityDto1);
 
         CreateUniversityDto createUniversityDto2 = new CreateUniversityDto();
         createUniversityDto2.setName("UTEC2");
-        createUniversityDto2.setEmailDomains(List.of("utec2.edu.pe"));
-        createUniversityDto2.setDegreeIds(List.of(degree1.getId(), degree2.getId(), degree3.getId()));
+        createUniversityDto2.setEmailDomains(Set.of("utec2.edu.pe"));
+        createUniversityDto2.setDegreeIds(Set.of(degree1.getId(), degree2.getId(), degree3.getId()));
         university2 = universityService.createUniversity(createUniversityDto2);
 
         mockMvc.perform(get("/universities"))
@@ -125,7 +121,8 @@ public class UniversityControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").value(university1.getId().toString()))
                 .andExpect(jsonPath("$.name").value(university1.getName()))
                 .andExpect(jsonPath("$.emailDomains.length()").value(1))
-                .andExpect(jsonPath("$.emailDomains[0]").value(university1.getEmailDomains().getFirst()))
+                .andExpect(
+                        jsonPath("$.emailDomains[0]").value(university1.getEmailDomains().stream().findFirst().get()))
                 .andExpect(jsonPath("$.degrees.length()").value(2))
                 .andExpect(jsonPath("$.degrees[0].id").value(degree1.getId().toString()))
                 .andExpect(jsonPath("$.degrees[0].name").value(degree1.getName()))
@@ -137,7 +134,8 @@ public class UniversityControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").value(university2.getId().toString()))
                 .andExpect(jsonPath("$.name").value(university2.getName()))
                 .andExpect(jsonPath("$.emailDomains.length()").value(1))
-                .andExpect(jsonPath("$.emailDomains[0]").value(university2.getEmailDomains().getFirst()))
+                .andExpect(
+                        jsonPath("$.emailDomains[0]").value(university2.getEmailDomains().stream().findFirst().get()))
                 .andExpect(jsonPath("$.degrees.length()").value(3))
                 .andExpect(jsonPath("$.degrees[0].id").value(degree1.getId().toString()))
                 .andExpect(jsonPath("$.degrees[0].name").value(degree1.getName()))
@@ -163,8 +161,8 @@ public class UniversityControllerIntegrationTest {
 
         CreateUniversityDto createUniversityDto = new CreateUniversityDto();
         createUniversityDto.setName("UTEC3");
-        createUniversityDto.setEmailDomains(List.of("utec3.edu.pe"));
-        createUniversityDto.setDegreeIds(List.of(degree1.getId(), degree3.getId()));
+        createUniversityDto.setEmailDomains(Set.of("utec3.edu.pe"));
+        createUniversityDto.setDegreeIds(Set.of(degree1.getId(), degree3.getId()));
 
         mockMvc.perform(post("/universities")
                 .header("Authorization", userAuth)
@@ -183,7 +181,8 @@ public class UniversityControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value(createUniversityDto.getName()))
                 .andExpect(jsonPath("$.emailDomains.length()").value(1))
-                .andExpect(jsonPath("$.emailDomains[0]").value(createUniversityDto.getEmailDomains().getFirst()))
+                .andExpect(jsonPath("$.emailDomains[0]")
+                        .value(createUniversityDto.getEmailDomains().stream().findFirst().get()))
                 .andExpect(jsonPath("$.degrees.length()").value(2))
                 .andExpect(jsonPath("$.degrees[0].id").value(degree1.getId().toString()))
                 .andExpect(jsonPath("$.degrees[0].name").value(degree1.getName()))
@@ -196,31 +195,6 @@ public class UniversityControllerIntegrationTest {
 
         Optional<University> createdUniversity = universityRepository.findById(id);
         Assertions.assertTrue(createdUniversity.isPresent());
-
-    }
-
-    // Update university está incompleto, se deja el test pendiente
-
-    @Test
-    @Order(5)
-    public void addUniversityDegreeTest() throws Exception {
-        AddDegreeToUniversityDto addDegreeToUniversityDto = new AddDegreeToUniversityDto();
-        addDegreeToUniversityDto.setDegreeId(degree3.getId());
-
-        mockMvc.perform(patch("/universities/{id}/degrees", university1.getId())
-                .header("Authorization", userAuth)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(addDegreeToUniversityDto)))
-                .andExpect(status().isForbidden());
-
-        mockMvc.perform(patch("/universities/{id}/degrees", university1.getId())
-                .header("Authorization", adminAuth)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(addDegreeToUniversityDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(university1.getId().toString()))
-                .andExpect(jsonPath("$.name").value(university1.getName()))
-                .andExpect(jsonPath("$.degrees.length()").value(3));
 
     }
 
