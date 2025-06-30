@@ -1,5 +1,7 @@
 package com.turinmachin.unilife.perspective.domain;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @Service
 public class PerspectiveService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PerspectiveService.class);
 
     private static final double TOXICITY_THRESHOLD = 0.7;
 
@@ -51,7 +55,7 @@ public class PerspectiveService {
 
             return score >= TOXICITY_THRESHOLD;
         } catch (Exception e) {
-            System.err.println("Error al usar Perspective API: " + e.getMessage());
+            logger.error("Error al usar Perspective API: {}", e);
             return false;
         }
     }
