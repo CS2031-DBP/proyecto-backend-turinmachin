@@ -3,6 +3,8 @@ package com.turinmachin.unilife.post.domain;
 import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.fileinfo.domain.FileInfoService;
+import com.turinmachin.unilife.perspective.domain.PerspectiveService;
+import com.turinmachin.unilife.perspective.exception.ToxicContentException;
 import com.turinmachin.unilife.post.dto.CreatePostDto;
 import com.turinmachin.unilife.post.dto.UpdatePostDto;
 import com.turinmachin.unilife.post.infrastructure.PostRepository;
@@ -37,6 +39,8 @@ public class PostService {
 
     private final ModelMapper modelMapper;
 
+    private final PerspectiveService perspectiveService;
+
     public Page<Post> getPostsWithSpec(Specification<Post> spec, Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(
@@ -54,6 +58,10 @@ public class PostService {
     public Post createPost(CreatePostDto dto, User author) throws IOException {
         if (author.getUniversity() == null) {
             throw new UserWithoutUniversityException();
+        }
+
+        if (perspectiveService.isToxic(dto.getContent())) {
+            throw new ToxicContentException();
         }
 
         Post post = modelMapper.map(dto, Post.class);

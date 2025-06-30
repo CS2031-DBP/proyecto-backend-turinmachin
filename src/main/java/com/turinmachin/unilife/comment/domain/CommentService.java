@@ -3,6 +3,8 @@ package com.turinmachin.unilife.comment.domain;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.turinmachin.unilife.perspective.domain.PerspectiveService;
+import com.turinmachin.unilife.perspective.exception.ToxicContentException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -24,11 +26,18 @@ public class CommentService {
 
     private final ModelMapper modelMapper;
 
+    private final PerspectiveService perspectiveService;
+
     public Optional<Comment> getPostCommentById(UUID postId, UUID id) {
         return commentRepository.findByIdAndPostId(id, postId);
     }
 
     public Comment createComment(CreateCommentDto commentDto, User author, Post post) {
+
+        if(perspectiveService.isToxic(commentDto.getContent())) {
+            throw new ToxicContentException();
+        }
+
         Comment comment = modelMapper.map(commentDto, Comment.class);
         comment.setAuthor(author);
         comment.setPost(post);
@@ -37,6 +46,11 @@ public class CommentService {
     }
 
     public Comment createCommentReply(CreateCommentDto commentDto, User author, Comment parent) {
+
+        if(perspectiveService.isToxic(commentDto.getContent())) {
+            throw new ToxicContentException();
+        }
+
         Comment comment = modelMapper.map(commentDto, Comment.class);
         comment.setAuthor(author);
         comment.setPost(parent.getPost());
