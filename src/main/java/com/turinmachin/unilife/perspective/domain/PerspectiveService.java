@@ -9,10 +9,13 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class PerspectiveService {
 
     private static final Logger logger = LoggerFactory.getLogger(PerspectiveService.class);
@@ -29,7 +32,7 @@ public class PerspectiveService {
         return "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=" + apiKey;
     }
 
-    @Cacheable(value = "toxic_cache", key = "content")
+    @Cacheable("ToxicCache")
     public boolean isToxic(String content) {
         Map<String, Object> requestBody = Map.of(
                 "comment", Map.of("text", content),
