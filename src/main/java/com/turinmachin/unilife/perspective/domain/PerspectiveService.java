@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.perspective.domain;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class PerspectiveService {
         return "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=" + apiKey;
     }
 
+    @Cacheable(value = "toxic_cache", key = "content")
     public boolean isToxic(String content) {
         Map<String, Object> requestBody = Map.of(
                 "comment", Map.of("text", content),
