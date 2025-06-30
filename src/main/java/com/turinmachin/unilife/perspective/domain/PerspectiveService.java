@@ -17,10 +17,11 @@ public class PerspectiveService {
 
     private static final Logger logger = LoggerFactory.getLogger(PerspectiveService.class);
 
-    private static final double TOXICITY_THRESHOLD = 0.7;
-
-    @Value("${google.api-key}")
+    @Value("${perspective.api-key}")
     private String apiKey;
+
+    @Value("${perspective.toxicity-threshold}")
+    private double toxicityThreshold;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -53,7 +54,7 @@ public class PerspectiveService {
             Map<String, Object> summaryScore = (Map<String, Object>) toxicity.get("summaryScore");
             double score = ((Number) summaryScore.get("value")).doubleValue();
 
-            return score >= TOXICITY_THRESHOLD;
+            return score >= toxicityThreshold;
         } catch (Exception e) {
             logger.error("Error al usar Perspective API: {}", e);
             return false;
