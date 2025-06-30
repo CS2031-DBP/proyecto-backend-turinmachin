@@ -27,8 +27,7 @@ public class PerspectiveService {
         Map<String, Object> requestBody = Map.of(
                 "comment", Map.of("text", content),
                 "languages", List.of("es"),
-                "requestedAttributes", Map.of("TOXICITY", Map.of())
-        );
+                "requestedAttributes", Map.of("TOXICITY", Map.of()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -36,9 +35,12 @@ public class PerspectiveService {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(getApiUrl(), HttpMethod.POST, request, new ParameterizedTypeReference<>() {});
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(getApiUrl(), HttpMethod.POST, request,
+                    new ParameterizedTypeReference<>() {
+                    });
             Map<String, Object> responseBody = response.getBody();
-            if (responseBody == null) return false;
+            if (responseBody == null)
+                return false;
 
             Map<String, Object> attributes = (Map<String, Object>) responseBody.get("attributeScores");
             Map<String, Object> toxicity = (Map<String, Object>) attributes.get("TOXICITY");
