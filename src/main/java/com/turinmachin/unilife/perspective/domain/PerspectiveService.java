@@ -1,6 +1,9 @@
 package com.turinmachin.unilife.perspective.domain;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -11,6 +14,8 @@ import java.util.Map;
 
 @Service
 public class PerspectiveService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PerspectiveService.class);
 
     private static final double TOXICITY_THRESHOLD = 0.7;
 
@@ -23,12 +28,12 @@ public class PerspectiveService {
         return "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=" + apiKey;
     }
 
+    @Cacheable(value = "toxic_cache", key = "content")
     public boolean isToxic(String content) {
         Map<String, Object> requestBody = Map.of(
                 "comment", Map.of("text", content),
                 "languages", List.of("es"),
-                "requestedAttributes", Map.of("TOXICITY", Map.of())
-        );
+                "requestedAttributes", Map.of("TOXICITY", Map.of()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -36,9 +41,12 @@ public class PerspectiveService {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(getApiUrl(), HttpMethod.POST, request, new ParameterizedTypeReference<>() {});
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(getApiUrl(), HttpMethod.POST, request,
+                    new ParameterizedTypeReference<>() {
+                    });
             Map<String, Object> responseBody = response.getBody();
-            if (responseBody == null) return false;
+            if (responseBody == null)
+                return false;
 
             Map<String, Object> attributes = (Map<String, Object>) responseBody.get("attributeScores");
             Map<String, Object> toxicity = (Map<String, Object>) attributes.get("TOXICITY");
@@ -47,7 +55,7 @@ public class PerspectiveService {
 
             return score >= TOXICITY_THRESHOLD;
         } catch (Exception e) {
-            System.err.println("Error al usar Perspective API: " + e.getMessage());
+            logger.error("Error al usar Perspective API: {}", e);
             return false;
         }
     }
