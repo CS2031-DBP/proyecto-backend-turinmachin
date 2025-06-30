@@ -34,7 +34,6 @@ import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.UpdateUserDto;
-import com.turinmachin.unilife.user.dto.UpdateUserEmailDto;
 import com.turinmachin.unilife.user.dto.UpdateUserPasswordDto;
 import com.turinmachin.unilife.user.infrastructure.UserRepository;
 
@@ -185,23 +184,6 @@ public class UserControllerIntegrationTest {
 
         user2 = userRepository.findById(user2.getId()).orElseThrow();
         Assertions.assertTrue(passwordEncoder.matches(dto.getNewPassword(), user2.getPassword()));
-    }
-
-    @Test
-    @Order(6)
-    public void testUpdateSelfEmail() throws Exception {
-        UpdateUserEmailDto dto = new UpdateUserEmailDto();
-        dto.setEmail("juan.nuevo@mail.com");
-
-        mockMvc.perform(patch("/users/@self/email")
-                .header("Authorization", auth1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(dto.getEmail()));
-
-        user1 = userRepository.findById(user1.getId()).orElseThrow();
-        assertEquals(dto.getEmail(), user1.getEmail());
     }
 
     @Test

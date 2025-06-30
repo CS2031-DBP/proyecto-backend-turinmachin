@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +22,7 @@ import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.degree.domain.DegreeService;
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
 import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
+import com.turinmachin.unilife.degree.dto.DegreeWithStatsDto;
 import com.turinmachin.unilife.degree.dto.UpdateDegreeDto;
 import com.turinmachin.unilife.degree.exception.DegreeNotFoundException;
 
@@ -36,15 +38,20 @@ public class DegreeController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public List<DegreeResponseDto> getAllDegrees() {
-        List<Degree> degrees = degreeService.getAllDegrees();
+    public List<DegreeResponseDto> getAllDegrees(@RequestParam(required = false) UUID universityId) {
+        List<Degree> degrees;
+
+        if (universityId != null) {
+            degrees = degreeService.getDegreesByUniversityId(universityId);
+        } else {
+            degrees = degreeService.getAllDegrees();
+        }
         return degrees.stream().map(degree -> modelMapper.map(degree, DegreeResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")
-    public DegreeResponseDto getDegree(@PathVariable UUID id) {
-        Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
-        return modelMapper.map(degree, DegreeResponseDto.class);
+    public DegreeWithStatsDto getDegree(@PathVariable UUID id) {
+        return degreeService.getDegreeWithStatsById(id).orElseThrow(DegreeNotFoundException::new);
     }
 
     @PostMapping

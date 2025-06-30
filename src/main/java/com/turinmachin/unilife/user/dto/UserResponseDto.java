@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.turinmachin.unilife.degree.dto.DegreeResponseDto;
 import com.turinmachin.unilife.fileinfo.dto.FileInfoResponseDto;
 import com.turinmachin.unilife.university.dto.UniversityResponseDto;
@@ -12,6 +13,7 @@ import com.turinmachin.unilife.user.domain.Role;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResponseDto {
 
     private UUID id;

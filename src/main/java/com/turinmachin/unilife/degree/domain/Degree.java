@@ -28,6 +28,9 @@ public class Degree {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(nullable = true, unique = true)
+    private String shortName;
+
     @ManyToMany(mappedBy = "degrees")
     private List<University> universities = new ArrayList<>();
 
@@ -36,7 +39,8 @@ public class Degree {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Degree degree = (Degree) o;
         return Objects.equals(id, degree.id);
     }

@@ -9,4 +9,6 @@ public class CreateDegreeDto {
     @NotBlank
     private String name;
 
+    private String shortName;
+
 }

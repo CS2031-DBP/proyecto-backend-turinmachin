@@ -2,6 +2,7 @@ package com.turinmachin.unilife.university.infrastructure;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,19 +32,19 @@ public class UniversityRepositoryTest {
     @BeforeEach
     public void setup() {
         university1 = new University();
-        university1.setEmailDomains(List.of("uni1.com"));
+        university1.setEmailDomains(Set.of("uni1.com"));
         university1.setName("University 1");
         university1.setWebsiteUrl("https://website1.com");
         university1 = universityRepository.save(university1);
 
         university2 = new University();
-        university2.setEmailDomains(List.of("uni2.com"));
+        university2.setEmailDomains(Set.of("uni2.com"));
         university2.setName("University 2");
         university2.setWebsiteUrl("https://website2.com");
         university2 = universityRepository.save(university2);
 
         university3 = new University();
-        university3.setEmailDomains(List.of("uni3.com"));
+        university3.setEmailDomains(Set.of("uni3.com"));
         university3.setName("University 3");
         university3.setWebsiteUrl("https://website3.com");
         university3.setActive(false);
@@ -61,7 +62,7 @@ public class UniversityRepositoryTest {
 
     @Test
     public void testFindByActiveTrue() {
-        List<University> result = universityRepository.findByActiveTrue();
+        List<University> result = universityRepository.findByActiveTrueOrderByName();
 
         Assertions.assertEquals(2, result.size());
         Assertions.assertTrue(result.contains(university1));
