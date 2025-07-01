@@ -46,16 +46,16 @@ public class UserController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public Page<UserResponseDto> getAllUsers(
+    @PreAuthorize("hasRole('ROLE_MODERATOR')")
+    public List<UserResponseDto> getAllUsers(
             @RequestParam(required = false) UUID universityId,
-            @RequestParam(required = false) UUID degreeId,
-            Pageable pageable) {
+            @RequestParam(required = false) UUID degreeId) {
         Specification<User> spec = Specification
                 .where(UserSpecifications.hasUniversityId(universityId))
                 .and(UserSpecifications.hasDegreeId(degreeId));
 
-        Page<User> users = userService.getAllUsersWithSpec(spec, pageable);
-        return users.map(user -> modelMapper.map(user, UserResponseDto.class));
+        List<User> users = userService.getAllUsers(spec);
+        return users.stream().map(user -> modelMapper.map(user, UserResponseDto.class)).toList();
     }
 
     @GetMapping("/@self")

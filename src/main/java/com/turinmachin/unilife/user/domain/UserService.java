@@ -67,8 +67,8 @@ public class UserService implements UserDetailsService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public Page<User> getAllUsersWithSpec(Specification<User> spec, Pageable pageable) {
-        return userRepository.findAll(spec, pageable);
+    public List<User> getAllUsers(Specification<User> spec) {
+        return userRepository.findAll(spec);
     }
 
     public Optional<User> getUserById(UUID id) {
