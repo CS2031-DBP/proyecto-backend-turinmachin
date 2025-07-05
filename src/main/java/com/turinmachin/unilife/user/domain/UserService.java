@@ -56,6 +56,9 @@ public class UserService implements UserDetailsService {
     @Value("${cooldown.verification-resend}")
     private Duration verificationEmailCooldown;
 
+    @Value("${auth.password-reset-duration}")
+    private Duration passwordResetDuration;
+
     private final UserRepository userRepository;
     private final UserTokenRepository userTokenRepository;
     private final UniversityService universityService;
@@ -86,7 +89,9 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> getUserByPasswordResetToken(String token) {
         String hashedToken = HashUtils.hashTokenSHA256(token);
-        return userRepository.findByPasswordResetTokenValue(hashedToken);
+        Instant now = Instant.now();
+        return userRepository.findByPasswordResetTokenValueAndCreatedAtGreaterThan(hashedToken,
+                now.minus(passwordResetDuration));
     }
 
     public Optional<User> getUserByVerificationId(UUID verificationId) {
@@ -320,7 +325,8 @@ public class UserService implements UserDetailsService {
 
     public boolean userTokenExistsByValue(String value) {
         String hashedToken = HashUtils.hashTokenSHA256(value);
-        return userTokenRepository.existsByValue(hashedToken);
+        Instant now = Instant.now();
+        return userTokenRepository.existsByValueAndCreatedAtGreaterThan(hashedToken, now.minus(passwordResetDuration));
     }
 
 }

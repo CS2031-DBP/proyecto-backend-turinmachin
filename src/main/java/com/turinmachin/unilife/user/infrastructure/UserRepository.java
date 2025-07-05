@@ -1,5 +1,6 @@
 package com.turinmachin.unilife.user.infrastructure;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
     Optional<User> findByVerificationId(UUID verificationId);
 
-    Optional<User> findByPasswordResetTokenValue(String passwordResetTokenId);
+    Optional<User> findByPasswordResetTokenValueAndCreatedAtGreaterThan(String passwordResetTokenId, Instant createdAt);
 
     boolean existsByUsername(String username);
 
