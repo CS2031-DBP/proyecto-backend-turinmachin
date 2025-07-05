@@ -9,7 +9,6 @@ import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.UserResponseDto;
-import com.turinmachin.unilife.user.event.SendVerificationEmailEvent;
 import com.turinmachin.unilife.user.event.SendWelcomeEmailEvent;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
 import jakarta.validation.Valid;
