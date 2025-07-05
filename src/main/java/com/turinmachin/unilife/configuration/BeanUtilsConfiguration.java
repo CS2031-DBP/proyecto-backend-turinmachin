@@ -1,5 +1,7 @@
 package com.turinmachin.unilife.configuration;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.List;
 
 import org.modelmapper.Converter;
@@ -61,6 +63,16 @@ public class BeanUtilsConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecureRandom secureRandom() {
+        return new SecureRandom();
+    }
+
+    @Bean
+    public Base64.Encoder base64Encoder() {
+        return Base64.getUrlEncoder().withoutPadding();
     }
 
 }

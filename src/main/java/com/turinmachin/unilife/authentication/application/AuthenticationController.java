@@ -3,6 +3,10 @@ package com.turinmachin.unilife.authentication.application;
 import com.turinmachin.unilife.authentication.domain.AuthenticationService;
 import com.turinmachin.unilife.authentication.dto.JwtAuthLoginDto;
 import com.turinmachin.unilife.authentication.dto.LoginResponseDto;
+import com.turinmachin.unilife.authentication.dto.ResetPasswordDto;
+import com.turinmachin.unilife.authentication.dto.IssuePasswordResetDto;
+import com.turinmachin.unilife.authentication.dto.TokenRequestDto;
+import com.turinmachin.unilife.authentication.dto.TokenVerifyResponseDto;
 import com.turinmachin.unilife.authentication.dto.VerifyUserDto;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
@@ -11,6 +15,8 @@ import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.UserResponseDto;
 import com.turinmachin.unilife.user.event.SendWelcomeEmailEvent;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
+import com.turinmachin.unilife.user.exception.UserNotFoundException;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -26,13 +32,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-
     private final JwtService jwtService;
-
     private final UserService userService;
-
     private final ModelMapper modelMapper;
-
     private final ApplicationEventPublisher eventPublisher;
 
     @PostMapping("/login")
@@ -69,6 +71,25 @@ public class AuthenticationController {
         }
 
         userService.sendVerificationEmail(user);
+    }
+
+    @PostMapping("/request-password-reset")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void issuePasswordReset(@Valid @RequestBody IssuePasswordResetDto dto) {
+        User user = userService.getUserByEmail(dto.getEmail()).orElseThrow(UserNotFoundException::new);
+        authenticationService.triggerResetPassword(user);
+    }
+
+    @PostMapping("/verify-reset-token")
+    public TokenVerifyResponseDto verifyPasswordToken(@Valid @RequestBody TokenRequestDto dto) {
+        boolean valid = authenticationService.verifyPasswordToken(dto.getToken());
+        return new TokenVerifyResponseDto(valid);
+    }
+
+    @PostMapping("/reset-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reset(@Valid @RequestBody ResetPasswordDto dto) {
+        authenticationService.resetUserPassword(dto.getToken(), dto.getNewPassword());
     }
 
 }

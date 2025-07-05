@@ -1,6 +1,8 @@
 package com.turinmachin.unilife.email.domain;
 
 import com.turinmachin.unilife.user.domain.User;
+import com.turinmachin.unilife.user.domain.UserToken;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,6 @@ public class EmailService {
     @Value("${deployment.frontend.url}")
     private String frontendUrl;
 
-    @Async
     public void sendTemplatedEmail(String to, String subject, String templateName, Context context)
             throws MessagingException {
         String emailContent = templateEngine.process(templateName, context);
@@ -43,7 +44,6 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    @Async
     public void sendVerificationEmail(User user) throws MessagingException {
         String verificationUrl = frontendUrl + "/verify?vid=" + user.getVerificationId();
 
@@ -54,12 +54,21 @@ public class EmailService {
         sendTemplatedEmail(user.getEmail(), "Tu verificación de UniLife", "verification", context);
     }
 
-    @Async
     public void sendWelcomeEmail(User user) throws MessagingException {
         Context context = new Context();
         context.setVariable("user_name", Optional.ofNullable(user.getDisplayName()).orElse(user.getUsername()));
 
         sendTemplatedEmail(user.getEmail(), "¡Bienvenido a UniLife!", "welcome", context);
+    }
+
+    public void sendResetPasswordEmail(User user, String token) throws MessagingException {
+        String url = frontendUrl + "/reset-password?token=" + token;
+
+        Context context = new Context();
+        context.setVariable("user_name", Optional.ofNullable(user.getDisplayName()).orElse(user.getUsername()));
+        context.setVariable("link", url);
+
+        sendTemplatedEmail(user.getEmail(), "Reestablece tu correo de UniLife", "reset_password", context);
     }
 
 }

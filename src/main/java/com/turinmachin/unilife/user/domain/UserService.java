@@ -20,9 +20,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.turinmachin.unilife.authentication.event.ResetPasswordIssuedEvent;
 import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
+import com.turinmachin.unilife.common.utils.HashUtils;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.email.EmailUtils;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
@@ -41,6 +43,7 @@ import com.turinmachin.unilife.user.exception.UserWithoutUniversityException;
 import com.turinmachin.unilife.user.exception.UsernameConflictException;
 import com.turinmachin.unilife.user.exception.VerificationEmailCooldownException;
 import com.turinmachin.unilife.user.infrastructure.UserRepository;
+import com.turinmachin.unilife.user.infrastructure.UserTokenRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -54,15 +57,11 @@ public class UserService implements UserDetailsService {
     private Duration verificationEmailCooldown;
 
     private final UserRepository userRepository;
-
+    private final UserTokenRepository userTokenRepository;
     private final UniversityService universityService;
-
     private final ModelMapper modelMapper;
-
     private final PasswordEncoder passwordEncoder;
-
     private final FileInfoService fileInfoService;
-
     private final ApplicationEventPublisher eventPublisher;
 
     public List<User> getAllUsers(Specification<User> spec) {
@@ -73,12 +72,21 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id);
     }
 
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     public Optional<User> getUserByUsernameOrEmail(String usernameOrEmail) {
         return userRepository.findByUsernameOrEmail(usernameOrEmail);
+    }
+
+    public Optional<User> getUserByPasswordResetToken(String token) {
+        String hashedToken = HashUtils.hashTokenSHA256(token);
+        return userRepository.findByPasswordResetTokenValue(hashedToken);
     }
 
     public Optional<User> getUserByVerificationId(UUID verificationId) {
@@ -286,6 +294,33 @@ public class UserService implements UserDetailsService {
 
         user.setLastVerificationEmailSent(now);
         userRepository.save(user);
+    }
+
+    public User clearResetPasswordToken(User user) {
+        user.setPasswordResetToken(null);
+        return userRepository.save(user);
+    }
+
+    public User setResetPasswordToken(User user, String tokenValue) {
+        UserToken token = new UserToken();
+        token.setValue(HashUtils.hashTokenSHA256(tokenValue));
+        token.setUser(user);
+        user.setPasswordResetToken(token);
+
+        user = userRepository.save(user);
+        eventPublisher.publishEvent(new ResetPasswordIssuedEvent(user, tokenValue));
+        return user;
+    }
+
+    public User resetPassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordResetToken(null);
+        return userRepository.save(user);
+    }
+
+    public boolean userTokenExistsByValue(String value) {
+        String hashedToken = HashUtils.hashTokenSHA256(value);
+        return userTokenRepository.existsByValue(hashedToken);
     }
 
 }

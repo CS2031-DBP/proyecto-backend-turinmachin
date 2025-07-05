@@ -17,10 +17,14 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByEmail(String email);
+
     @NativeQuery("SELECT * FROM users WHERE username = ?1 OR email = ?1 LIMIT 1")
     Optional<User> findByUsernameOrEmail(String usernameOrEmail);
 
     Optional<User> findByVerificationId(UUID verificationId);
+
+    Optional<User> findByPasswordResetTokenValue(String passwordResetTokenId);
 
     boolean existsByUsername(String username);
 
