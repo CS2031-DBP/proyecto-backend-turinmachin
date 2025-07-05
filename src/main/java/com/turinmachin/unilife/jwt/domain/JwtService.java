@@ -1,13 +1,10 @@
 package com.turinmachin.unilife.jwt.domain;
 
-import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,9 +30,10 @@ public class JwtService {
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
-                .setIssuedAt(new Date())
+                .claim("https://unilife.lat/role", user.getRole().name())
+                .claim("role", 16479)
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -63,7 +61,7 @@ public class JwtService {
     }
 
     private Key getSigningKey() {
-        byte[] bytes = Decoders.BASE64.decode(secret);
+        byte[] bytes = secret.getBytes();
         return Keys.hmacShaKeyFor(bytes);
     }
 
