@@ -1,15 +1,17 @@
 package com.turinmachin.unilife.configuration;
 
-import com.turinmachin.unilife.user.domain.Role;
-import com.turinmachin.unilife.user.domain.User;
-import com.turinmachin.unilife.user.domain.UserService;
-import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.turinmachin.unilife.user.domain.Role;
+import com.turinmachin.unilife.user.domain.User;
+import com.turinmachin.unilife.user.domain.UserService;
+import com.turinmachin.unilife.user.dto.RegisterUserDto;
 
 @Configuration
 public class BootstrapConfiguration {
@@ -41,6 +43,14 @@ public class BootstrapConfiguration {
             User admin = userService.createUser(dto);
             userService.updateUserRole(admin, Role.ADMIN);
             userService.verifyUser(admin);
+        };
+    }
+
+    @Bean
+    public FlywayMigrationStrategy repairFlyway() {
+        return flyway -> {
+            flyway.repair();
+            flyway.migrate();
         };
     }
 
