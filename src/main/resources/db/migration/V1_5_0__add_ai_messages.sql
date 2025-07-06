@@ -1,0 +1,7 @@
+CREATE TABLE ai_message (
+     id UUID NOT NULL PRIMARY KEY,
+     user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+     role VARCHAR(255) NOT NULL CHECK (role in ('SYSTEM', 'USER', 'ASSISTANT', 'TOOL', 'DEVELOPER')),
+     content TEXT NOT NULL,
+     created_at TIMESTAMPTZ NOT NULL
+);

@@ -68,7 +68,7 @@ public class EmailService {
         context.setVariable("user_name", Optional.ofNullable(user.getDisplayName()).orElse(user.getUsername()));
         context.setVariable("link", url);
 
-        sendTemplatedEmail(user.getEmail(), "Reestablece tu correo de UniLife", "reset_password", context);
+        sendTemplatedEmail(user.getEmail(), "Restablece tu contraseña de UniLife", "reset_password", context);
     }
 
 }
