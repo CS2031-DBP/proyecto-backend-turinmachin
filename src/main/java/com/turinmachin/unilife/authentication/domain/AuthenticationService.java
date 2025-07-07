@@ -1,8 +1,5 @@
 package com.turinmachin.unilife.authentication.domain;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.UUID;
@@ -16,7 +13,6 @@ import com.turinmachin.unilife.authentication.dto.LoginResponseDto;
 import com.turinmachin.unilife.authentication.exception.InvalidCredentialsException;
 import com.turinmachin.unilife.authentication.exception.InvalidVerificationIdException;
 import com.turinmachin.unilife.common.exception.ConflictException;
-import com.turinmachin.unilife.common.utils.HashUtils;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
