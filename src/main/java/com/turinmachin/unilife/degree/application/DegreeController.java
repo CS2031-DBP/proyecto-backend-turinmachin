@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,19 +36,23 @@ import jakarta.validation.Valid;
 public class DegreeController {
 
     private final DegreeService degreeService;
-
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public List<DegreeResponseDto> getAllDegrees(@RequestParam(required = false) UUID universityId) {
-        List<Degree> degrees;
+    public Page<DegreeResponseDto> getAllDegrees(
+            @RequestParam(required = false) UUID universityId,
+            @RequestParam(required = false) String query,
+            Pageable pageable) {
+        Page<Degree> degrees;
 
-        if (universityId != null) {
-            degrees = degreeService.getDegreesByUniversityId(universityId);
+        if (query != null) {
+            degrees = degreeService.searchDegrees(query, universityId, pageable);
+        } else if (universityId != null) {
+            degrees = degreeService.getDegreesByUniversityId(universityId, pageable);
         } else {
-            degrees = degreeService.getAllDegrees();
+            degrees = degreeService.getAllDegrees(pageable);
         }
-        return degrees.stream().map(degree -> modelMapper.map(degree, DegreeResponseDto.class)).toList();
+        return degrees.map(degree -> modelMapper.map(degree, DegreeResponseDto.class));
     }
 
     @GetMapping("/{id}")

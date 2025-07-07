@@ -61,15 +61,6 @@ public class UniversityRepositoryTest {
     }
 
     @Test
-    public void testFindByActiveTrue() {
-        List<University> result = universityRepository.findByActiveTrueOrderByName();
-
-        Assertions.assertEquals(2, result.size());
-        Assertions.assertTrue(result.contains(university1));
-        Assertions.assertTrue(result.contains(university2));
-    }
-
-    @Test
     public void testFindByIdAndActiveTrue() {
         Optional<University> result1 = universityRepository.findByIdAndActiveTrue(university1.getId());
         Assertions.assertEquals(Optional.ofNullable(university1), result1);

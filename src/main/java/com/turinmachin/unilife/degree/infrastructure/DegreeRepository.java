@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
 
@@ -20,9 +22,32 @@ public interface DegreeRepository extends JpaRepository<Degree, UUID> {
 
     boolean existsByShortNameAndIdNot(String shortName, UUID id);
 
-    List<Degree> findByUniversitiesIdOrderByName(UUID universityId);
+    Page<Degree> findByUniversitiesIdOrderByName(UUID universityId, Pageable pageable);
 
-    List<Degree> findAllByOrderByName();
+    Page<Degree> findAllByOrderByName(Pageable Pageable);
+
+    @NativeQuery("""
+            SELECT D.*
+            FROM degree D
+            WHERE
+                (:universityId IS NULL OR EXISTS (
+                    SELECT 1 FROM university_degrees
+                    WHERE universities_id = :universityId AND degrees_id = D.id
+                ))
+                AND (
+                    D.name_tsv @@ plainto_tsquery('spanish', :query)
+                    OR D.name % :query
+                    OR D.short_name_tsv @@ plainto_tsquery('spanish', :query)
+                    OR D.short_name % :query
+                )
+            ORDER BY
+                ts_rank(D.name_tsv, plainto_tsquery('spanish', :query)) DESC,
+                ts_rank(D.short_name_tsv, plainto_tsquery('spanish', :query)) DESC,
+                similarity(D.name, :query) DESC,
+                similarity(D.short_name, :query) DESC,
+                D.name
+            """)
+    Page<Degree> omnisearch(String query, UUID universityId, Pageable pageable);
 
     @NativeQuery("""
             SELECT

@@ -1,13 +1,14 @@
 package com.turinmachin.unilife.university.domain;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,15 +35,16 @@ import lombok.RequiredArgsConstructor;
 public class UniversityService {
 
     private final UniversityRepository universityRepository;
-
     private final DegreeService degreeService;
-
     private final FileInfoService fileInfoService;
-
     private final ModelMapper modelMapper;
 
-    public List<University> getAllUniversities() {
-        return universityRepository.findByActiveTrueOrderByName();
+    public Page<University> getAllUniversities(Pageable pageable) {
+        return universityRepository.findByActiveTrueOrderByName(pageable);
+    }
+
+    public Page<University> searchUniversities(String query, Pageable pageable) {
+        return universityRepository.omnisearch(query, pageable);
     }
 
     public Optional<University> getUniversityById(UUID id) {

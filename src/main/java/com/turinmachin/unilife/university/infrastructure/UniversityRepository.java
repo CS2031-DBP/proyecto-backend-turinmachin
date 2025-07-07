@@ -1,9 +1,10 @@
 package com.turinmachin.unilife.university.infrastructure;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
 
@@ -20,7 +21,26 @@ public interface UniversityRepository extends JpaRepository<University, UUID> {
 
     boolean existsByShortNameAndIdNot(String shortName, UUID id);
 
-    List<University> findByActiveTrueOrderByName();
+    Page<University> findByActiveTrueOrderByName(Pageable pageable);
+
+    @NativeQuery("""
+            SELECT * FROM university
+            WHERE
+                active IS TRUE
+                AND (
+                    name_tsv @@ plainto_tsquery('spanish', :query)
+                    OR name % :query
+                    OR short_name_tsv @@ plainto_tsquery('spanish', :query)
+                    OR short_name % :query
+                )
+            ORDER BY
+                ts_rank(name_tsv, plainto_tsquery('spanish', :query)) DESC,
+                ts_rank(short_name_tsv, plainto_tsquery('spanish', :query)) DESC,
+                similarity(name, :query) DESC,
+                similarity(short_name, :query) DESC,
+                name
+            """)
+    Page<University> omnisearch(String query, Pageable pageable);
 
     Optional<University> findByIdAndActiveTrue(UUID id);
 

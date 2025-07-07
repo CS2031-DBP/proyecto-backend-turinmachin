@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.turinmachin.unilife.degree.dto.CreateDegreeDto;
@@ -26,12 +28,16 @@ public class DegreeService {
 
     private final ModelMapper modelMapper;
 
-    public List<Degree> getAllDegrees() {
-        return degreeRepository.findAllByOrderByName();
+    public Page<Degree> getAllDegrees(Pageable pageable) {
+        return degreeRepository.findAllByOrderByName(pageable);
     }
 
-    public List<Degree> getDegreesByUniversityId(UUID universityId) {
-        return degreeRepository.findByUniversitiesIdOrderByName(universityId);
+    public Page<Degree> searchDegrees(String query, UUID universityId, Pageable pageable) {
+        return degreeRepository.omnisearch(query, universityId, pageable);
+    }
+
+    public Page<Degree> getDegreesByUniversityId(UUID universityId, Pageable pageable) {
+        return degreeRepository.findByUniversitiesIdOrderByName(universityId, pageable);
     }
 
     public Optional<Degree> getDegreeById(UUID id) {
