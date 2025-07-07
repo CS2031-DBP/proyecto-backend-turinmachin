@@ -1,7 +1,6 @@
 package com.turinmachin.unilife.university.application;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -46,12 +45,14 @@ public class UniversityController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public Page<UniversityResponseDto> getUniversities(@RequestParam(required = false) String name, Pageable pageable) {
+    public Page<UniversityResponseDto> getUniversities(
+            @RequestParam(required = false) String query,
+            Pageable pageable) {
         Page<University> universities;
-        if (name == null) {
+        if (query == null) {
             universities = universityService.getAllUniversities(pageable);
         } else {
-            universities = universityService.searchUniversities(name, pageable);
+            universities = universityService.searchUniversities(query, pageable);
         }
         return universities.map(uni -> modelMapper.map(uni, UniversityResponseDto.class));
     }

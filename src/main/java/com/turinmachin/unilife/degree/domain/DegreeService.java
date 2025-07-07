@@ -28,6 +28,10 @@ public class DegreeService {
 
     private final ModelMapper modelMapper;
 
+    public List<Degree> getAllDegrees() {
+        return degreeRepository.findAllByOrderByName();
+    }
+
     public Page<Degree> getAllDegrees(Pageable pageable) {
         return degreeRepository.findAllByOrderByName(pageable);
     }
@@ -38,6 +42,10 @@ public class DegreeService {
 
     public Page<Degree> getDegreesByUniversityId(UUID universityId, Pageable pageable) {
         return degreeRepository.findByUniversitiesIdOrderByName(universityId, pageable);
+    }
+
+    public List<Degree> getDegreesByUniversityId(UUID universityId) {
+        return degreeRepository.findByUniversitiesIdOrderByName(universityId);
     }
 
     public Optional<Degree> getDegreeById(UUID id) {

@@ -39,7 +39,7 @@ public class DegreeController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public Page<DegreeResponseDto> getAllDegrees(
+    public Page<DegreeResponseDto> getPaginatedDegrees(
             @RequestParam(required = false) UUID universityId,
             @RequestParam(required = false) String query,
             Pageable pageable) {
@@ -52,7 +52,20 @@ public class DegreeController {
         } else {
             degrees = degreeService.getAllDegrees(pageable);
         }
+
         return degrees.map(degree -> modelMapper.map(degree, DegreeResponseDto.class));
+    }
+
+    @GetMapping("/all")
+    public List<DegreeResponseDto> getAllDegrees(@RequestParam(required = false) UUID universityId) {
+        List<Degree> degrees;
+        if (universityId != null) {
+            degrees = degreeService.getDegreesByUniversityId(universityId);
+        } else {
+            degrees = degreeService.getAllDegrees();
+        }
+
+        return degrees.stream().map(degree -> modelMapper.map(degree, DegreeResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")

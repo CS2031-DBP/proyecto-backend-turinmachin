@@ -22,7 +22,11 @@ public interface DegreeRepository extends JpaRepository<Degree, UUID> {
 
     boolean existsByShortNameAndIdNot(String shortName, UUID id);
 
+    List<Degree> findByUniversitiesIdOrderByName(UUID universityId);
+
     Page<Degree> findByUniversitiesIdOrderByName(UUID universityId, Pageable pageable);
+
+    List<Degree> findAllByOrderByName();
 
     Page<Degree> findAllByOrderByName(Pageable Pageable);
 
