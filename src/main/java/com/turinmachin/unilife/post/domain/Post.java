@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.turinmachin.unilife.comment.domain.Comment;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.university.domain.University;
@@ -63,10 +62,6 @@ public class Post {
     private List<String> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("createdAt DESC")
-    private List<Comment> comments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostVote> votes = new ArrayList<>();
 
     @Column(nullable = false)
@@ -86,10 +81,6 @@ public class Post {
                 .map(VoteType::getValue)
                 .map(s -> (int) s)
                 .reduce(0, Integer::sum);
-    }
-
-    public int getTotalComments() {
-        return getComments().size();
     }
 
     @Override

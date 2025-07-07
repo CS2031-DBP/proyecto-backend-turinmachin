@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.turinmachin.unilife.comment.domain.CommentService;
 import com.turinmachin.unilife.common.exception.ForbiddenException;
 import com.turinmachin.unilife.common.exception.NotFoundException;
 import com.turinmachin.unilife.post.domain.Post;
@@ -47,9 +48,8 @@ import jakarta.validation.Valid;
 public class PostController {
 
     private final PostService postService;
-
+    private final CommentService commentService;
     private final UserService userService;
-
     private final ModelMapper modelMapper;
 
     @GetMapping
@@ -74,13 +74,20 @@ public class PostController {
             posts = postService.omnisearch(query, authorId, universityId, degreeId, tags, pageable);
         }
 
-        return posts.map(post -> modelMapper.map(post, PostResponseDto.class));
+        return posts.map(post -> {
+            PostResponseDto response = modelMapper.map(post, PostResponseDto.class);
+            response.setTotalComments(commentService.countPostComments(post.getId()));
+            return response;
+        });
     }
 
     @GetMapping("/{id}")
     public PostResponseDto getPost(@PathVariable UUID id) {
         Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
-        return modelMapper.map(post, PostResponseDto.class);
+
+        PostResponseDto response = modelMapper.map(post, PostResponseDto.class);
+        response.setTotalComments(commentService.countPostComments(post.getId()));
+        return response;
     }
 
     @PostMapping

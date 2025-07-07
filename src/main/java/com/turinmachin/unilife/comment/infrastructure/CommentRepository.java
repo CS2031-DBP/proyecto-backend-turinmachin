@@ -15,4 +15,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     Optional<Comment> findByIdAndPostId(UUID id, UUID postId);
 
+    int countByPostId(UUID postId);
+
 }

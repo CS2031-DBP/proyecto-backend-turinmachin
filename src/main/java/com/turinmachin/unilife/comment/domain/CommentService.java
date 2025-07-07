@@ -33,6 +33,10 @@ public class CommentService {
         return commentRepository.findByPostIdAndParentNullOrderByCreatedAtDesc(postId);
     }
 
+    public int countPostComments(UUID postId) {
+        return commentRepository.countByPostId(postId);
+    }
+
     public Optional<Comment> getPostCommentById(UUID postId, UUID id) {
         return commentRepository.findByIdAndPostId(id, postId);
     }
