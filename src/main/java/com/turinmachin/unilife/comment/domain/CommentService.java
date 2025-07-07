@@ -39,7 +39,7 @@ public class CommentService {
 
     public Comment createComment(CreateCommentDto commentDto, User author, Post post) {
 
-        if(perspectiveService.isToxic(commentDto.getContent())) {
+        if (perspectiveService.isToxic(commentDto.getContent())) {
             throw new ToxicContentException();
         }
 
@@ -52,7 +52,7 @@ public class CommentService {
 
     public Comment createCommentReply(CreateCommentDto commentDto, User author, Comment parent) {
 
-        if(perspectiveService.isToxic(commentDto.getContent())) {
+        if (perspectiveService.isToxic(commentDto.getContent())) {
             throw new ToxicContentException();
         }
 
