@@ -60,9 +60,9 @@ public class AuthenticationService {
     }
 
     public void triggerResetPassword(User user) {
-        if (userService.userHasValidToken(user)) {
-            throw new ConflictException("User already has reset token");
-        }
+        // if (userService.userHasValidToken(user)) {
+        // throw new ConflictException("User already has reset token");
+        // }
 
         String tokenValue = generateSecureToken(32);
         userService.setResetPasswordToken(user, tokenValue);

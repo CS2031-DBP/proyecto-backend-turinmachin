@@ -316,6 +316,9 @@ public class UserService implements UserDetailsService {
     }
 
     public User setResetPasswordToken(User user, String tokenValue) {
+        user.setPasswordResetToken(null);
+        userTokenRepository.deleteByUserId(user.getId());
+
         UserToken token = new UserToken();
         token.setValue(HashUtils.hashTokenSHA256(tokenValue));
         token.setUser(user);

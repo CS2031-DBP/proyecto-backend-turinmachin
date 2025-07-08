@@ -11,4 +11,6 @@ public interface UserTokenRepository extends JpaRepository<UserToken, UUID> {
 
     boolean existsByValueAndCreatedAtGreaterThan(String value, Instant createdAt);
 
+    int deleteByUserId(UUID userId);
+
 }
