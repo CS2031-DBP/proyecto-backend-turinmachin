@@ -99,7 +99,7 @@ public class UserService implements UserDetailsService {
     public Optional<User> getUserByPasswordResetToken(String token) {
         String hashedToken = HashUtils.hashTokenSHA256(token);
         Instant now = Instant.now();
-        return userRepository.findByPasswordResetTokenValueAndCreatedAtGreaterThan(hashedToken,
+        return userRepository.findByPasswordResetTokenValueAndPasswordResetTokenCreatedAtGreaterThan(hashedToken,
                 now.minus(passwordResetDuration));
     }
 
@@ -336,6 +336,16 @@ public class UserService implements UserDetailsService {
         String hashedToken = HashUtils.hashTokenSHA256(value);
         Instant now = Instant.now();
         return userTokenRepository.existsByValueAndCreatedAtGreaterThan(hashedToken, now.minus(passwordResetDuration));
+    }
+
+    public boolean userHasValidToken(User user) {
+        UserToken existingToken = user.getPasswordResetToken();
+
+        if (existingToken == null)
+            return false;
+
+        Instant now = Instant.now();
+        return now.isBefore(existingToken.getCreatedAt().plus(passwordResetDuration));
     }
 
 }

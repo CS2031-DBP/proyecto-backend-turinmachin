@@ -88,7 +88,7 @@ public class AuthenticationController {
 
     @PostMapping("/reset-password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void reset(@Valid @RequestBody ResetPasswordDto dto) {
+    public void resetPassword(@Valid @RequestBody ResetPasswordDto dto) {
         authenticationService.resetUserPassword(dto.getToken(), dto.getNewPassword());
     }
 

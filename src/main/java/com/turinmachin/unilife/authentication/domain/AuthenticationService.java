@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.authentication.domain;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
+import com.turinmachin.unilife.user.domain.UserToken;
 import com.turinmachin.unilife.user.dto.UserResponseDto;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
 import com.turinmachin.unilife.user.exception.UserNotFoundException;
@@ -58,7 +60,7 @@ public class AuthenticationService {
     }
 
     public void triggerResetPassword(User user) {
-        if (user.getPasswordResetToken() != null) {
+        if (userService.userHasValidToken(user)) {
             throw new ConflictException("User already has reset token");
         }
 

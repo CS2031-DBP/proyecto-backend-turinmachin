@@ -27,7 +27,8 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
     Optional<User> findByVerificationId(UUID verificationId);
 
-    Optional<User> findByPasswordResetTokenValueAndCreatedAtGreaterThan(String passwordResetTokenId, Instant createdAt);
+    Optional<User> findByPasswordResetTokenValueAndPasswordResetTokenCreatedAtGreaterThan(String passwordResetTokenId,
+            Instant createdAt);
 
     boolean existsByUsername(String username);
 
