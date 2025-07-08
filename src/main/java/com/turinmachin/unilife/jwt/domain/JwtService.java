@@ -31,7 +31,7 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("https://unilife.lat/role", user.getRole().name())
-                .claim("role", 16479)
+                .claim("role", "authenticated")
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSigningKey())
                 .compact();
