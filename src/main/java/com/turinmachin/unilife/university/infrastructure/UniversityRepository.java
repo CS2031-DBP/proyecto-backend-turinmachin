@@ -32,6 +32,8 @@ public interface UniversityRepository extends JpaRepository<University, UUID> {
                     OR name % :query
                     OR short_name_tsv @@ plainto_tsquery('spanish', :query)
                     OR short_name % :query
+                    OR LOWER(name) LIKE '%' || LOWER(:query) || '%'
+                    OR LOWER(short_name) LIKE '%' || LOWER(:query) || '%'
                 )
             ORDER BY
                 ts_rank(name_tsv, plainto_tsquery('spanish', :query)) DESC,

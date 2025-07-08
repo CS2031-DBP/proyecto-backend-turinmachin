@@ -43,6 +43,8 @@ public interface DegreeRepository extends JpaRepository<Degree, UUID> {
                     OR D.name % :query
                     OR D.short_name_tsv @@ plainto_tsquery('spanish', :query)
                     OR D.short_name % :query
+                    OR LOWER(D.name) LIKE '%' || LOWER(:query) || '%'
+                    OR LOWER(D.short_name) LIKE '%' || LOWER(:query) || '%'
                 )
             ORDER BY
                 ts_rank(D.name_tsv, plainto_tsquery('spanish', :query)) DESC,
