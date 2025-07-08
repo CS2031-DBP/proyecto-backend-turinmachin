@@ -41,6 +41,8 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
     List<User> findAllByVerificationIdIsNullAndUniversityIsNull();
 
+    Page<User> findAllByOrderByUsername(Pageable pageable);
+
     @Modifying
     @NativeQuery("UPDATE users SET university_id = NULL, degree_id = NULL WHERE university_id = :universityId")
     int detachUniversity(UUID universityId);
@@ -52,14 +54,20 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     @NativeQuery("""
             SELECT * FROM users
             WHERE
-                username % :query
-                OR display_name % :query
-                OR LOWER(username) LIKE '%' || LOWER(:query) || '%'
-                OR LOWER(display_name) LIKE '%' || LOWER(:query) || '%'
+                :excludedId IS NULL OR id <> :excludedId
+                AND (
+                    username % :query
+                    OR display_name % :query
+                    OR LOWER(username) LIKE '%' || LOWER(:query) || '%'
+                    OR LOWER(display_name) LIKE '%' || LOWER(:query) || '%'
+                )
             ORDER BY
                 similarity(username, :query) DESC,
-                similarity(display_name, :query) DESC
+                similarity(display_name, :query) DESC,
+                username
             """)
-    Page<User> search(String query, Pageable pageable);
+    Page<User> searchExcluding(String query, UUID excludedId, Pageable pageable);
+
+    Page<User> findByIdNotOrderByUsername(UUID excludedId, Pageable pageable);
 
 }

@@ -42,13 +42,16 @@ public class UserController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public Page<UserResponseDto> getAllUsers(@RequestParam(required = false) String query, Pageable pageable) {
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public Page<UserResponseDto> getAllUsers(@RequestParam(required = false) String query, Pageable pageable,
+            Authentication authentication) {
+        User authUser = (User) authentication.getPrincipal();
         Page<User> users;
 
-        if (query == null) {
-            users = userService.getUsers(pageable);
+        if (query == null || query.isEmpty()) {
+            users = userService.getUsersExcluding(authUser.getId(), pageable);
         } else {
-            users = userService.searchUsers(query, pageable);
+            users = userService.searchUsersExcluding(query, authUser.getId(), pageable);
         }
         return users.map(user -> modelMapper.map(user, UserResponseDto.class));
     }

@@ -69,11 +69,15 @@ public class UserService implements UserDetailsService {
     private final ApplicationEventPublisher eventPublisher;
 
     public Page<User> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+        return userRepository.findAllByOrderByUsername(pageable);
     }
 
-    public Page<User> searchUsers(String query, Pageable pageable) {
-        return userRepository.search(query, pageable);
+    public Page<User> getUsersExcluding(UUID excludedId, Pageable pageable) {
+        return userRepository.findByIdNotOrderByUsername(excludedId, pageable);
+    }
+
+    public Page<User> searchUsersExcluding(String query, UUID excludedId, Pageable pageable) {
+        return userRepository.searchExcluding(query, excludedId, pageable);
     }
 
     public Optional<User> getUserById(UUID id) {
