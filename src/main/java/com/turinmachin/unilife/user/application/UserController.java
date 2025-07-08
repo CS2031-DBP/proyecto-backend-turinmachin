@@ -1,12 +1,12 @@
 package com.turinmachin.unilife.user.application;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -30,7 +30,6 @@ import com.turinmachin.unilife.user.dto.UpdateUserProfilePictureDto;
 import com.turinmachin.unilife.user.dto.UpdateUserRoleDto;
 import com.turinmachin.unilife.user.dto.UserResponseDto;
 import com.turinmachin.unilife.user.exception.UserNotFoundException;
-import com.turinmachin.unilife.user.infrastructure.UserSpecifications;
 
 import jakarta.validation.Valid;
 
@@ -40,20 +39,18 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final UserService userService;
-
     private final ModelMapper modelMapper;
 
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_MODERATOR')")
-    public List<UserResponseDto> getAllUsers(
-            @RequestParam(required = false) UUID universityId,
-            @RequestParam(required = false) UUID degreeId) {
-        Specification<User> spec = Specification
-                .where(UserSpecifications.hasUniversityId(universityId))
-                .and(UserSpecifications.hasDegreeId(degreeId));
+    public Page<UserResponseDto> getAllUsers(@RequestParam(required = false) String query, Pageable pageable) {
+        Page<User> users;
 
-        List<User> users = userService.getAllUsers(spec);
-        return users.stream().map(user -> modelMapper.map(user, UserResponseDto.class)).toList();
+        if (query == null) {
+            users = userService.getUsers(pageable);
+        } else {
+            users = userService.searchUsers(query, pageable);
+        }
+        return users.map(user -> modelMapper.map(user, UserResponseDto.class));
     }
 
     @GetMapping("/@self")

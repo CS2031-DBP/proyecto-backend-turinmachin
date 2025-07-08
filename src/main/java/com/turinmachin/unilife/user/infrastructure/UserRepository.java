@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -46,5 +48,18 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     @Modifying
     @NativeQuery("UPDATE users SET degree_id = NULL WHERE university_id = :universityId AND degree_id = :degreeId")
     int syncDegreeRemoval(UUID universityId, UUID degreeId);
+
+    @NativeQuery("""
+            SELECT * FROM users
+            WHERE
+                username % :query
+                OR display_name % :query
+                OR LOWER(username) LIKE '%' || LOWER(:query) || '%'
+                OR LOWER(display_name) LIKE '%' || LOWER(:query) || '%'
+            ORDER BY
+                similarity(username, :query) DESC,
+                similarity(display_name, :query) DESC
+            """)
+    Page<User> search(String query, Pageable pageable);
 
 }

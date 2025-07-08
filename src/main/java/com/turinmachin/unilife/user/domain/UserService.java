@@ -12,7 +12,8 @@ import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -67,8 +68,12 @@ public class UserService implements UserDetailsService {
     private final FileInfoService fileInfoService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public List<User> getAllUsers(Specification<User> spec) {
-        return userRepository.findAll(spec);
+    public Page<User> getUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
+    public Page<User> searchUsers(String query, Pageable pageable) {
+        return userRepository.search(query, pageable);
     }
 
     public Optional<User> getUserById(UUID id) {
