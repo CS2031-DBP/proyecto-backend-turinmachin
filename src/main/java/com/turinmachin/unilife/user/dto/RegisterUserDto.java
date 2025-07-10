@@ -13,11 +13,11 @@ public class RegisterUserDto {
     @Email
     private String email;
 
-    @Size(min = 3, max = 50)
+    @Size(min = 3, max = 16)
     @Pattern(regexp = "^[a-zA-Z0-9.\\-_]*$")
     private String username;
 
-    @Size(min = 3, max = 50)
+    @Size(min = 3, max = 36)
     private String displayName;
 
     @NotBlank

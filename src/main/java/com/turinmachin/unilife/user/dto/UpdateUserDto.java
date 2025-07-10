@@ -16,11 +16,11 @@ public class UpdateUserDto {
     private String email;
 
     @NotBlank
-    @Size(min = 3, max = 50)
+    @Size(min = 3, max = 16)
     @Pattern(regexp = "^[a-zA-Z0-9.\\-_]*$")
     private String username;
 
-    @Size(min = 3, max = 50)
+    @Size(min = 3, max = 36)
     private String displayName;
 
     private String bio;
