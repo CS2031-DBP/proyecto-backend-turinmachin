@@ -12,6 +12,7 @@ import java.util.List;
 public class CreatePostDto {
 
     @NotBlank
+    @Size(max = 300)
     private String content;
 
     private List<String> tags = new ArrayList<>();
