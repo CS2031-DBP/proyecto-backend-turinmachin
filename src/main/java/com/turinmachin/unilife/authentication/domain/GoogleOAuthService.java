@@ -13,11 +13,11 @@ import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
 @Service
-public class GoogleAuthenticationService {
+public class GoogleOAuthService {
 
     private final GoogleIdTokenVerifier verifier;
 
-    public GoogleAuthenticationService(@Value("${oauth.google.client-id}") String clientId) {
+    public GoogleOAuthService(@Value("${oauth.google.client-id}") String clientId) {
         verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
                 Utils.getDefaultJsonFactory())
                 .setAudience(List.of(clientId))

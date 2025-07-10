@@ -37,7 +37,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final GoogleAuthenticationService googleAuthenticationService;
+    private final GoogleOAuthService googleAuthenticationService;
     private final SecureRandom secureRandom;
     private final Base64.Encoder base64Encoder;
     private final UserService userService;
@@ -74,12 +74,11 @@ public class AuthenticationService {
 
         String email = payload.get("email").toString();
 
-        User user = userService.getUserByEmail(email)
-                .orElseGet(() -> {
-                    User createdUser = userService.createGoogleUser(email, payload);
-                    eventPublisher.publishEvent(new SendWelcomeEmailEvent(createdUser));
-                    return createdUser;
-                });
+        User user = userService.getUserByEmail(email).orElseGet(() -> {
+            User createdUser = userService.createGoogleUser(email, payload);
+            eventPublisher.publishEvent(new SendWelcomeEmailEvent(createdUser));
+            return createdUser;
+        });
 
         if (user.getAuthProvider() != AuthProvider.GOOGLE) {
             throw new AuthProviderNotGoogleException();

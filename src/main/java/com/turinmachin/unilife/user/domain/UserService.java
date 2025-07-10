@@ -135,32 +135,44 @@ public class UserService implements UserDetailsService {
             throw new EmailConflictException();
         }
 
-        String username = generateBaseUsername(payload.get("name").toString());
-
-        if (userRepository.existsByUsername(username)) {
-            int suffix = 1;
-            while (userRepository.existsByUsername(username + suffix)) {
-                suffix++;
-            }
-            username = username + suffix;
-        }
+        String nameSource = Optional.ofNullable(payload.get("given_name"))
+                .orElseGet(() -> payload.get("name"))
+                .toString();
+        String username = generateValidUsernameFrom(nameSource);
 
         User user = new User();
         user.setAuthProvider(AuthProvider.GOOGLE);
         user.setEmail(email);
         user.setUsername(username);
-        return userRepository.save(user);
+        return assignUserToBelongingUniversity(user);
     }
 
-    public String generateBaseUsername(String name) {
-        return StringUtils.removeAccents(name.toLowerCase()).replaceAll("[^a-z0-9]", "");
+    public String generateValidUsernameFrom(String name) {
+        String username = StringUtils.removeAccents(name.trim().replaceAll("\\s+", "_"))
+                .replaceAll("[^a-zA-Z0-9.\\-_]", "");
+        username = username.substring(0, Math.min(username.length(), 16));
+
+        if (userRepository.existsByUsername(username)) {
+            // PERF: could potentially cause an actual catastrophe (0.0001% chance)
+            int suffix = 1;
+            while (userRepository.existsByUsername(username + suffix)) {
+                suffix++;
+            }
+
+            username += suffix;
+        }
+
+        return username;
     }
 
     public User verifyUser(User user) {
         user.setVerificationId(null);
+        return assignUserToBelongingUniversity(user);
+    }
 
-        // Assigns the user to its university automatically
+    public User assignUserToBelongingUniversity(User user) {
         String emailDomain = EmailUtils.extractDomain(user.getEmail());
+
         Optional<University> university = universityService.getUniversityByEmailDomain(emailDomain);
         user.setUniversity(university.orElse(null));
 

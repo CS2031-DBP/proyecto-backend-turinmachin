@@ -24,7 +24,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.turinmachin.unilife.authentication.domain.AuthProvider;
 import com.turinmachin.unilife.authentication.domain.AuthenticationService;
-import com.turinmachin.unilife.authentication.domain.GoogleAuthenticationService;
+import com.turinmachin.unilife.authentication.domain.GoogleOAuthService;
 import com.turinmachin.unilife.authentication.dto.IssuePasswordResetDto;
 import com.turinmachin.unilife.authentication.dto.JwtAuthLoginDto;
 import com.turinmachin.unilife.authentication.dto.LoginResponseDto;
