@@ -21,7 +21,7 @@ public class RegisterUserDto {
     private String displayName;
 
     @NotBlank
-    @Size(min = 4)
+    @Size(min = 6)
     private String password;
 
 }

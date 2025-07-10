@@ -11,7 +11,7 @@ public class UpdateUserPasswordDto {
     private String currentPassword;
 
     @NotBlank
-    @Size(min = 4)
+    @Size(min = 6)
     private String newPassword;
 
 }
