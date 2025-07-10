@@ -3,6 +3,7 @@ package com.turinmachin.unilife.thumbnail.domain;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
@@ -27,10 +28,10 @@ public class ThumbnailService {
     @Value("${thumbnail.quality}")
     private double quality;
 
-    public ByteArrayOutputStream generateThumbnailOutputStream(MultipartFile file) throws IOException {
+    public ByteArrayOutputStream generateThumbnailOutputStream(InputStream inputStream) throws IOException {
         var thumbnailOutput = new ByteArrayOutputStream();
 
-        BufferedImage image = ImageIO.read(file.getInputStream());
+        BufferedImage image = ImageIO.read(inputStream);
         if (image == null)
             return null;
 
@@ -47,8 +48,8 @@ public class ThumbnailService {
 
     }
 
-    public String generateThumbnailDataUrl(MultipartFile file) throws IOException {
-        ByteArrayOutputStream outputStream = generateThumbnailOutputStream(file);
+    public String generateThumbnailDataUrl(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream outputStream = generateThumbnailOutputStream(inputStream);
         if (outputStream == null)
             return null;
 
@@ -60,4 +61,9 @@ public class ThumbnailService {
         String thumbnailData = Base64.getEncoder().encodeToString(thumbnailBytes);
         return "data:image/jpeg;base64," + thumbnailData;
     }
+
+    public String generateThumbnailDataUrl(MultipartFile file) throws IOException {
+        return generateThumbnailDataUrl(file.getInputStream());
+    }
+
 }

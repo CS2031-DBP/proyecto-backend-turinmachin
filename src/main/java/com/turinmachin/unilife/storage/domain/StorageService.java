@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.storage.domain;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,17 @@ public class StorageService {
         String key = time + "_" + file.getOriginalFilename();
 
         s3Client.putObject(bucketName, key, file.getInputStream(), metadata);
+        return key;
+    }
+
+    public String uploadFile(InputStream inputStream, String name, String contentType) throws IOException {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(contentType);
+
+        long time = System.currentTimeMillis();
+        String key = time + "_" + name;
+
+        s3Client.putObject(bucketName, key, inputStream, metadata);
         return key;
     }
 

@@ -1,6 +1,7 @@
 package com.turinmachin.unilife.fileinfo.domain;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +46,23 @@ public class FileInfoService {
 
         if (isContentTypeImage(file.getContentType())) {
             String blurDataUrl = thumbnailService.generateThumbnailDataUrl(file);
+            fileInfo.setBlurDataUrl(blurDataUrl);
+        }
+
+        return fileInfoRepository.save(fileInfo);
+    }
+
+    public FileInfo createFileUnchecked(InputStream inputStream, String name, String contentType) throws IOException {
+        String key = storageService.uploadFile(inputStream, name, contentType);
+        String url = storageService.getObjectUrl(key).toString();
+
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setKey(key);
+        fileInfo.setUrl(url);
+        fileInfo.setMediaType(contentType);
+
+        if (isContentTypeImage(contentType)) {
+            String blurDataUrl = thumbnailService.generateThumbnailDataUrl(inputStream);
             fileInfo.setBlurDataUrl(blurDataUrl);
         }
 

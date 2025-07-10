@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.api.client.auth.openidconnect.IdToken.Payload;
@@ -63,6 +65,7 @@ public class UserService implements UserDetailsService {
     @Value("${auth.password-reset-duration}")
     private Duration passwordResetDuration;
 
+    private final RestTemplate restTemplate = new RestTemplate();
     private final UserRepository userRepository;
     private final UserTokenRepository userTokenRepository;
     private final UniversityService universityService;
@@ -144,6 +147,27 @@ public class UserService implements UserDetailsService {
         user.setAuthProvider(AuthProvider.GOOGLE);
         user.setEmail(email);
         user.setUsername(username);
+
+        String pictureUrl = payload.get("picture").toString();
+
+        if (pictureUrl != null) {
+            try {
+                var pictureResponse = restTemplate.getForEntity(pictureUrl, Resource.class);
+
+                if (pictureResponse.getStatusCode().is2xxSuccessful() && pictureResponse.hasBody()) {
+                    String contentType = pictureResponse.getHeaders().getContentType().toString();
+
+                    FileInfo profilePicture = fileInfoService.createFileUnchecked(
+                            pictureResponse.getBody().getInputStream(),
+                            username + "_profile_picture",
+                            contentType);
+
+                    user.setProfilePicture(profilePicture);
+                }
+            } catch (IOException ex) {
+            }
+        }
+
         return assignUserToBelongingUniversity(user);
     }
 
