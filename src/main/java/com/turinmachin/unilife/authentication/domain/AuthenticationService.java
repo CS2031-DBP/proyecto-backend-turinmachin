@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.turinmachin.unilife.authentication.dto.GoogleLoginRequestDto;
 import com.turinmachin.unilife.authentication.dto.JwtAuthLoginDto;
 import com.turinmachin.unilife.authentication.dto.LoginResponseDto;
-import com.turinmachin.unilife.authentication.dto.RegisterResponseDto;
 import com.turinmachin.unilife.authentication.exception.AuthProviderNotCredentialsException;
 import com.turinmachin.unilife.authentication.exception.AuthProviderNotGoogleException;
 import com.turinmachin.unilife.authentication.exception.InvalidCredentialsException;

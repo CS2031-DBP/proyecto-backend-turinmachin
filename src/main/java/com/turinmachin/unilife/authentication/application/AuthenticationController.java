@@ -2,11 +2,8 @@ package com.turinmachin.unilife.authentication.application;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -16,15 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.api.client.auth.openidconnect.IdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.googleapis.util.Utils;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.turinmachin.unilife.authentication.domain.AuthProvider;
 import com.turinmachin.unilife.authentication.domain.AuthenticationService;
-import com.turinmachin.unilife.authentication.domain.GoogleOAuthService;
 import com.turinmachin.unilife.authentication.dto.IssuePasswordResetDto;
 import com.turinmachin.unilife.authentication.dto.JwtAuthLoginDto;
 import com.turinmachin.unilife.authentication.dto.LoginResponseDto;
