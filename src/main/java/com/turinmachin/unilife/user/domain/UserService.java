@@ -55,7 +55,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
@@ -117,6 +116,7 @@ public class UserService implements UserDetailsService {
         return userRepository.existsByRole(role);
     }
 
+    @Transactional
     public User createUser(RegisterUserDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new EmailConflictException();
@@ -189,11 +189,13 @@ public class UserService implements UserDetailsService {
         return username;
     }
 
+    @Transactional
     public User verifyUser(User user) {
         user.setVerificationId(null);
         return assignUserToBelongingUniversity(user);
     }
 
+    @Transactional
     public User assignUserToBelongingUniversity(User user) {
         String emailDomain = EmailUtils.extractDomain(user.getEmail());
 
@@ -203,6 +205,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public User updateUser(User user, UpdateUserDto dto) {
         if (!Objects.equals(user.getUsername(), dto.getUsername())
                 && userRepository.existsByUsername(dto.getUsername())) {
@@ -244,6 +247,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public User updateUserPassword(User user, UpdateUserPasswordDto dto) {
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             throw new UnauthorizedException("Current password is incorrect");
@@ -253,6 +257,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public User updateUserRole(User user, Role role) {
         if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId())) {
             throw new OnlyAdminException();
@@ -262,6 +267,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public void deleteUser(User user) {
         if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId())) {
             throw new OnlyAdminException();
