@@ -164,7 +164,7 @@ public class UserService implements UserDetailsService {
 
                     user.setProfilePicture(profilePicture);
                 }
-            } catch (IOException ex) {
+            } catch (Exception ex) {
             }
         }
 
