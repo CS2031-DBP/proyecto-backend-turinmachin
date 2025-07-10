@@ -21,11 +21,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.api.client.auth.openidconnect.IdToken.Payload;
+import com.turinmachin.unilife.authentication.domain.AuthProvider;
 import com.turinmachin.unilife.authentication.event.ResetPasswordIssuedEvent;
 import com.turinmachin.unilife.common.exception.ConflictException;
 import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.common.utils.HashUtils;
+import com.turinmachin.unilife.common.utils.StringUtils;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.email.EmailUtils;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
@@ -121,9 +124,36 @@ public class UserService implements UserDetailsService {
         }
 
         User user = modelMapper.map(dto, User.class);
+        user.setAuthProvider(AuthProvider.CREDENTIALS);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setVerificationId(UUID.randomUUID());
         return userRepository.save(user);
+    }
+
+    public User createGoogleUser(String email, Payload payload) {
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailConflictException();
+        }
+
+        String username = generateBaseUsername(payload.get("name").toString());
+
+        if (userRepository.existsByUsername(username)) {
+            int suffix = 1;
+            while (userRepository.existsByUsername(username + suffix)) {
+                suffix++;
+            }
+            username = username + suffix;
+        }
+
+        User user = new User();
+        user.setAuthProvider(AuthProvider.GOOGLE);
+        user.setEmail(email);
+        user.setUsername(username);
+        return userRepository.save(user);
+    }
+
+    public String generateBaseUsername(String name) {
+        return StringUtils.removeAccents(name.toLowerCase()).replaceAll("[^a-z0-9]", "");
     }
 
     public User verifyUser(User user) {

@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.turinmachin.unilife.authentication.domain.AuthProvider;
 import com.turinmachin.unilife.degree.domain.Degree;
 import com.turinmachin.unilife.fileinfo.domain.FileInfo;
 import com.turinmachin.unilife.post.domain.Post;
@@ -53,8 +54,12 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider;
 
     @Column(nullable = true, unique = true)
     private UUID verificationId;
