@@ -31,10 +31,10 @@ public class FileInfo {
     private String mediaType;
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
-        FileInfo fileInfo = (FileInfo) o;
+        final FileInfo fileInfo = (FileInfo) o;
         return Objects.equals(id, fileInfo.id);
     }
 

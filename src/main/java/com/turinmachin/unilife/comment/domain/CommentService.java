@@ -29,38 +29,38 @@ public class CommentService {
 
     private final PerspectiveService perspectiveService;
 
-    public List<Comment> getAllPostComments(UUID postId) {
+    public List<Comment> getAllPostComments(final UUID postId) {
         return commentRepository.findByPostIdAndParentNullOrderByCreatedAtDesc(postId);
     }
 
-    public int countPostComments(UUID postId) {
+    public int countPostComments(final UUID postId) {
         return commentRepository.countByPostId(postId);
     }
 
-    public Optional<Comment> getPostCommentById(UUID postId, UUID id) {
+    public Optional<Comment> getPostCommentById(final UUID postId, final UUID id) {
         return commentRepository.findByIdAndPostId(id, postId);
     }
 
-    public Comment createComment(CreateCommentDto commentDto, User author, Post post) {
+    public Comment createComment(final CreateCommentDto commentDto, final User author, final Post post) {
 
         if (perspectiveService.isToxic(commentDto.getContent())) {
             throw new ToxicContentException();
         }
 
-        Comment comment = modelMapper.map(commentDto, Comment.class);
+        final Comment comment = modelMapper.map(commentDto, Comment.class);
         comment.setAuthor(author);
         comment.setPost(post);
 
         return commentRepository.save(comment);
     }
 
-    public Comment createCommentReply(CreateCommentDto commentDto, User author, Comment parent) {
+    public Comment createCommentReply(final CreateCommentDto commentDto, final User author, final Comment parent) {
 
         if (perspectiveService.isToxic(commentDto.getContent())) {
             throw new ToxicContentException();
         }
 
-        Comment comment = modelMapper.map(commentDto, Comment.class);
+        final Comment comment = modelMapper.map(commentDto, Comment.class);
         comment.setAuthor(author);
         comment.setPost(parent.getPost());
         comment.setParent(parent);
@@ -68,12 +68,12 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public Comment updateComment(Comment comment, UpdateCommentDto update) {
+    public Comment updateComment(final Comment comment, final UpdateCommentDto update) {
         comment.setContent(update.getContent());
         return commentRepository.save(comment);
     }
 
-    public void deleteComment(Comment comment) {
+    public void deleteComment(final Comment comment) {
         commentRepository.delete(comment);
     }
 

@@ -44,33 +44,33 @@ public class AuthenticationService {
     private final ModelMapper modelMapper;
     private final ApplicationEventPublisher eventPublisher;
 
-    public LoginResponseDto jwtLogin(JwtAuthLoginDto dto) {
-        User user = userService.getUserByUsernameOrEmail(dto.getUsername())
+    public LoginResponseDto jwtLogin(final JwtAuthLoginDto dto) {
+        final User user = userService.getUserByUsernameOrEmail(dto.getUsername())
                 .orElseThrow(InvalidCredentialsException::new);
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword()))
             throw new InvalidCredentialsException();
 
-        String token = jwtService.generateToken(user);
+        final String token = jwtService.generateToken(user);
         return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));
     }
 
-    public LoginResponseDto jwtRegister(RegisterUserDto dto) {
-        User createdUser = userService.createUser(dto);
+    public LoginResponseDto jwtRegister(final RegisterUserDto dto) {
+        final User createdUser = userService.createUser(dto);
         userService.sendVerificationEmail(createdUser);
 
-        String token = jwtService.generateToken(createdUser);
+        final String token = jwtService.generateToken(createdUser);
         return new LoginResponseDto(token, modelMapper.map(createdUser, SelfUserResponseDto.class));
     }
 
-    public LoginResponseDto googleAuth(String idTokenValue) throws IOException, GeneralSecurityException {
-        GoogleIdToken idToken = googleAuthenticationService.verifyIdToken(idTokenValue);
-        Payload payload = idToken.getPayload();
+    public LoginResponseDto googleAuth(final String idTokenValue) throws IOException, GeneralSecurityException {
+        final GoogleIdToken idToken = googleAuthenticationService.verifyIdToken(idTokenValue);
+        final Payload payload = idToken.getPayload();
 
-        String email = payload.get("email").toString();
+        final String email = payload.get("email").toString();
 
-        User user = userService.getUserByEmail(email).orElseGet(() -> {
-            User createdUser = userService.createGoogleUser(email, payload);
+        final User user = userService.getUserByEmail(email).orElseGet(() -> {
+            final User createdUser = userService.createGoogleUser(email, payload);
             eventPublisher.publishEvent(new SendWelcomeEmailEvent(createdUser));
             return createdUser;
         });
@@ -79,16 +79,16 @@ public class AuthenticationService {
             throw new AuthProviderNotGoogleException();
         }
 
-        String token = jwtService.generateToken(user);
+        final String token = jwtService.generateToken(user);
         return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));
     }
 
-    public LoginResponseDto googleAuthUpgrade(String idTokenValue) throws IOException, GeneralSecurityException {
-        GoogleIdToken idToken = googleAuthenticationService.verifyIdToken(idTokenValue);
-        Payload payload = idToken.getPayload();
+    public LoginResponseDto googleAuthUpgrade(final String idTokenValue) throws IOException, GeneralSecurityException {
+        final GoogleIdToken idToken = googleAuthenticationService.verifyIdToken(idTokenValue);
+        final Payload payload = idToken.getPayload();
 
-        String email = payload.get("email").toString();
-        User user = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
+        final String email = payload.get("email").toString();
+        final User user = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
 
         if (user.getAuthProvider() != AuthProvider.CREDENTIALS) {
             throw new AuthProviderNotCredentialsException();
@@ -96,11 +96,11 @@ public class AuthenticationService {
 
         userService.upgradeUserAuthToGoogle(user, payload);
 
-        String token = jwtService.generateToken(user);
+        final String token = jwtService.generateToken(user);
         return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));
     }
 
-    public User tryVerifyUser(User user, UUID verificationId) {
+    public User tryVerifyUser(final User user, final UUID verificationId) {
         if (user.getVerified())
             throw new UserAlreadyVerifiedException();
 
@@ -111,29 +111,29 @@ public class AuthenticationService {
         return userService.verifyUser(user);
     }
 
-    public void triggerResetPassword(User user) {
+    public void triggerResetPassword(final User user) {
         if (user.getPassword() == null)
             throw new ConflictException("User does not have a password");
 
         if (userService.userHasValidToken(user))
             throw new ConflictException("User already has reset token");
 
-        String tokenValue = generateSecureToken(32);
+        final String tokenValue = generateSecureToken(32);
         userService.setResetPasswordToken(user, tokenValue);
     }
 
-    public boolean verifyPasswordToken(String token) {
+    public boolean verifyPasswordToken(final String token) {
         return userService.userTokenExistsByValue(token);
     }
 
-    public User resetUserPassword(String token, String newPassword) {
-        User user = userService.getUserByPasswordResetToken(token).orElseThrow(UserNotFoundException::new);
+    public User resetUserPassword(final String token, final String newPassword) {
+        final User user = userService.getUserByPasswordResetToken(token).orElseThrow(UserNotFoundException::new);
 
         return userService.resetPassword(user, newPassword);
     }
 
-    private String generateSecureToken(int lengthBytes) {
-        byte[] randomBytes = new byte[lengthBytes];
+    private String generateSecureToken(final int lengthBytes) {
+        final byte[] randomBytes = new byte[lengthBytes];
         secureRandom.nextBytes(randomBytes);
         return base64Encoder.encodeToString(randomBytes);
     }

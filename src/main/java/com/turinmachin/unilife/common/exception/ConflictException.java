@@ -9,7 +9,7 @@ public class ConflictException extends ResponseStatusException {
         this("Conflict");
     }
 
-    public ConflictException(String message) {
+    public ConflictException(final String message) {
         super(HttpStatus.CONFLICT, message);
     }
 

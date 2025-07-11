@@ -31,57 +31,58 @@ public class FileInfoService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public FileInfo createFile(MultipartFile file) throws IOException {
+    public FileInfo createFile(final MultipartFile file) throws IOException {
         if (!isContentTypeValid(file.getContentType())) {
             throw new UnsupportedMediaTypeException();
         }
 
-        String key = storageService.uploadFile(file);
-        String url = storageService.getObjectUrl(key).toString();
+        final String key = storageService.uploadFile(file);
+        final String url = storageService.getObjectUrl(key).toString();
 
-        FileInfo fileInfo = new FileInfo();
+        final FileInfo fileInfo = new FileInfo();
         fileInfo.setKey(key);
         fileInfo.setUrl(url);
         fileInfo.setMediaType(file.getContentType());
 
         if (isContentTypeImage(file.getContentType())) {
-            String blurDataUrl = thumbnailService.generateThumbnailDataUrl(file);
+            final String blurDataUrl = thumbnailService.generateThumbnailDataUrl(file);
             fileInfo.setBlurDataUrl(blurDataUrl);
         }
 
         return fileInfoRepository.save(fileInfo);
     }
 
-    public FileInfo createFileUnchecked(InputStream inputStream, String name, String contentType) throws IOException {
-        String key = storageService.uploadFile(inputStream, name, contentType);
-        String url = storageService.getObjectUrl(key).toString();
+    public FileInfo createFileUnchecked(final InputStream inputStream, final String name, final String contentType)
+            throws IOException {
+        final String key = storageService.uploadFile(inputStream, name, contentType);
+        final String url = storageService.getObjectUrl(key).toString();
 
-        FileInfo fileInfo = new FileInfo();
+        final FileInfo fileInfo = new FileInfo();
         fileInfo.setKey(key);
         fileInfo.setUrl(url);
         fileInfo.setMediaType(contentType);
 
         if (isContentTypeImage(contentType)) {
-            String blurDataUrl = thumbnailService.generateThumbnailDataUrl(inputStream);
+            final String blurDataUrl = thumbnailService.generateThumbnailDataUrl(inputStream);
             fileInfo.setBlurDataUrl(blurDataUrl);
         }
 
         return fileInfoRepository.save(fileInfo);
     }
 
-    public List<FileInfo> createFileBatch(List<MultipartFile> files) throws IOException {
+    public List<FileInfo> createFileBatch(final List<MultipartFile> files) throws IOException {
         if (!files.stream().map(MultipartFile::getContentType).allMatch(this::isContentTypeValid)) {
             throw new UnsupportedMediaTypeException();
         }
 
-        List<FileInfo> fileInfos = new ArrayList<>(files.size());
+        final List<FileInfo> fileInfos = new ArrayList<>(files.size());
 
         try {
-            for (MultipartFile file : files) {
-                FileInfo uploadedFile = createFile(file);
+            for (final MultipartFile file : files) {
+                final FileInfo uploadedFile = createFile(file);
                 fileInfos.add(uploadedFile);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // Remove partially uploaded files
             triggerFileBatchDeletion(fileInfos);
             throw e;
@@ -90,24 +91,24 @@ public class FileInfoService {
         return fileInfos;
     }
 
-    public void deleteFile(FileInfo file) {
+    public void deleteFile(final FileInfo file) {
         eventPublisher.publishEvent(new DeleteFilesEvent(List.of(file.getKey())));
         fileInfoRepository.delete(file);
     }
 
-    public void triggerFileBatchDeletion(List<FileInfo> files) {
+    public void triggerFileBatchDeletion(final List<FileInfo> files) {
         eventPublisher.publishEvent(new DeleteFilesEvent(files.stream().map(FileInfo::getKey).toList()));
     }
 
-    public boolean isContentTypeImage(String contentType) {
+    public boolean isContentTypeImage(final String contentType) {
         return contentType.startsWith("image/");
     }
 
-    public boolean isContentTypeVideo(String contentType) {
+    public boolean isContentTypeVideo(final String contentType) {
         return contentType.startsWith("video/");
     }
 
-    public boolean isContentTypeValid(String contentType) {
+    public boolean isContentTypeValid(final String contentType) {
         return contentType != null && (isContentTypeImage(contentType) || isContentTypeVideo(contentType));
     }
 

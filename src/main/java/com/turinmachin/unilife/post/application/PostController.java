@@ -54,16 +54,16 @@ public class PostController {
 
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) UUID universityId,
-            @RequestParam(required = false) UUID degreeId,
-            @RequestParam(required = false) List<String> tags,
-            @RequestParam(required = false) UUID authorId,
-            Pageable pageable) {
+            @RequestParam(required = false) final String query,
+            @RequestParam(required = false) final UUID universityId,
+            @RequestParam(required = false) final UUID degreeId,
+            @RequestParam(required = false) final List<String> tags,
+            @RequestParam(required = false) final UUID authorId,
+            final Pageable pageable) {
         Page<Post> posts;
 
         if (query == null) {
-            Specification<Post> spec = Specification
+            final Specification<Post> spec = Specification
                     .where(PostSpecifications.hasUniversityId(universityId))
                     .and(PostSpecifications.hasDegreeId(degreeId))
                     .and(PostSpecifications.hasAuthorId(authorId))
@@ -75,17 +75,17 @@ public class PostController {
         }
 
         return posts.map(post -> {
-            PostResponseDto response = modelMapper.map(post, PostResponseDto.class);
+            final PostResponseDto response = modelMapper.map(post, PostResponseDto.class);
             response.setTotalComments(commentService.countPostComments(post.getId()));
             return response;
         });
     }
 
     @GetMapping("/{id}")
-    public PostResponseDto getPost(@PathVariable UUID id) {
-        Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
+    public PostResponseDto getPost(@PathVariable final UUID id) {
+        final Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
 
-        PostResponseDto response = modelMapper.map(post, PostResponseDto.class);
+        final PostResponseDto response = modelMapper.map(post, PostResponseDto.class);
         response.setTotalComments(commentService.countPostComments(post.getId()));
         return response;
     }
@@ -93,59 +93,60 @@ public class PostController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public PostResponseDto createPost(@Valid @ModelAttribute CreatePostDto dto, Authentication authentication)
+    public PostResponseDto createPost(@Valid @ModelAttribute final CreatePostDto dto,
+            final Authentication authentication)
             throws IOException {
-        User user = (User) authentication.getPrincipal();
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Post post = postService.createPost(dto, user);
+        final Post post = postService.createPost(dto, user);
         return modelMapper.map(post, PostResponseDto.class);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public PostResponseDto updatePost(@PathVariable UUID id, @Valid @RequestBody UpdatePostDto dto,
-            Authentication authentication) {
-        Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
-        User user = (User) authentication.getPrincipal();
+    public PostResponseDto updatePost(@PathVariable final UUID id, @Valid @RequestBody final UpdatePostDto dto,
+            final Authentication authentication) {
+        final Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
         if (!user.equals(post.getAuthor())) {
             throw new ForbiddenException();
         }
 
-        Post updatedPost = postService.updatePost(post, dto);
+        final Post updatedPost = postService.updatePost(post, dto);
         return modelMapper.map(updatedPost, PostResponseDto.class);
     }
 
     @PutMapping("/{id}/upvotes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void addPostUpvote(@PathVariable UUID id, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public void addPostUpvote(@PathVariable final UUID id, final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
+        final Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
         postService.setPostVote(post, user, VoteType.UPVOTE);
     }
 
     @PutMapping("/{id}/downvotes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void addPostDownvote(@PathVariable UUID id, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public void addPostDownvote(@PathVariable final UUID id, final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
+        final Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
         postService.setPostVote(post, user, VoteType.DOWNVOTE);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void deletePost(@PathVariable UUID id, Authentication authentication) {
-        Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
-        User user = (User) authentication.getPrincipal();
+    public void deletePost(@PathVariable final UUID id, final Authentication authentication) {
+        final Post post = postService.getActivePostById(id).orElseThrow(PostNotFoundException::new);
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
         if (user.getRole() == Role.USER && !user.equals(post.getAuthor())) {
@@ -158,11 +159,11 @@ public class PostController {
     @DeleteMapping("/{id}/votes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void deletePostVote(@PathVariable UUID id, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public void deletePostVote(@PathVariable final UUID id, final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        PostVote vote = postService
+        final PostVote vote = postService
                 .getPostVote(id, user.getId())
                 .orElseThrow(() -> new NotFoundException("Post or vote not found"));
 

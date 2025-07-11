@@ -30,7 +30,7 @@ public class SecurityConfiguration {
     private final JwtAuthenticatorFilter jwtAuthenticatorFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
@@ -53,8 +53,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public static MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
-        var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+    public static MethodSecurityExpressionHandler methodSecurityExpressionHandler(final RoleHierarchy roleHierarchy) {
+        final var expressionHandler = new DefaultMethodSecurityExpressionHandler();
         expressionHandler.setRoleHierarchy(roleHierarchy);
         expressionHandler.setDefaultRolePrefix("ROLE_");
         return expressionHandler;
@@ -64,7 +64,7 @@ public class SecurityConfiguration {
     public WebMvcConfigurer corsMappingConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(final CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD", "PATCH")

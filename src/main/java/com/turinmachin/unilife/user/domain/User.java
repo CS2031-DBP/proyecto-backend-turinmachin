@@ -114,8 +114,8 @@ public class User implements UserDetails {
         LocalDate expectedDate = LocalDate.now(ZoneOffset.UTC);
         int streak = 0;
 
-        for (Post post : posts) {
-            LocalDate postDate = post.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate();
+        for (final Post post : posts) {
+            final LocalDate postDate = post.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate();
 
             if (postDate.isAfter(expectedDate)) {
                 continue;
@@ -162,10 +162,10 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
-        User user = (User) o;
+        final User user = (User) o;
         return Objects.equals(id, user.id);
     }
 

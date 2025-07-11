@@ -27,12 +27,13 @@ public class EmailService {
     @Value("${deployment.frontend.url}")
     private String frontendUrl;
 
-    public void sendTemplatedEmail(String to, String subject, String templateName, Context context)
+    public void sendTemplatedEmail(final String to, final String subject, final String templateName,
+            final Context context)
             throws MessagingException {
-        String emailContent = templateEngine.process(templateName, context);
+        final String emailContent = templateEngine.process(templateName, context);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+        final MimeMessage message = mailSender.createMimeMessage();
+        final MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
 
         helper.setTo(to);
@@ -42,27 +43,27 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void sendVerificationEmail(User user) throws MessagingException {
-        String verificationUrl = frontendUrl + "/verify?vid=" + user.getVerificationId();
+    public void sendVerificationEmail(final User user) throws MessagingException {
+        final String verificationUrl = frontendUrl + "/verify?vid=" + user.getVerificationId();
 
-        Context context = new Context();
+        final Context context = new Context();
         context.setVariable("username", user.getUsername());
         context.setVariable("verification_url", verificationUrl);
 
         sendTemplatedEmail(user.getEmail(), "Tu verificación de UniLife", "verification", context);
     }
 
-    public void sendWelcomeEmail(User user) throws MessagingException {
-        Context context = new Context();
+    public void sendWelcomeEmail(final User user) throws MessagingException {
+        final Context context = new Context();
         context.setVariable("user_name", Optional.ofNullable(user.getDisplayName()).orElse(user.getUsername()));
 
         sendTemplatedEmail(user.getEmail(), "¡Bienvenido a UniLife!", "welcome", context);
     }
 
-    public void sendResetPasswordEmail(User user, String token) throws MessagingException {
-        String url = frontendUrl + "/reset-password?token=" + token;
+    public void sendResetPasswordEmail(final User user, final String token) throws MessagingException {
+        final String url = frontendUrl + "/reset-password?token=" + token;
 
-        Context context = new Context();
+        final Context context = new Context();
         context.setVariable("user_name", Optional.ofNullable(user.getDisplayName()).orElse(user.getUsername()));
         context.setVariable("link", url);
 

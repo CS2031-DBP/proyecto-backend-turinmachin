@@ -36,9 +36,10 @@ public class PostVote {
     private VoteType value;
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        PostVote postVote = (PostVote) o;
+    public boolean equals(final Object o) {
+        if (o == null || getClass() != o.getClass())
+            return false;
+        final PostVote postVote = (PostVote) o;
         return Objects.equals(id, postVote.id);
     }
 

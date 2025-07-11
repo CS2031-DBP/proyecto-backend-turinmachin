@@ -75,74 +75,74 @@ public class UserService implements UserDetailsService {
     private final FileInfoService fileInfoService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public Page<User> getUsers(Pageable pageable) {
+    public Page<User> getUsers(final Pageable pageable) {
         return userRepository.findAllByOrderByUsername(pageable);
     }
 
-    public Page<User> getUsersExcluding(UUID excludedId, Pageable pageable) {
+    public Page<User> getUsersExcluding(final UUID excludedId, final Pageable pageable) {
         return userRepository.findByIdNotOrderByUsername(excludedId, pageable);
     }
 
-    public Page<User> searchUsersExcluding(String query, UUID excludedId, Pageable pageable) {
+    public Page<User> searchUsersExcluding(final String query, final UUID excludedId, final Pageable pageable) {
         return userRepository.searchExcluding(query, excludedId, pageable);
     }
 
-    public Optional<User> getUserById(UUID id) {
+    public Optional<User> getUserById(final UUID id) {
         return userRepository.findById(id);
     }
 
-    public Optional<User> getUserByEmail(String email) {
+    public Optional<User> getUserByEmail(final String email) {
         return userRepository.findByEmail(email);
     }
 
-    public Optional<User> getUserByUsername(String username) {
+    public Optional<User> getUserByUsername(final String username) {
         return userRepository.findByUsername(username);
     }
 
-    public Optional<User> getUserByUsernameOrEmail(String usernameOrEmail) {
+    public Optional<User> getUserByUsernameOrEmail(final String usernameOrEmail) {
         return userRepository.findByUsernameOrEmail(usernameOrEmail);
     }
 
-    public Optional<User> getUserByPasswordResetToken(String token) {
-        String hashedToken = HashUtils.hashTokenSHA256(token);
-        Instant now = Instant.now();
+    public Optional<User> getUserByPasswordResetToken(final String token) {
+        final String hashedToken = HashUtils.hashTokenSHA256(token);
+        final Instant now = Instant.now();
         return userRepository.findByPasswordResetTokenValueAndPasswordResetTokenCreatedAtGreaterThan(hashedToken,
                 now.minus(passwordResetDuration));
     }
 
-    public Optional<User> getUserByVerificationId(UUID verificationId) {
+    public Optional<User> getUserByVerificationId(final UUID verificationId) {
         return userRepository.findByVerificationId(verificationId);
     }
 
-    public boolean userExistsByRole(Role role) {
+    public boolean userExistsByRole(final Role role) {
         return userRepository.existsByRole(role);
     }
 
     @Transactional
-    public User createUser(RegisterUserDto dto) {
+    public User createUser(final RegisterUserDto dto) {
         if (userRepository.existsByEmail(dto.getEmail()))
             throw new EmailConflictException();
 
         if (userRepository.existsByUsername(dto.getUsername()))
             throw new UsernameConflictException();
 
-        User user = modelMapper.map(dto, User.class);
+        final User user = modelMapper.map(dto, User.class);
         user.setAuthProvider(AuthProvider.CREDENTIALS);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setVerificationId(UUID.randomUUID());
         return userRepository.save(user);
     }
 
-    public User createGoogleUser(String email, Payload payload) {
+    public User createGoogleUser(final String email, final Payload payload) {
         if (userRepository.existsByEmail(email))
             throw new EmailConflictException();
 
-        String nameSource = Optional.ofNullable(payload.get("given_name"))
+        final String nameSource = Optional.ofNullable(payload.get("given_name"))
                 .orElseGet(() -> payload.get("name"))
                 .toString();
-        String username = generateValidUsernameFrom(nameSource);
+        final String username = generateValidUsernameFrom(nameSource);
 
-        User user = new User();
+        final User user = new User();
         user.setAuthProvider(AuthProvider.GOOGLE);
         user.setEmail(email);
         user.setUsername(username);
@@ -151,26 +151,26 @@ public class UserService implements UserDetailsService {
         return assignUserToBelongingUniversity(user);
     }
 
-    public User tryAssignGooglePictureToUser(User user, Payload payload) {
-        String pictureUrl = payload.get("picture").toString();
+    public User tryAssignGooglePictureToUser(User user, final Payload payload) {
+        final String pictureUrl = payload.get("picture").toString();
 
         if (pictureUrl != null) {
             try {
                 user = assignPictureToUserFromUrl(user, pictureUrl);
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
             }
         }
 
         return userRepository.save(user);
     }
 
-    public User assignPictureToUserFromUrl(User user, String pictureUrl) throws IOException {
-        var pictureResponse = restTemplate.getForEntity(pictureUrl, Resource.class);
+    public User assignPictureToUserFromUrl(final User user, final String pictureUrl) throws IOException {
+        final var pictureResponse = restTemplate.getForEntity(pictureUrl, Resource.class);
 
         if (pictureResponse.getStatusCode().is2xxSuccessful() && pictureResponse.hasBody()) {
-            String contentType = pictureResponse.getHeaders().getContentType().toString();
+            final String contentType = pictureResponse.getHeaders().getContentType().toString();
 
-            FileInfo profilePicture = fileInfoService.createFileUnchecked(
+            final FileInfo profilePicture = fileInfoService.createFileUnchecked(
                     pictureResponse.getBody().getInputStream(),
                     user.getUsername() + "_profile_picture",
                     contentType);
@@ -181,7 +181,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public String generateValidUsernameFrom(String name) {
+    public String generateValidUsernameFrom(final String name) {
         String username = StringUtils.removeAccents(name.trim().replaceAll("\\s+", "_"))
                 .replaceAll("[^a-zA-Z0-9.\\-_]", "");
         username = username.substring(0, Math.min(username.length(), 16));
@@ -200,23 +200,23 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public User verifyUser(User user) {
+    public User verifyUser(final User user) {
         user.setVerificationId(null);
         return assignUserToBelongingUniversity(user);
     }
 
     @Transactional
-    public User assignUserToBelongingUniversity(User user) {
-        String emailDomain = EmailUtils.extractDomain(user.getEmail());
+    public User assignUserToBelongingUniversity(final User user) {
+        final String emailDomain = EmailUtils.extractDomain(user.getEmail());
 
-        Optional<University> university = universityService.getUniversityByEmailDomain(emailDomain);
+        final Optional<University> university = universityService.getUniversityByEmailDomain(emailDomain);
         user.setUniversity(university.orElse(null));
 
         return userRepository.save(user);
     }
 
     @Transactional
-    public User updateUser(User user, UpdateUserDto dto) {
+    public User updateUser(final User user, final UpdateUserDto dto) {
         if (!Objects.equals(user.getUsername(), dto.getUsername())
                 && userRepository.existsByUsername(dto.getUsername()))
             throw new UsernameConflictException();
@@ -237,7 +237,7 @@ public class UserService implements UserDetailsService {
             eventPublisher.publishEvent(new SendVerificationEmailEvent(user));
         } else {
             // Update degree
-            UUID userDegreeId = Optional.ofNullable(user.getDegree()).map(Degree::getId).orElse(null);
+            final UUID userDegreeId = Optional.ofNullable(user.getDegree()).map(Degree::getId).orElse(null);
 
             if (!Objects.equals(dto.getDegreeId(), userDegreeId)) {
                 if (dto.getDegreeId() == null) {
@@ -245,7 +245,7 @@ public class UserService implements UserDetailsService {
                 } else if (user.getUniversity() == null) {
                     throw new UserWithoutUniversityException();
                 } else {
-                    Degree newDegree = user.getUniversity().getDegrees()
+                    final Degree newDegree = user.getUniversity().getDegrees()
                             .stream()
                             .filter(d -> d.getId().equals(dto.getDegreeId()))
                             .findFirst()
@@ -260,7 +260,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public User updateUserPassword(User user, UpdateUserPasswordDto dto) {
+    public User updateUserPassword(final User user, final UpdateUserPasswordDto dto) {
         if (user.getPassword() != null && !passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword()))
             throw new UnauthorizedException("Current password is incorrect");
 
@@ -269,7 +269,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public User updateUserRole(User user, Role role) {
+    public User updateUserRole(final User user, final Role role) {
         if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId()))
             throw new OnlyAdminException();
 
@@ -278,29 +278,29 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void deleteUser(User user) {
+    public void deleteUser(final User user) {
         if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId()))
             throw new OnlyAdminException();
 
         userRepository.delete(user);
     }
 
-    public void checkUserVerified(User user) {
+    public void checkUserVerified(final User user) {
         if (!user.getVerified())
             throw new UserNotVerifiedException();
 
     }
 
-    public int detachUniversity(University university) {
+    public int detachUniversity(final University university) {
         return userRepository.detachUniversity(university.getId());
     }
 
-    public User updateUserProfilePicture(User user, MultipartFile file) throws IOException {
+    public User updateUserProfilePicture(User user, final MultipartFile file) throws IOException {
         if (!fileInfoService.isContentTypeImage(file.getContentType()))
             throw new UnsupportedMediaTypeException();
 
-        FileInfo oldPicture = user.getProfilePicture();
-        FileInfo newPicture = fileInfoService.createFile(file);
+        final FileInfo oldPicture = user.getProfilePicture();
+        final FileInfo newPicture = fileInfoService.createFile(file);
 
         user.setProfilePicture(newPicture);
         user = userRepository.save(user);
@@ -312,7 +312,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User deleteUserProfilePicture(User user) {
-        FileInfo oldPicture = user.getProfilePicture();
+        final FileInfo oldPicture = user.getProfilePicture();
 
         if (oldPicture == null)
             throw new ConflictException("User does not have a profile picture");
@@ -324,30 +324,30 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         return getUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
     }
 
     @Transactional
-    public void syncUniversityAssociations(University university) {
-        List<User> toDeassociate = userRepository.findAllByUniversity(university).stream()
+    public void syncUniversityAssociations(final University university) {
+        final List<User> toDeassociate = userRepository.findAllByUniversity(university).stream()
                 .filter(user -> !university.ownsEmail(user.getEmail()))
                 .toList();
 
-        for (User user : toDeassociate) {
+        for (final User user : toDeassociate) {
             user.setUniversity(null);
             user.setDegree(null);
         }
 
         userRepository.saveAll(toDeassociate);
 
-        List<User> toAssociate = userRepository.findAllByVerificationIdIsNullAndUniversityIsNull()
+        final List<User> toAssociate = userRepository.findAllByVerificationIdIsNullAndUniversityIsNull()
                 .stream()
                 .filter(user -> university.ownsEmail(user.getEmail()))
                 .toList();
 
-        for (User user : toAssociate) {
+        for (final User user : toAssociate) {
             user.setUniversity(university);
         }
 
@@ -355,11 +355,11 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void removeInvalidDegrees(University university) {
-        List<User> associatedUsers = userRepository.findAllByUniversity(university);
-        List<User> toSave = new ArrayList<>();
+    public void removeInvalidDegrees(final University university) {
+        final List<User> associatedUsers = userRepository.findAllByUniversity(university);
+        final List<User> toSave = new ArrayList<>();
 
-        for (User user : associatedUsers) {
+        for (final User user : associatedUsers) {
             if (user.getDegree() != null && !university.getDegrees().contains(user.getDegree())) {
                 user.setDegree(null);
             }
@@ -368,15 +368,15 @@ public class UserService implements UserDetailsService {
         userRepository.saveAll(toSave);
     }
 
-    public void syncDegreeRemoval(University university, Degree degree) {
+    public void syncDegreeRemoval(final University university, final Degree degree) {
         userRepository.syncDegreeRemoval(university.getId(), degree.getId());
     }
 
-    public void sendVerificationEmail(User user) {
-        Instant now = Instant.now();
+    public void sendVerificationEmail(final User user) {
+        final Instant now = Instant.now();
 
         if (user.getLastVerificationEmailSent() != null) {
-            Instant lastSent = user.getLastVerificationEmailSent();
+            final Instant lastSent = user.getLastVerificationEmailSent();
 
             if (now.isBefore(lastSent.plus(verificationEmailCooldown)))
                 throw new VerificationEmailCooldownException();
@@ -388,16 +388,16 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public User clearResetPasswordToken(User user) {
+    public User clearResetPasswordToken(final User user) {
         user.setPasswordResetToken(null);
         return userRepository.save(user);
     }
 
-    public User setResetPasswordToken(User user, String tokenValue) {
+    public User setResetPasswordToken(User user, final String tokenValue) {
         user.setPasswordResetToken(null);
         userTokenRepository.deleteByUserId(user.getId());
 
-        UserToken token = new UserToken();
+        final UserToken token = new UserToken();
         token.setValue(HashUtils.hashTokenSHA256(tokenValue));
         token.setUser(user);
         user.setPasswordResetToken(token);
@@ -407,29 +407,29 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public User resetPassword(User user, String newPassword) {
+    public User resetPassword(final User user, final String newPassword) {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setPasswordResetToken(null);
         return userRepository.save(user);
     }
 
-    public boolean userTokenExistsByValue(String value) {
-        String hashedToken = HashUtils.hashTokenSHA256(value);
-        Instant now = Instant.now();
+    public boolean userTokenExistsByValue(final String value) {
+        final String hashedToken = HashUtils.hashTokenSHA256(value);
+        final Instant now = Instant.now();
         return userTokenRepository.existsByValueAndCreatedAtGreaterThan(hashedToken, now.minus(passwordResetDuration));
     }
 
-    public boolean userHasValidToken(User user) {
-        UserToken existingToken = user.getPasswordResetToken();
+    public boolean userHasValidToken(final User user) {
+        final UserToken existingToken = user.getPasswordResetToken();
 
         if (existingToken == null)
             return false;
 
-        Instant now = Instant.now();
+        final Instant now = Instant.now();
         return now.isBefore(existingToken.getCreatedAt().plus(passwordResetDuration));
     }
 
-    public User upgradeUserAuthToGoogle(User user, Payload payload) {
+    public User upgradeUserAuthToGoogle(final User user, final Payload payload) {
         user.setAuthProvider(AuthProvider.GOOGLE);
 
         if (!user.getVerified()) {

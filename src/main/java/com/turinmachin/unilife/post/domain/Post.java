@@ -84,10 +84,10 @@ public class Post {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
-        Post that = (Post) o;
+        final Post that = (Post) o;
         return Objects.equals(id, that.id);
     }
 

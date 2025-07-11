@@ -33,32 +33,33 @@ public class PerspectiveService {
     }
 
     @Cacheable("ToxicCache")
-    public boolean isToxic(String content) {
-        Map<String, Object> requestBody = Map.of(
+    public boolean isToxic(final String content) {
+        final Map<String, Object> requestBody = Map.of(
                 "comment", Map.of("text", content),
                 "languages", List.of("es"),
                 "requestedAttributes", Map.of("TOXICITY", Map.of()));
 
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        final HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(getApiUrl(), HttpMethod.POST, request,
+            final ResponseEntity<Map<String, Object>> response = restTemplate.exchange(getApiUrl(), HttpMethod.POST,
+                    request,
                     new ParameterizedTypeReference<>() {
                     });
-            Map<String, Object> responseBody = response.getBody();
+            final Map<String, Object> responseBody = response.getBody();
             if (responseBody == null)
                 return false;
 
-            Map<String, Object> attributes = (Map<String, Object>) responseBody.get("attributeScores");
-            Map<String, Object> toxicity = (Map<String, Object>) attributes.get("TOXICITY");
-            Map<String, Object> summaryScore = (Map<String, Object>) toxicity.get("summaryScore");
-            double score = ((Number) summaryScore.get("value")).doubleValue();
+            final Map<String, Object> attributes = (Map<String, Object>) responseBody.get("attributeScores");
+            final Map<String, Object> toxicity = (Map<String, Object>) attributes.get("TOXICITY");
+            final Map<String, Object> summaryScore = (Map<String, Object>) toxicity.get("summaryScore");
+            final double score = ((Number) summaryScore.get("value")).doubleValue();
 
             return score >= toxicityThreshold;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("Error al usar Perspective API: {}", e);
             return false;
         }

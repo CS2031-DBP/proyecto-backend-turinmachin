@@ -29,8 +29,8 @@ public class AIConversationController {
 
     @GetMapping("/conversation")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public List<AIMessageResponseDto> getConversation(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public List<AIMessageResponseDto> getConversation(final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
         return conversationService.getConversation(user);
@@ -40,21 +40,20 @@ public class AIConversationController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @ResponseStatus(HttpStatus.CREATED)
     public AIMessageResponseDto sendMessage(
-            @Valid @RequestBody UserPromptRequestDto request,
-            Authentication authentication
-    ) {
-        User user = (User) authentication.getPrincipal();
+            @Valid @RequestBody final UserPromptRequestDto request,
+            final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        AIMessage aiMessage = conversationService.sendMessage(user, request.getContent());
+        final AIMessage aiMessage = conversationService.sendMessage(user, request.getContent());
         return modelMapper.map(aiMessage, AIMessageResponseDto.class);
     }
 
     @DeleteMapping("/conversation")
     @PreAuthorize("hasRole('ROLE_USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void resetConversation(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public void resetConversation(final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
         conversationService.resetConversation(user);

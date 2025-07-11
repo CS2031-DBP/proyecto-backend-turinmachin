@@ -40,9 +40,9 @@ public class DegreeController {
 
     @GetMapping
     public Page<DegreeResponseDto> getPaginatedDegrees(
-            @RequestParam(required = false) UUID universityId,
-            @RequestParam(required = false) String query,
-            Pageable pageable) {
+            @RequestParam(required = false) final UUID universityId,
+            @RequestParam(required = false) final String query,
+            final Pageable pageable) {
         Page<Degree> degrees;
 
         if (query != null) {
@@ -57,7 +57,7 @@ public class DegreeController {
     }
 
     @GetMapping("/all")
-    public List<DegreeResponseDto> getAllDegrees(@RequestParam(required = false) UUID universityId) {
+    public List<DegreeResponseDto> getAllDegrees(@RequestParam(required = false) final UUID universityId) {
         List<Degree> degrees;
         if (universityId != null) {
             degrees = degreeService.getDegreesByUniversityId(universityId);
@@ -69,31 +69,31 @@ public class DegreeController {
     }
 
     @GetMapping("/{id}")
-    public DegreeWithStatsDto getDegree(@PathVariable UUID id) {
+    public DegreeWithStatsDto getDegree(@PathVariable final UUID id) {
         return degreeService.getDegreeWithStatsById(id).orElseThrow(DegreeNotFoundException::new);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public DegreeResponseDto createDegree(@Valid @RequestBody CreateDegreeDto dto) {
-        Degree degree = degreeService.createDegree(dto);
+    public DegreeResponseDto createDegree(@Valid @RequestBody final CreateDegreeDto dto) {
+        final Degree degree = degreeService.createDegree(dto);
         return modelMapper.map(degree, DegreeResponseDto.class);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public DegreeResponseDto updateDegree(@PathVariable UUID id, @Valid @RequestBody UpdateDegreeDto dto) {
-        Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
-        Degree updatedDegree = degreeService.updateDegree(degree, dto);
+    public DegreeResponseDto updateDegree(@PathVariable final UUID id, @Valid @RequestBody final UpdateDegreeDto dto) {
+        final Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
+        final Degree updatedDegree = degreeService.updateDegree(degree, dto);
         return modelMapper.map(updatedDegree, DegreeResponseDto.class);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteDegree(@PathVariable UUID id) {
-        Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
+    public void deleteDegree(@PathVariable final UUID id) {
+        final Degree degree = degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new);
         degreeService.deleteDegree(degree);
     }
 

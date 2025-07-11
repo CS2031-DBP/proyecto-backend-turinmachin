@@ -25,13 +25,14 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
+            final FilterChain filterChain)
             throws ServletException, IOException {
-        String jwtToken = resolveToken(request);
+        final String jwtToken = resolveToken(request);
 
         if (StringUtils.hasText(jwtToken)) {
-            Optional<Claims> maybeClaims = jwtService.extractAllClaims(jwtToken);
-            Optional<Authentication> maybeAuth = maybeClaims
+            final Optional<Claims> maybeClaims = jwtService.extractAllClaims(jwtToken);
+            final Optional<Authentication> maybeAuth = maybeClaims
                     .flatMap(claims -> jwtService.getAuthentication(jwtToken, claims));
 
             maybeAuth.ifPresent(SecurityContextHolder.getContext()::setAuthentication);
@@ -43,9 +44,9 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(null);
     }
 
-    private String resolveToken(HttpServletRequest request) {
+    private String resolveToken(final HttpServletRequest request) {
 
-        String bearerToken = request.getHeader("Authorization");
+        final String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7, bearerToken.length());
         }

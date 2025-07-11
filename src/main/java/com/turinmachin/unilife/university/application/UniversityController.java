@@ -46,8 +46,8 @@ public class UniversityController {
 
     @GetMapping
     public Page<UniversityResponseDto> getUniversities(
-            @RequestParam(required = false) String query,
-            Pageable pageable) {
+            @RequestParam(required = false) final String query,
+            final Pageable pageable) {
         Page<University> universities;
         if (query == null) {
             universities = universityService.getAllUniversities(pageable);
@@ -58,19 +58,20 @@ public class UniversityController {
     }
 
     @GetMapping("/{id}")
-    public UniversityResponseDto getUniversity(@PathVariable UUID id) {
-        University university = universityService.getUniversityById(id).orElseThrow(UniversityNotFoundException::new);
+    public UniversityResponseDto getUniversity(@PathVariable final UUID id) {
+        final University university = universityService.getUniversityById(id)
+                .orElseThrow(UniversityNotFoundException::new);
         return modelMapper.map(university, UniversityResponseDto.class);
     }
 
     @GetMapping("/with-stats/{id}")
-    public UniversityWithStatsDto getUniversityWithStats(@PathVariable UUID id) {
+    public UniversityWithStatsDto getUniversityWithStats(@PathVariable final UUID id) {
         return universityService.getUniversityWithStatsById(id).orElseThrow(UniversityNotFoundException::new);
     }
 
     @GetMapping("/domain/{emailDomain}")
-    public UniversityResponseDto getUniversityByEmailDomain(@PathVariable String emailDomain) {
-        University university = universityService.getUniversityByEmailDomain(emailDomain)
+    public UniversityResponseDto getUniversityByEmailDomain(@PathVariable final String emailDomain) {
+        final University university = universityService.getUniversityByEmailDomain(emailDomain)
                 .orElseThrow(UniversityNotFoundException::new);
         return modelMapper.map(university, UniversityResponseDto.class);
     }
@@ -78,15 +79,16 @@ public class UniversityController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UniversityResponseDto createUniversity(@Valid @RequestBody CreateUniversityDto dto) {
-        University university = universityService.createUniversity(dto);
+    public UniversityResponseDto createUniversity(@Valid @RequestBody final CreateUniversityDto dto) {
+        final University university = universityService.createUniversity(dto);
         userService.syncUniversityAssociations(university);
         return modelMapper.map(university, UniversityResponseDto.class);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UniversityResponseDto updateUniversity(@PathVariable UUID id, @Valid @RequestBody UpdateUniversityDto dto) {
+    public UniversityResponseDto updateUniversity(@PathVariable final UUID id,
+            @Valid @RequestBody final UpdateUniversityDto dto) {
         University university = universityService.getUniversityById(id)
                 .orElseThrow(UniversityNotFoundException::new);
         university = universityService.updateUniversity(university, dto);
@@ -97,8 +99,8 @@ public class UniversityController {
 
     @PatchMapping("/{id}/picture")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UniversityResponseDto updateUniversityPicture(@PathVariable UUID id,
-            @Valid @ModelAttribute UpdateUniversityPictureDto dto)
+    public UniversityResponseDto updateUniversityPicture(@PathVariable final UUID id,
+            @Valid @ModelAttribute final UpdateUniversityPictureDto dto)
             throws IOException {
         University university = universityService.getUniversityById(id)
                 .orElseThrow(UniversityNotFoundException::new);
@@ -110,7 +112,7 @@ public class UniversityController {
     @DeleteMapping("/{id}/picture")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UniversityResponseDto deleteUserProfilePicture(@PathVariable UUID id) throws IOException {
+    public UniversityResponseDto deleteUserProfilePicture(@PathVariable final UUID id) throws IOException {
         University university = universityService.getUniversityById(id)
                 .orElseThrow(UniversityNotFoundException::new);
 
@@ -121,8 +123,8 @@ public class UniversityController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteUniversity(@PathVariable UUID id) {
-        University university = universityService.getUniversityById(id)
+    public void deleteUniversity(@PathVariable final UUID id) {
+        final University university = universityService.getUniversityById(id)
                 .orElseThrow(UniversityNotFoundException::new);
         userService.detachUniversity(university);
         universityService.deactivateUniversity(university);

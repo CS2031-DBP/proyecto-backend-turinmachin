@@ -17,7 +17,7 @@ public class ResetPasswordIssuedEventListener {
 
     @Async
     @EventListener
-    public void handleResetPasswordIssuedEvent(ResetPasswordIssuedEvent ev) throws MessagingException {
+    public void handleResetPasswordIssuedEvent(final ResetPasswordIssuedEvent ev) throws MessagingException {
         emailService.sendResetPasswordEmail(ev.getUser(), ev.getToken());
     }
 

@@ -64,15 +64,15 @@ public class University {
     @Column(nullable = false)
     private Boolean active = true;
 
-    public boolean ownsEmail(String email) {
+    public boolean ownsEmail(final String email) {
         return emailDomains.contains(EmailUtils.extractDomain(email));
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
-        University that = (University) o;
+        final University that = (University) o;
         return Objects.equals(id, that.id);
     }
 

@@ -9,7 +9,7 @@ public class PayloadTooLargeException extends ResponseStatusException {
         this("Payload too large");
     }
 
-    public PayloadTooLargeException(String message) {
+    public PayloadTooLargeException(final String message) {
         super(HttpStatus.PAYLOAD_TOO_LARGE, message);
     }
 

@@ -15,7 +15,7 @@ public class SendVerificationEmailListener {
 
     @Async
     @EventListener
-    public void handleSendVerificationEmailEvent(SendVerificationEmailEvent event) throws MessagingException {
+    public void handleSendVerificationEmailEvent(final SendVerificationEmailEvent event) throws MessagingException {
         emailService.sendVerificationEmail(event.getUser());
     }
 

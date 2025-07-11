@@ -17,14 +17,14 @@ public class GoogleOAuthService {
 
     private final GoogleIdTokenVerifier verifier;
 
-    public GoogleOAuthService(@Value("${oauth.google.client-id}") String clientId) {
+    public GoogleOAuthService(@Value("${oauth.google.client-id}") final String clientId) {
         verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
                 Utils.getDefaultJsonFactory())
                 .setAudience(List.of(clientId))
                 .build();
     }
 
-    public GoogleIdToken verifyIdToken(String idToken) throws IOException, GeneralSecurityException {
+    public GoogleIdToken verifyIdToken(final String idToken) throws IOException, GeneralSecurityException {
         return verifier.verify(idToken);
     }
 

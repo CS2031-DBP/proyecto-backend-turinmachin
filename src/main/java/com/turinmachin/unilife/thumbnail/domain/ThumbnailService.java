@@ -28,15 +28,15 @@ public class ThumbnailService {
     @Value("${thumbnail.quality}")
     private double quality;
 
-    public ByteArrayOutputStream generateThumbnailOutputStream(InputStream inputStream) throws IOException {
-        var thumbnailOutput = new ByteArrayOutputStream();
+    public ByteArrayOutputStream generateThumbnailOutputStream(final InputStream inputStream) throws IOException {
+        final var thumbnailOutput = new ByteArrayOutputStream();
 
-        BufferedImage image = ImageIO.read(inputStream);
+        final BufferedImage image = ImageIO.read(inputStream);
         if (image == null)
             return null;
 
-        int thumbnailWidth = (int) (image.getWidth() * reduction);
-        int thumbnailHeight = (int) (image.getHeight() * reduction);
+        final int thumbnailWidth = (int) (image.getWidth() * reduction);
+        final int thumbnailHeight = (int) (image.getHeight() * reduction);
 
         Thumbnails.of(image)
                 .size(Math.min(thumbnailWidth, maxSize), Math.min(thumbnailHeight, maxSize))
@@ -48,21 +48,21 @@ public class ThumbnailService {
 
     }
 
-    public String generateThumbnailDataUrl(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream outputStream = generateThumbnailOutputStream(inputStream);
+    public String generateThumbnailDataUrl(final InputStream inputStream) throws IOException {
+        final ByteArrayOutputStream outputStream = generateThumbnailOutputStream(inputStream);
         if (outputStream == null)
             return null;
 
-        byte[] thumbnailBytes = outputStream.toByteArray();
+        final byte[] thumbnailBytes = outputStream.toByteArray();
 
         if (thumbnailBytes == null)
             return null;
 
-        String thumbnailData = Base64.getEncoder().encodeToString(thumbnailBytes);
+        final String thumbnailData = Base64.getEncoder().encodeToString(thumbnailBytes);
         return "data:image/jpeg;base64," + thumbnailData;
     }
 
-    public String generateThumbnailDataUrl(MultipartFile file) throws IOException {
+    public String generateThumbnailDataUrl(final MultipartFile file) throws IOException {
         return generateThumbnailDataUrl(file.getInputStream());
     }
 

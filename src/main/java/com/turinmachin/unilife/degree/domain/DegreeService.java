@@ -32,31 +32,31 @@ public class DegreeService {
         return degreeRepository.findAllByOrderByName();
     }
 
-    public Page<Degree> getAllDegrees(Pageable pageable) {
+    public Page<Degree> getAllDegrees(final Pageable pageable) {
         return degreeRepository.findAllByOrderByName(pageable);
     }
 
-    public Page<Degree> searchDegrees(String query, UUID universityId, Pageable pageable) {
+    public Page<Degree> searchDegrees(final String query, final UUID universityId, final Pageable pageable) {
         return degreeRepository.omnisearch(query, universityId, pageable);
     }
 
-    public Page<Degree> getDegreesByUniversityId(UUID universityId, Pageable pageable) {
+    public Page<Degree> getDegreesByUniversityId(final UUID universityId, final Pageable pageable) {
         return degreeRepository.findByUniversitiesIdOrderByName(universityId, pageable);
     }
 
-    public List<Degree> getDegreesByUniversityId(UUID universityId) {
+    public List<Degree> getDegreesByUniversityId(final UUID universityId) {
         return degreeRepository.findByUniversitiesIdOrderByName(universityId);
     }
 
-    public Optional<Degree> getDegreeById(UUID id) {
+    public Optional<Degree> getDegreeById(final UUID id) {
         return degreeRepository.findById(id);
     }
 
-    public Optional<DegreeWithStatsDto> getDegreeWithStatsById(UUID id) {
+    public Optional<DegreeWithStatsDto> getDegreeWithStatsById(final UUID id) {
         return degreeRepository.findWithStatsById(id);
     }
 
-    public Degree createDegree(CreateDegreeDto dto) {
+    public Degree createDegree(final CreateDegreeDto dto) {
         if (degreeRepository.existsByName(dto.getName())) {
             throw new DegreeNameConflictException();
         }
@@ -65,11 +65,11 @@ public class DegreeService {
             throw new DegreeShortNameConflictException();
         }
 
-        Degree degree = modelMapper.map(dto, Degree.class);
+        final Degree degree = modelMapper.map(dto, Degree.class);
         return degreeRepository.save(degree);
     }
 
-    public Degree updateDegree(Degree degree, UpdateDegreeDto dto) {
+    public Degree updateDegree(final Degree degree, final UpdateDegreeDto dto) {
         if (degreeRepository.existsByNameAndIdNot(dto.getName(), degree.getId())) {
             throw new DegreeNameConflictException();
         }
@@ -85,7 +85,7 @@ public class DegreeService {
         return degreeRepository.save(degree);
     }
 
-    public void deleteDegree(Degree degree) {
+    public void deleteDegree(final Degree degree) {
         degreeRepository.delete(degree);
     }
 

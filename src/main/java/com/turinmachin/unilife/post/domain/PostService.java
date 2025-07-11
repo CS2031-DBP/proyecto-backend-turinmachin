@@ -41,7 +41,7 @@ public class PostService {
 
     private final PerspectiveService perspectiveService;
 
-    public Page<Post> getPostsWithSpec(Specification<Post> spec, Pageable pageable) {
+    public Page<Post> getPostsWithSpec(final Specification<Post> spec, Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(
                     pageable.getPageNumber(),
@@ -51,16 +51,17 @@ public class PostService {
         return postRepository.findAll(spec, pageable);
     }
 
-    public Optional<Post> getActivePostById(UUID id) {
+    public Optional<Post> getActivePostById(final UUID id) {
         return postRepository.findByIdAndActiveTrue(id);
     }
 
-    public Page<Post> omnisearch(String query, UUID authorId, UUID universityId, UUID degreeId, List<String> tags,
-            Pageable pageable) {
+    public Page<Post> omnisearch(final String query, final UUID authorId, final UUID universityId, final UUID degreeId,
+            final List<String> tags,
+            final Pageable pageable) {
         return postRepository.omnisearch(query, authorId, universityId, degreeId, tags, pageable);
     }
 
-    public Post createPost(CreatePostDto dto, User author) throws IOException {
+    public Post createPost(final CreatePostDto dto, final User author) throws IOException {
         if (author.getUniversity() == null) {
             throw new UserWithoutUniversityException();
         }
@@ -69,45 +70,45 @@ public class PostService {
             throw new ToxicContentException();
         }
 
-        Post post = modelMapper.map(dto, Post.class);
+        final Post post = modelMapper.map(dto, Post.class);
         post.setAuthor(author);
         post.setUniversity(author.getUniversity());
         post.setDegree(author.getDegree());
         post.setTags(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
 
-        List<FileInfo> files = fileInfoService.createFileBatch(dto.getFiles());
+        final List<FileInfo> files = fileInfoService.createFileBatch(dto.getFiles());
         post.setFiles(files);
 
         return postRepository.save(post);
     }
 
-    public Post updatePost(Post post, UpdatePostDto dto) {
+    public Post updatePost(final Post post, final UpdatePostDto dto) {
         post.setContent(dto.getContent());
 
-        List<String> tags = post.getTags();
+        final List<String> tags = post.getTags();
         tags.clear();
         tags.addAll(dto.getTags().stream().map(String::toLowerCase).map(String::trim).sorted().toList());
 
         return postRepository.save(post);
     }
 
-    public Post deactivatePost(Post post) {
+    public Post deactivatePost(final Post post) {
         fileInfoService.triggerFileBatchDeletion(post.getFiles());
 
         post.setActive(false);
         return postRepository.save(post);
     }
 
-    public Optional<PostVote> getPostVote(UUID postId, UUID userId) {
+    public Optional<PostVote> getPostVote(final UUID postId, final UUID userId) {
         return postVoteRepository.findById(new PostVoteId(postId, userId));
     }
 
-    public PostVote setPostVote(Post post, User user, VoteType voteType) {
-        PostVoteId voteId = new PostVoteId(post.getId(), user.getId());
+    public PostVote setPostVote(final Post post, final User user, final VoteType voteType) {
+        final PostVoteId voteId = new PostVoteId(post.getId(), user.getId());
 
-        PostVote vote = postVoteRepository.findById(voteId)
+        final PostVote vote = postVoteRepository.findById(voteId)
                 .orElseGet(() -> {
-                    PostVote newVote = new PostVote();
+                    final PostVote newVote = new PostVote();
                     newVote.setId(voteId);
                     newVote.setPost(post);
                     newVote.setAuthor(user);
@@ -122,7 +123,7 @@ public class PostService {
         return postVoteRepository.save(vote);
     }
 
-    public void removePostVote(PostVote vote) {
+    public void removePostVote(final PostVote vote) {
         postVoteRepository.delete(vote);
     }
 

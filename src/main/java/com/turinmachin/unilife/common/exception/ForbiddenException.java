@@ -9,7 +9,7 @@ public class ForbiddenException extends ResponseStatusException {
         this("Forbidden");
     }
 
-    public ForbiddenException(String message) {
+    public ForbiddenException(final String message) {
         super(HttpStatus.FORBIDDEN, message);
     }
 

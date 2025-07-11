@@ -13,7 +13,7 @@ public enum VoteType {
 
     private final short value;
 
-    public static VoteType fromValue(short value) {
+    public static VoteType fromValue(final short value) {
         return Arrays.stream(values())
                 .filter(v -> v.value == value)
                 .findFirst()

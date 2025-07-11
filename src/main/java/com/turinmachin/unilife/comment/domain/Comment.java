@@ -61,10 +61,10 @@ public class Comment {
     private List<Comment> replies = new ArrayList<>();
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
-        Comment comment = (Comment) o;
+        final Comment comment = (Comment) o;
         return Objects.equals(id, comment.id);
     }
 

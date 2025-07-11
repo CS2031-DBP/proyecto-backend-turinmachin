@@ -9,7 +9,7 @@ public class UnauthorizedException extends ResponseStatusException {
         this("Unauthorized");
     }
 
-    public UnauthorizedException(String message) {
+    public UnauthorizedException(final String message) {
         super(HttpStatus.UNAUTHORIZED, message);
     }
 

@@ -38,10 +38,10 @@ public class Degree {
     private List<User> students = new ArrayList<>();
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
-        Degree degree = (Degree) o;
+        final Degree degree = (Degree) o;
         return Objects.equals(id, degree.id);
     }
 

@@ -44,9 +44,10 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Page<UserResponseDto> getAllUsers(@RequestParam(required = false) String query, Pageable pageable,
-            Authentication authentication) {
-        User authUser = (User) authentication.getPrincipal();
+    public Page<UserResponseDto> getAllUsers(@RequestParam(required = false) final String query,
+            final Pageable pageable,
+            final Authentication authentication) {
+        final User authUser = (User) authentication.getPrincipal();
         Page<User> users;
 
         if (query == null || query.isEmpty()) {
@@ -59,26 +60,27 @@ public class UserController {
 
     @GetMapping("/@self")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public SelfUserResponseDto getSelfUser(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public SelfUserResponseDto getSelfUser(final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         return modelMapper.map(user, SelfUserResponseDto.class);
     }
 
     @GetMapping("/{id}")
-    public UserResponseDto getUserById(@PathVariable UUID id) {
-        User user = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
+    public UserResponseDto getUserById(@PathVariable final UUID id) {
+        final User user = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
         return modelMapper.map(user, UserResponseDto.class);
     }
 
     @GetMapping("/username/{username}")
-    public UserResponseDto getUserByUsername(@PathVariable String username) {
-        User user = userService.getUserByUsername(username).orElseThrow(UserNotFoundException::new);
+    public UserResponseDto getUserByUsername(@PathVariable final String username) {
+        final User user = userService.getUserByUsername(username).orElseThrow(UserNotFoundException::new);
         return modelMapper.map(user, UserResponseDto.class);
     }
 
     @PutMapping("/@self")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public SelfUserResponseDto updateUser(@Valid @RequestBody UpdateUserDto dto, Authentication authentication) {
+    public SelfUserResponseDto updateUser(@Valid @RequestBody final UpdateUserDto dto,
+            final Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         user = userService.updateUser(user, dto);
         return modelMapper.map(user, SelfUserResponseDto.class);
@@ -87,16 +89,16 @@ public class UserController {
     @PatchMapping("/@self/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void updateUserPassword(@Valid @RequestBody UpdateUserPasswordDto dto,
-            Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public void updateUserPassword(@Valid @RequestBody final UpdateUserPasswordDto dto,
+            final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.updateUserPassword(user, dto);
     }
 
     @PatchMapping("/@self/picture")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public SelfUserResponseDto updateUserProfilePicture(@Valid @ModelAttribute UpdateUserProfilePictureDto dto,
-            Authentication authentication) throws IOException {
+    public SelfUserResponseDto updateUserProfilePicture(@Valid @ModelAttribute final UpdateUserProfilePictureDto dto,
+            final Authentication authentication) throws IOException {
         User user = (User) authentication.getPrincipal();
         user = userService.updateUserProfilePicture(user, dto.getPicture());
         return modelMapper.map(user, SelfUserResponseDto.class);
@@ -105,14 +107,15 @@ public class UserController {
     @DeleteMapping("/@self/picture")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void deleteUserProfilePicture(Authentication authentication) throws IOException {
-        User user = (User) authentication.getPrincipal();
+    public void deleteUserProfilePicture(final Authentication authentication) throws IOException {
+        final User user = (User) authentication.getPrincipal();
         userService.deleteUserProfilePicture(user);
     }
 
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public UserResponseDto updateUserRole(@PathVariable UUID id, @Valid @RequestBody UpdateUserRoleDto dto) {
+    public UserResponseDto updateUserRole(@PathVariable final UUID id,
+            @Valid @RequestBody final UpdateUserRoleDto dto) {
         User user = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
         user = userService.updateUserRole(user, dto.getRole());
         return modelMapper.map(user, UserResponseDto.class);
@@ -121,16 +124,16 @@ public class UserController {
     @DeleteMapping("/@self")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void deleteSelfUser(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public void deleteSelfUser(final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.deleteUser(user);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_MODERATOR')")
-    public void deleteUser(@PathVariable UUID id) {
-        User user = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
+    public void deleteUser(@PathVariable final UUID id) {
+        final User user = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
         userService.deleteUser(user);
     }
 

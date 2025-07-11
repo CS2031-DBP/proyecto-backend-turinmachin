@@ -9,7 +9,7 @@ public class NotFoundException extends ResponseStatusException {
         this("Not found");
     }
 
-    public NotFoundException(String message) {
+    public NotFoundException(final String message) {
         super(HttpStatus.NOT_FOUND, message);
     }
 

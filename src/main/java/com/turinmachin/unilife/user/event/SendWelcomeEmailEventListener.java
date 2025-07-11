@@ -15,7 +15,7 @@ public class SendWelcomeEmailEventListener {
 
     @Async
     @EventListener
-    public void handleSendWelcomeEmailEvent(SendWelcomeEmailEvent event) throws MessagingException {
+    public void handleSendWelcomeEmailEvent(final SendWelcomeEmailEvent event) throws MessagingException {
         emailService.sendWelcomeEmail(event.getUser());
     }
 

@@ -19,9 +19,10 @@ public class PostVoteId implements Serializable {
     private UUID authorId;
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        PostVoteId that = (PostVoteId) o;
+    public boolean equals(final Object o) {
+        if (o == null || getClass() != o.getClass())
+            return false;
+        final PostVoteId that = (PostVoteId) o;
         return Objects.equals(postId, that.postId) && Objects.equals(authorId, that.authorId);
     }
 

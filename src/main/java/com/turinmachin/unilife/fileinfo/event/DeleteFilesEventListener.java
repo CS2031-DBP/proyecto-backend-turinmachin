@@ -15,8 +15,8 @@ public class DeleteFilesEventListener {
 
     @Async
     @EventListener
-    public void handleDeleteFilesEvent(DeleteFilesEvent event) {
-        for (String key : event.getFileKeys()) {
+    public void handleDeleteFilesEvent(final DeleteFilesEvent event) {
+        for (final String key : event.getFileKeys()) {
             storageService.deleteFile(key);
         }
     }

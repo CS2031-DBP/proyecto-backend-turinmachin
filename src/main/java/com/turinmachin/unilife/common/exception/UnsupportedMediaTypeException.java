@@ -9,7 +9,7 @@ public class UnsupportedMediaTypeException extends ResponseStatusException {
         this("Unsupported media type");
     }
 
-    public UnsupportedMediaTypeException(String message) {
+    public UnsupportedMediaTypeException(final String message) {
         super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
     }
 }

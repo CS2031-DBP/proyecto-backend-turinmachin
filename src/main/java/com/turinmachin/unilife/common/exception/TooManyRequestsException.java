@@ -9,7 +9,7 @@ public class TooManyRequestsException extends ResponseStatusException {
         super(HttpStatus.TOO_MANY_REQUESTS, "Too many requests");
     }
 
-    public TooManyRequestsException(String message) {
+    public TooManyRequestsException(final String message) {
         super(HttpStatus.TOO_MANY_REQUESTS, message);
     }
 

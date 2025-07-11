@@ -27,7 +27,7 @@ public class JwtService {
 
     private final UserService userService;
 
-    public String generateToken(User user) {
+    public String generateToken(final User user) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("https://unilife.lat/role", user.getRole().name())
@@ -37,31 +37,31 @@ public class JwtService {
                 .compact();
     }
 
-    public Optional<Claims> extractAllClaims(String jwtToken) {
+    public Optional<Claims> extractAllClaims(final String jwtToken) {
         try {
-            Claims claims = Jwts.parserBuilder()
+            final Claims claims = Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(jwtToken)
                     .getBody();
             return Optional.of(claims);
-        } catch (JwtException e) {
+        } catch (final JwtException e) {
             return Optional.empty();
         }
     }
 
-    private <T> T extractClaim(Claims claims, Function<Claims, T> resolver) {
+    private <T> T extractClaim(final Claims claims, final Function<Claims, T> resolver) {
         return resolver.apply(claims);
     }
 
-    public Optional<Authentication> getAuthentication(String jwtToken, Claims claims) {
-        UUID id = UUID.fromString(extractClaim(claims, Claims::getSubject));
-        Optional<User> maybeUser = userService.getUserById(id);
+    public Optional<Authentication> getAuthentication(final String jwtToken, final Claims claims) {
+        final UUID id = UUID.fromString(extractClaim(claims, Claims::getSubject));
+        final Optional<User> maybeUser = userService.getUserById(id);
         return maybeUser.map(user -> new UsernamePasswordAuthenticationToken(user, jwtToken, user.getAuthorities()));
     }
 
     private Key getSigningKey() {
-        byte[] bytes = secret.getBytes();
+        final byte[] bytes = secret.getBytes();
         return Keys.hmacShaKeyFor(bytes);
     }
 

@@ -22,38 +22,39 @@ public class StorageService {
     @Value("${amazon-s3.bucket-name}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(final MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new EmptyFileException();
         }
 
-        ObjectMetadata metadata = new ObjectMetadata();
+        final ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
 
-        long time = System.currentTimeMillis();
-        String key = time + "_" + file.getOriginalFilename();
+        final long time = System.currentTimeMillis();
+        final String key = time + "_" + file.getOriginalFilename();
 
         s3Client.putObject(bucketName, key, file.getInputStream(), metadata);
         return key;
     }
 
-    public String uploadFile(InputStream inputStream, String name, String contentType) throws IOException {
-        ObjectMetadata metadata = new ObjectMetadata();
+    public String uploadFile(final InputStream inputStream, final String name, final String contentType)
+            throws IOException {
+        final ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(contentType);
 
-        long time = System.currentTimeMillis();
-        String key = time + "_" + name;
+        final long time = System.currentTimeMillis();
+        final String key = time + "_" + name;
 
         s3Client.putObject(bucketName, key, inputStream, metadata);
         return key;
     }
 
-    public URL getObjectUrl(String key) {
+    public URL getObjectUrl(final String key) {
         return s3Client.getUrl(bucketName, key);
     }
 
-    public void deleteFile(String key) {
+    public void deleteFile(final String key) {
         s3Client.deleteObject(bucketName, key);
     }
 

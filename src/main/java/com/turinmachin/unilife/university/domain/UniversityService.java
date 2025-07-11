@@ -39,27 +39,27 @@ public class UniversityService {
     private final FileInfoService fileInfoService;
     private final ModelMapper modelMapper;
 
-    public Page<University> getAllUniversities(Pageable pageable) {
+    public Page<University> getAllUniversities(final Pageable pageable) {
         return universityRepository.findByActiveTrueOrderByName(pageable);
     }
 
-    public Page<University> searchUniversities(String query, Pageable pageable) {
+    public Page<University> searchUniversities(final String query, final Pageable pageable) {
         return universityRepository.omnisearch(query, pageable);
     }
 
-    public Optional<University> getUniversityById(UUID id) {
+    public Optional<University> getUniversityById(final UUID id) {
         return universityRepository.findByIdAndActiveTrue(id);
     }
 
-    public Optional<UniversityWithStatsDto> getUniversityWithStatsById(UUID id) {
+    public Optional<UniversityWithStatsDto> getUniversityWithStatsById(final UUID id) {
         return universityRepository.findWithStatsById(id);
     }
 
-    public Optional<University> getUniversityByEmailDomain(String emailDomain) {
+    public Optional<University> getUniversityByEmailDomain(final String emailDomain) {
         return universityRepository.findByEmailDomainsContaining(emailDomain);
     }
 
-    public University createUniversity(CreateUniversityDto dto) {
+    public University createUniversity(final CreateUniversityDto dto) {
         if (universityRepository.existsByName(dto.getName())) {
             throw new UniversityNameConflictException();
         }
@@ -68,9 +68,9 @@ public class UniversityService {
             throw new UniversityShortNameConflictException();
         }
 
-        University university = modelMapper.map(dto, University.class);
+        final University university = modelMapper.map(dto, University.class);
 
-        Set<Degree> degrees = dto.getDegreeIds()
+        final Set<Degree> degrees = dto.getDegreeIds()
                 .stream()
                 .map(id -> degreeService.getDegreeById(id).orElseThrow(DegreeNotFoundException::new))
                 .collect(Collectors.toSet());
@@ -79,7 +79,7 @@ public class UniversityService {
         return universityRepository.save(university);
     }
 
-    public University updateUniversity(University university, UpdateUniversityDto dto) {
+    public University updateUniversity(final University university, final UpdateUniversityDto dto) {
         if (universityRepository.existsByNameAndIdNot(dto.getName(), university.getId())) {
             throw new UniversityNameConflictException();
         }
@@ -96,8 +96,8 @@ public class UniversityService {
 
         university.getDegrees().removeIf(degree -> !dto.getDegreeIds().contains(degree.getId()));
 
-        for (UUID newDegreeId : dto.getDegreeIds()) {
-            Degree newDegree = degreeService.getDegreeById(newDegreeId).orElseThrow(DegreeNotFoundException::new);
+        for (final UUID newDegreeId : dto.getDegreeIds()) {
+            final Degree newDegree = degreeService.getDegreeById(newDegreeId).orElseThrow(DegreeNotFoundException::new);
             if (!university.getDegrees().contains(newDegree)) {
                 university.getDegrees().add(newDegree);
             }
@@ -106,18 +106,18 @@ public class UniversityService {
         return universityRepository.save(university);
     }
 
-    public University deactivateUniversity(University university) {
+    public University deactivateUniversity(final University university) {
         university.setActive(false);
         return universityRepository.save(university);
     }
 
-    public University updateUniversityPicture(University university, MultipartFile file) throws IOException {
+    public University updateUniversityPicture(University university, final MultipartFile file) throws IOException {
         if (!fileInfoService.isContentTypeImage(file.getContentType())) {
             throw new UnsupportedMediaTypeException();
         }
 
-        FileInfo oldPicture = university.getPicture();
-        FileInfo newPicture = fileInfoService.createFile(file);
+        final FileInfo oldPicture = university.getPicture();
+        final FileInfo newPicture = fileInfoService.createFile(file);
 
         university.setPicture(newPicture);
         university = universityRepository.save(university);
@@ -129,7 +129,7 @@ public class UniversityService {
     }
 
     public University deleteUniversityPicture(University university) {
-        FileInfo oldPicture = university.getPicture();
+        final FileInfo oldPicture = university.getPicture();
 
         if (oldPicture == null) {
             throw new ConflictException("University does not have a picture");

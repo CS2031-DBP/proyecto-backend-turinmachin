@@ -48,27 +48,29 @@ public class CommentController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public List<CommentResponseDto> getAllPostComments(@PathVariable UUID postId) {
-        List<Comment> comments = commentService.getAllPostComments(postId);
+    public List<CommentResponseDto> getAllPostComments(@PathVariable final UUID postId) {
+        final List<Comment> comments = commentService.getAllPostComments(postId);
         return comments.stream().map(thing -> modelMapper.map(thing, CommentResponseDto.class)).toList();
     }
 
     @GetMapping("/{id}")
-    public CommentResponseDto getPostComment(@PathVariable UUID postId, @PathVariable UUID id) {
-        Comment comment = commentService.getPostCommentById(postId, id).orElseThrow(CommentNotFoundException::new);
+    public CommentResponseDto getPostComment(@PathVariable final UUID postId, @PathVariable final UUID id) {
+        final Comment comment = commentService.getPostCommentById(postId, id)
+                .orElseThrow(CommentNotFoundException::new);
         return modelMapper.map(comment, CommentResponseDto.class);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public CommentResponseDto createPostComment(@PathVariable UUID postId, @Valid @RequestBody CreateCommentDto dto,
-            Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public CommentResponseDto createPostComment(@PathVariable final UUID postId,
+            @Valid @RequestBody final CreateCommentDto dto,
+            final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Post post = postService.getActivePostById(postId).orElseThrow(PostNotFoundException::new);
-        Comment comment = commentService.createComment(dto, user, post);
+        final Post post = postService.getActivePostById(postId).orElseThrow(PostNotFoundException::new);
+        final Comment comment = commentService.createComment(dto, user, post);
 
         return modelMapper.map(comment, CommentResponseDto.class);
     }
@@ -76,44 +78,46 @@ public class CommentController {
     @PostMapping("/{id}/replies")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public CommentResponseDto createPostCommentReply(@PathVariable UUID postId, @PathVariable UUID id,
-            @Valid @RequestBody CreateCommentDto dto,
-            Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public CommentResponseDto createPostCommentReply(@PathVariable final UUID postId, @PathVariable final UUID id,
+            @Valid @RequestBody final CreateCommentDto dto,
+            final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Comment parent = commentService.getPostCommentById(postId, id).orElseThrow(CommentNotFoundException::new);
-        Comment comment = commentService.createCommentReply(dto, user, parent);
+        final Comment parent = commentService.getPostCommentById(postId, id).orElseThrow(CommentNotFoundException::new);
+        final Comment comment = commentService.createCommentReply(dto, user, parent);
 
         return modelMapper.map(comment, CommentResponseDto.class);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public CommentResponseDto updatePostComment(@PathVariable UUID postId, @PathVariable UUID id,
-            @Valid @RequestBody UpdateCommentDto dto,
-            Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public CommentResponseDto updatePostComment(@PathVariable final UUID postId, @PathVariable final UUID id,
+            @Valid @RequestBody final UpdateCommentDto dto,
+            final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Comment comment = commentService.getPostCommentById(postId, id).orElseThrow(CommentNotFoundException::new);
+        final Comment comment = commentService.getPostCommentById(postId, id)
+                .orElseThrow(CommentNotFoundException::new);
 
         if (!user.equals(comment.getAuthor())) {
             throw new ForbiddenException();
         }
 
-        Comment updatedComment = commentService.updateComment(comment, dto);
+        final Comment updatedComment = commentService.updateComment(comment, dto);
         return modelMapper.map(updatedComment, CommentResponseDto.class);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void deletePostComment(@PathVariable UUID postId, @PathVariable UUID id, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public void deletePostComment(@PathVariable final UUID postId, @PathVariable final UUID id,
+            final Authentication authentication) {
+        final User user = (User) authentication.getPrincipal();
         userService.checkUserVerified(user);
 
-        Comment comment = commentService
+        final Comment comment = commentService
                 .getPostCommentById(postId, id)
                 .orElseThrow(CommentNotFoundException::new);
 
