@@ -14,6 +14,7 @@ public class UpdatePostDto {
     @Size(max = 300)
     private String content;
 
+    @Size(max = 10)
     private List<String> tags = new ArrayList<>();
 
 }

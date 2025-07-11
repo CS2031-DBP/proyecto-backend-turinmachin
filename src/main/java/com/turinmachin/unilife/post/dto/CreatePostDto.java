@@ -15,6 +15,7 @@ public class CreatePostDto {
     @Size(max = 300)
     private String content;
 
+    @Size(max = 10)
     private List<String> tags = new ArrayList<>();
 
     @Size(max = 10)
