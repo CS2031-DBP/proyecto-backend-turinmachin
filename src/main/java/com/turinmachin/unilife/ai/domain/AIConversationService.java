@@ -5,15 +5,20 @@ import com.azure.ai.inference.models.*;
 import com.turinmachin.unilife.ai.dto.AIMessageResponseDto;
 import com.turinmachin.unilife.ai.exception.AIResponseException;
 import com.turinmachin.unilife.ai.infrastructure.AIMessageRepository;
+import com.turinmachin.unilife.university.dto.UniversityLinkDto;
+import com.turinmachin.unilife.university.infrastructure.UniversityRepository;
 import com.turinmachin.unilife.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +26,16 @@ public class AIConversationService {
 
     private final AIMessageRepository messageRepository;
 
+    private final UniversityRepository universityRepository;
+
     private final ChatCompletionsAsyncClient client;
 
     private final String defaultModel;
 
     private final ModelMapper modelMapper;
+
+    @Value("${deployment.frontend.url}")
+    private String frontendUrl;
 
     @Transactional(readOnly = true)
     public List<AIMessageResponseDto> getConversation(User user) {
@@ -58,10 +68,12 @@ public class AIConversationService {
                 .map(choices -> choices.getFirst().getMessage().getContent())
                 .orElseThrow(AIResponseException::new);
 
+        String linkedResponse = linkifyUniversities(response);
+
         AIMessage aiMessage = new AIMessage();
         aiMessage.setUser(user);
         aiMessage.setRole(AuthorRole.ASSISTANT);
-        aiMessage.setContent(response);
+        aiMessage.setContent(linkedResponse);
 
         return messageRepository.save(aiMessage);
     }
@@ -69,6 +81,40 @@ public class AIConversationService {
     @Transactional
     public void resetConversation(User user) {
         messageRepository.deleteAllByUser(user);
+    }
+
+    private String linkifyUniversities(String response) {
+        List<UniversityLinkDto> universities = universityRepository.findAll().stream()
+                .map(university -> modelMapper.map(university, UniversityLinkDto.class))
+                .toList();
+
+        for (UniversityLinkDto university : universities) {
+            String name = university.getName();
+            String shortName = university.getShortName();
+            String url = frontendUrl + "/universities/" + university.getId();
+
+            int nameIndex = indexOfWholeWord(response, name);
+            int shortNameIndex = indexOfWholeWord(response, shortName);
+
+            if (nameIndex != -1 && (shortNameIndex == -1 || nameIndex < shortNameIndex)) {
+                response = replaceFirstWordMatch(response, name, "[" + name + "](" + url + ")");
+            } else if (shortNameIndex != -1) {
+                response = replaceFirstWordMatch(response, shortName, "[" + shortName + "](" + url + ")");
+            }
+        }
+
+        return response;
+    }
+
+    private int indexOfWholeWord(String text, String word) {
+        if (word == null || word.isBlank()) return -1;
+        Pattern pattern = Pattern.compile("\\b" + Pattern.quote(word) + "\\b", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.start() : -1;
+    }
+
+    private String replaceFirstWordMatch(String input, String word, String replacement) {
+        return input.replaceFirst("(?i)\\b" + Pattern.quote(word) + "\\b", Matcher.quoteReplacement(replacement));
     }
 
     private String buildSystemPrompt(User user) {
@@ -101,11 +147,11 @@ public class AIConversationService {
         - Becas, intercambios, pasantías y otras oportunidades académicas
         - Comunidades, eventos estudiantiles y herramientas para explorar la vida universitaria
         
-        Responde siempre de forma clara, útil y amigable.
+        Responde siempre de forma clara, útil y amigable. Se breve en tus respuestas a menos que el contexto lo requiera o el usuario solicite mayor información.
         """);
 
         if (user.getDisplayName() != null) {
-            prompt.append(" Llama al usuario por su nombre: ").append(user.getDisplayName()).append(".");
+            prompt.append(" Llama al usuario por su nombre: ").append(user.getDisplayName()).append(". Si el usuario tiene un nombre compuesto, llamalo por su primer nombre.");
         } else {
             prompt.append(" Llama al usuario por su nombre de usuario: ").append(user.getUsername()).append(".");
         }
