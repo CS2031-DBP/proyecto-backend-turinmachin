@@ -438,7 +438,10 @@ public class UserService implements UserDetailsService {
             eventPublisher.publishEvent(new SendWelcomeEmailEvent(user));
         }
 
-        tryAssignGooglePictureToUser(user, payload);
+        if (user.getProfilePicture() == null) {
+            tryAssignGooglePictureToUser(user, payload);
+        }
+
         return userRepository.save(user);
     }
 
