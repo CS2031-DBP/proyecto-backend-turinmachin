@@ -26,7 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.api.client.auth.openidconnect.IdToken.Payload;
 import com.turinmachin.unilife.authentication.domain.AuthProvider;
 import com.turinmachin.unilife.authentication.event.ResetPasswordIssuedEvent;
+import com.turinmachin.unilife.authentication.exception.AuthProviderNotCredentialsException;
 import com.turinmachin.unilife.common.exception.ConflictException;
+import com.turinmachin.unilife.common.exception.ForbiddenException;
 import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.common.utils.HashUtils;
@@ -217,6 +219,10 @@ public class UserService implements UserDetailsService {
         user.setBio(dto.getBio());
 
         if (!user.getEmail().equalsIgnoreCase(dto.getEmail())) {
+            if (user.getAuthProvider() != AuthProvider.CREDENTIALS) {
+                throw new AuthProviderNotCredentialsException();
+            }
+
             // Update email
             user.setEmail(dto.getEmail());
             user.setVerificationId(UUID.randomUUID());
