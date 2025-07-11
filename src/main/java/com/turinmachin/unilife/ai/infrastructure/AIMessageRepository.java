@@ -1,7 +1,6 @@
 package com.turinmachin.unilife.ai.infrastructure;
 
 import com.turinmachin.unilife.ai.domain.AIMessage;
-import com.turinmachin.unilife.ai.domain.AuthorRole;
 import com.turinmachin.unilife.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,5 +13,4 @@ public interface AIMessageRepository extends JpaRepository<AIMessage, UUID> {
 
     void deleteAllByUser(User user);
 
-    boolean existsByUserAndRole(User user, AuthorRole role);
 }

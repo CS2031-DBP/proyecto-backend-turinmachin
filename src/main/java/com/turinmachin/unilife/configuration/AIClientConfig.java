@@ -1,6 +1,6 @@
 package com.turinmachin.unilife.configuration;
 
-import com.azure.ai.inference.ChatCompletionsClient;
+import com.azure.ai.inference.ChatCompletionsAsyncClient;
 import com.azure.ai.inference.ChatCompletionsClientBuilder;
 import com.azure.core.credential.AzureKeyCredential;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,11 +20,11 @@ public class AIClientConfig {
     private String defaultModel;
 
     @Bean
-    public ChatCompletionsClient chatCompletionsClient() {
+    public ChatCompletionsAsyncClient chatCompletionsClient() {
         return new ChatCompletionsClientBuilder()
                 .credential(new AzureKeyCredential(apiKey))
                 .endpoint(endpoint)
-                .buildClient();
+                .buildAsyncClient();
     }
 
     @Bean
