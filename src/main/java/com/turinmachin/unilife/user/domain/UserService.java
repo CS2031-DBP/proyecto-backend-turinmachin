@@ -28,7 +28,6 @@ import com.turinmachin.unilife.authentication.domain.AuthProvider;
 import com.turinmachin.unilife.authentication.event.ResetPasswordIssuedEvent;
 import com.turinmachin.unilife.authentication.exception.AuthProviderNotCredentialsException;
 import com.turinmachin.unilife.common.exception.ConflictException;
-import com.turinmachin.unilife.common.exception.ForbiddenException;
 import com.turinmachin.unilife.common.exception.UnauthorizedException;
 import com.turinmachin.unilife.common.exception.UnsupportedMediaTypeException;
 import com.turinmachin.unilife.common.utils.HashUtils;
@@ -44,6 +43,7 @@ import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.UpdateUserDto;
 import com.turinmachin.unilife.user.dto.UpdateUserPasswordDto;
 import com.turinmachin.unilife.user.event.SendVerificationEmailEvent;
+import com.turinmachin.unilife.user.event.SendWelcomeEmailEvent;
 import com.turinmachin.unilife.user.exception.EmailConflictException;
 import com.turinmachin.unilife.user.exception.OnlyAdminException;
 import com.turinmachin.unilife.user.exception.UserNotVerifiedException;
@@ -120,13 +120,11 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User createUser(RegisterUserDto dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        if (userRepository.existsByEmail(dto.getEmail()))
             throw new EmailConflictException();
-        }
 
-        if (userRepository.existsByUsername(dto.getUsername())) {
+        if (userRepository.existsByUsername(dto.getUsername()))
             throw new UsernameConflictException();
-        }
 
         User user = modelMapper.map(dto, User.class);
         user.setAuthProvider(AuthProvider.CREDENTIALS);
@@ -136,9 +134,8 @@ public class UserService implements UserDetailsService {
     }
 
     public User createGoogleUser(String email, Payload payload) {
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmail(email))
             throw new EmailConflictException();
-        }
 
         String nameSource = Optional.ofNullable(payload.get("given_name"))
                 .orElseGet(() -> payload.get("name"))
@@ -149,28 +146,39 @@ public class UserService implements UserDetailsService {
         user.setAuthProvider(AuthProvider.GOOGLE);
         user.setEmail(email);
         user.setUsername(username);
+        tryAssignGooglePictureToUser(user, payload);
 
+        return assignUserToBelongingUniversity(user);
+    }
+
+    public User tryAssignGooglePictureToUser(User user, Payload payload) {
         String pictureUrl = payload.get("picture").toString();
 
         if (pictureUrl != null) {
             try {
-                var pictureResponse = restTemplate.getForEntity(pictureUrl, Resource.class);
-
-                if (pictureResponse.getStatusCode().is2xxSuccessful() && pictureResponse.hasBody()) {
-                    String contentType = pictureResponse.getHeaders().getContentType().toString();
-
-                    FileInfo profilePicture = fileInfoService.createFileUnchecked(
-                            pictureResponse.getBody().getInputStream(),
-                            username + "_profile_picture",
-                            contentType);
-
-                    user.setProfilePicture(profilePicture);
-                }
+                user = assignPictureToUserFromUrl(user, pictureUrl);
             } catch (Exception ex) {
             }
         }
 
-        return assignUserToBelongingUniversity(user);
+        return userRepository.save(user);
+    }
+
+    public User assignPictureToUserFromUrl(User user, String pictureUrl) throws IOException {
+        var pictureResponse = restTemplate.getForEntity(pictureUrl, Resource.class);
+
+        if (pictureResponse.getStatusCode().is2xxSuccessful() && pictureResponse.hasBody()) {
+            String contentType = pictureResponse.getHeaders().getContentType().toString();
+
+            FileInfo profilePicture = fileInfoService.createFileUnchecked(
+                    pictureResponse.getBody().getInputStream(),
+                    user.getUsername() + "_profile_picture",
+                    contentType);
+
+            user.setProfilePicture(profilePicture);
+        }
+
+        return userRepository.save(user);
     }
 
     public String generateValidUsernameFrom(String name) {
@@ -210,18 +218,16 @@ public class UserService implements UserDetailsService {
     @Transactional
     public User updateUser(User user, UpdateUserDto dto) {
         if (!Objects.equals(user.getUsername(), dto.getUsername())
-                && userRepository.existsByUsername(dto.getUsername())) {
+                && userRepository.existsByUsername(dto.getUsername()))
             throw new UsernameConflictException();
-        }
 
         user.setUsername(dto.getUsername());
         user.setDisplayName(dto.getDisplayName());
         user.setBio(dto.getBio());
 
         if (!user.getEmail().equalsIgnoreCase(dto.getEmail())) {
-            if (user.getAuthProvider() != AuthProvider.CREDENTIALS) {
+            if (user.getAuthProvider() != AuthProvider.CREDENTIALS)
                 throw new AuthProviderNotCredentialsException();
-            }
 
             // Update email
             user.setEmail(dto.getEmail());
@@ -255,9 +261,8 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User updateUserPassword(User user, UpdateUserPasswordDto dto) {
-        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword()))
             throw new UnauthorizedException("Current password is incorrect");
-        }
 
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         return userRepository.save(user);
@@ -265,9 +270,8 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User updateUserRole(User user, Role role) {
-        if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId())) {
+        if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId()))
             throw new OnlyAdminException();
-        }
 
         user.setRole(role);
         return userRepository.save(user);
@@ -275,17 +279,16 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void deleteUser(User user) {
-        if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId())) {
+        if (user.getRole() == Role.ADMIN && !userRepository.existsByRoleAndIdNot(Role.ADMIN, user.getId()))
             throw new OnlyAdminException();
-        }
 
         userRepository.delete(user);
     }
 
     public void checkUserVerified(User user) {
-        if (!user.getVerified()) {
+        if (!user.getVerified())
             throw new UserNotVerifiedException();
-        }
+
     }
 
     public int detachUniversity(University university) {
@@ -293,9 +296,8 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateUserProfilePicture(User user, MultipartFile file) throws IOException {
-        if (!fileInfoService.isContentTypeImage(file.getContentType())) {
+        if (!fileInfoService.isContentTypeImage(file.getContentType()))
             throw new UnsupportedMediaTypeException();
-        }
 
         FileInfo oldPicture = user.getProfilePicture();
         FileInfo newPicture = fileInfoService.createFile(file);
@@ -312,9 +314,8 @@ public class UserService implements UserDetailsService {
     public User deleteUserProfilePicture(User user) {
         FileInfo oldPicture = user.getProfilePicture();
 
-        if (oldPicture == null) {
+        if (oldPicture == null)
             throw new ConflictException("User does not have a profile picture");
-        }
 
         user.setProfilePicture(null);
         user = userRepository.save(user);
@@ -377,9 +378,8 @@ public class UserService implements UserDetailsService {
         if (user.getLastVerificationEmailSent() != null) {
             Instant lastSent = user.getLastVerificationEmailSent();
 
-            if (now.isBefore(lastSent.plus(verificationEmailCooldown))) {
+            if (now.isBefore(lastSent.plus(verificationEmailCooldown)))
                 throw new VerificationEmailCooldownException();
-            }
         }
 
         eventPublisher.publishEvent(new SendVerificationEmailEvent(user));
@@ -427,6 +427,19 @@ public class UserService implements UserDetailsService {
 
         Instant now = Instant.now();
         return now.isBefore(existingToken.getCreatedAt().plus(passwordResetDuration));
+    }
+
+    public User upgradeUserAuthToGoogle(User user, Payload payload) {
+        user.setAuthProvider(AuthProvider.GOOGLE);
+        user.setPassword(null);
+
+        if (!user.getVerified()) {
+            verifyUser(user);
+            eventPublisher.publishEvent(new SendWelcomeEmailEvent(user));
+        }
+
+        tryAssignGooglePictureToUser(user, payload);
+        return userRepository.save(user);
     }
 
 }

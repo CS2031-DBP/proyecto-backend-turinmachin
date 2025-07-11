@@ -92,9 +92,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("/oauth/google")
-    public LoginResponseDto googleAuth(@Valid @RequestBody GoogleLoginRequestDto dto)
+    public LoginResponseDto googleLogin(@Valid @RequestBody GoogleLoginRequestDto dto)
             throws IOException, GeneralSecurityException {
         return authenticationService.googleAuth(dto.getIdToken());
+    }
+
+    @PostMapping("/oauth/google/upgrade")
+    public LoginResponseDto googleUpgradeLogin(@Valid @RequestBody GoogleLoginRequestDto dto)
+            throws IOException, GeneralSecurityException {
+        return authenticationService.googleAuthUpgrade(dto.getIdToken());
     }
 
 }

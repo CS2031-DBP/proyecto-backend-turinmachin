@@ -86,10 +86,26 @@ public class AuthenticationService {
         return new LoginResponseDto(token, modelMapper.map(user, UserResponseDto.class));
     }
 
-    public User tryVerifyUser(User user, UUID verificationId) {
+    public LoginResponseDto googleAuthUpgrade(String idTokenValue) throws IOException, GeneralSecurityException {
+        GoogleIdToken idToken = googleAuthenticationService.verifyIdToken(idTokenValue);
+        Payload payload = idToken.getPayload();
+
+        String email = payload.get("email").toString();
+        User user = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
+
         if (user.getAuthProvider() != AuthProvider.CREDENTIALS) {
             throw new AuthProviderNotCredentialsException();
         }
+
+        userService.upgradeUserAuthToGoogle(user, payload);
+
+        String token = jwtService.generateToken(user);
+        return new LoginResponseDto(token, modelMapper.map(user, UserResponseDto.class));
+    }
+
+    public User tryVerifyUser(User user, UUID verificationId) {
+        if (user.getAuthProvider() != AuthProvider.CREDENTIALS)
+            throw new AuthProviderNotCredentialsException();
 
         if (user.getVerified())
             throw new UserAlreadyVerifiedException();
