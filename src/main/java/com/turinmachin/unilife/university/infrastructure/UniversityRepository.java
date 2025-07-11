@@ -58,7 +58,7 @@ public interface UniversityRepository extends JpaRepository<University, UUID> {
                 COUNT(DISTINCT users.id) as total_students
             FROM university
                 LEFT JOIN users ON users.university_id = university.id
-            WHERE university.id = :id
+            WHERE university.id = :id AND active = TRUE
             GROUP BY university.id
             """)
     Optional<UniversityWithStatsDto> findWithStatsById(UUID id);
