@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
+import com.turinmachin.unilife.user.dto.SelfUserResponseDto;
 import com.turinmachin.unilife.user.dto.UpdateUserDto;
 import com.turinmachin.unilife.user.dto.UpdateUserPasswordDto;
 import com.turinmachin.unilife.user.dto.UpdateUserProfilePictureDto;
@@ -58,9 +59,9 @@ public class UserController {
 
     @GetMapping("/@self")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public UserResponseDto getSelfUser(Authentication authentication) {
+    public SelfUserResponseDto getSelfUser(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return modelMapper.map(user, UserResponseDto.class);
+        return modelMapper.map(user, SelfUserResponseDto.class);
     }
 
     @GetMapping("/{id}")
@@ -77,10 +78,10 @@ public class UserController {
 
     @PutMapping("/@self")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public UserResponseDto updateUser(@Valid @RequestBody UpdateUserDto dto, Authentication authentication) {
+    public SelfUserResponseDto updateUser(@Valid @RequestBody UpdateUserDto dto, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         user = userService.updateUser(user, dto);
-        return modelMapper.map(user, UserResponseDto.class);
+        return modelMapper.map(user, SelfUserResponseDto.class);
     }
 
     @PatchMapping("/@self/password")
@@ -94,11 +95,11 @@ public class UserController {
 
     @PatchMapping("/@self/picture")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public UserResponseDto updateUserProfilePicture(@Valid @ModelAttribute UpdateUserProfilePictureDto dto,
+    public SelfUserResponseDto updateUserProfilePicture(@Valid @ModelAttribute UpdateUserProfilePictureDto dto,
             Authentication authentication) throws IOException {
         User user = (User) authentication.getPrincipal();
         user = userService.updateUserProfilePicture(user, dto.getPicture());
-        return modelMapper.map(user, UserResponseDto.class);
+        return modelMapper.map(user, SelfUserResponseDto.class);
     }
 
     @DeleteMapping("/@self/picture")
