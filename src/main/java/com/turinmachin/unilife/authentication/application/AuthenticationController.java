@@ -25,7 +25,7 @@ import com.turinmachin.unilife.authentication.dto.VerifyUserDto;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
-import com.turinmachin.unilife.user.dto.UserResponseDto;
+import com.turinmachin.unilife.user.dto.SelfUserResponseDto;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
 import com.turinmachin.unilife.user.exception.UserNotFoundException;
 
@@ -53,11 +53,11 @@ public class AuthenticationController {
 
     @PostMapping("/verify")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public UserResponseDto verifyUser(@Valid @RequestBody VerifyUserDto dto, Authentication authentication) {
+    public SelfUserResponseDto verifyUser(@Valid @RequestBody VerifyUserDto dto, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         authenticationService.tryVerifyUser(user, dto.getVerificationId());
 
-        return modelMapper.map(user, UserResponseDto.class);
+        return modelMapper.map(user, SelfUserResponseDto.class);
     }
 
     @PostMapping("/verify-resend")
