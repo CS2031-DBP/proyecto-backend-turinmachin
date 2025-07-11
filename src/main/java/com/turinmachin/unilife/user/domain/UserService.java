@@ -261,7 +261,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User updateUserPassword(User user, UpdateUserPasswordDto dto) {
-        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword()))
+        if (user.getPassword() != null && !passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword()))
             throw new UnauthorizedException("Current password is incorrect");
 
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
@@ -431,7 +431,6 @@ public class UserService implements UserDetailsService {
 
     public User upgradeUserAuthToGoogle(User user, Payload payload) {
         user.setAuthProvider(AuthProvider.GOOGLE);
-        user.setPassword(null);
 
         if (!user.getVerified()) {
             verifyUser(user);

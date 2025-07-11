@@ -24,7 +24,7 @@ import com.turinmachin.unilife.jwt.domain.JwtService;
 import com.turinmachin.unilife.user.domain.User;
 import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
-import com.turinmachin.unilife.user.dto.UserResponseDto;
+import com.turinmachin.unilife.user.dto.SelfUserResponseDto;
 import com.turinmachin.unilife.user.event.SendWelcomeEmailEvent;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
 import com.turinmachin.unilife.user.exception.UserNotFoundException;
@@ -48,14 +48,11 @@ public class AuthenticationService {
         User user = userService.getUserByUsernameOrEmail(dto.getUsername())
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (user.getAuthProvider() != AuthProvider.CREDENTIALS)
-            throw new AuthProviderNotCredentialsException();
-
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword()))
             throw new InvalidCredentialsException();
 
         String token = jwtService.generateToken(user);
-        return new LoginResponseDto(token, modelMapper.map(user, UserResponseDto.class));
+        return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));
     }
 
     public LoginResponseDto jwtRegister(RegisterUserDto dto) {
@@ -63,7 +60,7 @@ public class AuthenticationService {
         userService.sendVerificationEmail(createdUser);
 
         String token = jwtService.generateToken(createdUser);
-        return new LoginResponseDto(token, modelMapper.map(createdUser, UserResponseDto.class));
+        return new LoginResponseDto(token, modelMapper.map(createdUser, SelfUserResponseDto.class));
     }
 
     public LoginResponseDto googleAuth(String idTokenValue) throws IOException, GeneralSecurityException {
@@ -83,7 +80,7 @@ public class AuthenticationService {
         }
 
         String token = jwtService.generateToken(user);
-        return new LoginResponseDto(token, modelMapper.map(user, UserResponseDto.class));
+        return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));
     }
 
     public LoginResponseDto googleAuthUpgrade(String idTokenValue) throws IOException, GeneralSecurityException {
@@ -100,13 +97,10 @@ public class AuthenticationService {
         userService.upgradeUserAuthToGoogle(user, payload);
 
         String token = jwtService.generateToken(user);
-        return new LoginResponseDto(token, modelMapper.map(user, UserResponseDto.class));
+        return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));
     }
 
     public User tryVerifyUser(User user, UUID verificationId) {
-        if (user.getAuthProvider() != AuthProvider.CREDENTIALS)
-            throw new AuthProviderNotCredentialsException();
-
         if (user.getVerified())
             throw new UserAlreadyVerifiedException();
 
@@ -118,8 +112,8 @@ public class AuthenticationService {
     }
 
     public void triggerResetPassword(User user) {
-        if (user.getAuthProvider() != AuthProvider.CREDENTIALS)
-            throw new AuthProviderNotCredentialsException();
+        if (user.getPassword() == null)
+            throw new ConflictException("User does not have a password");
 
         if (userService.userHasValidToken(user))
             throw new ConflictException("User already has reset token");
@@ -134,9 +128,6 @@ public class AuthenticationService {
 
     public User resetUserPassword(String token, String newPassword) {
         User user = userService.getUserByPasswordResetToken(token).orElseThrow(UserNotFoundException::new);
-
-        if (user.getAuthProvider() != AuthProvider.CREDENTIALS)
-            throw new AuthProviderNotCredentialsException();
 
         return userService.resetPassword(user, newPassword);
     }

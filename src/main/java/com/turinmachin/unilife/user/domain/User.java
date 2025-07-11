@@ -106,6 +106,10 @@ public class User implements UserDetails {
         return verificationId == null;
     }
 
+    public boolean getHasPassword() {
+        return password != null;
+    }
+
     public Integer getStreak() {
         LocalDate expectedDate = LocalDate.now(ZoneOffset.UTC);
         int streak = 0;

@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 public class UpdateUserPasswordDto {
 
-    @NotBlank
     private String currentPassword;
 
     @NotBlank

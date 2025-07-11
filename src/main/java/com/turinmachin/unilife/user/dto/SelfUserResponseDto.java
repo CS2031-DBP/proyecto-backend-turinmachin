@@ -23,6 +23,7 @@ public class SelfUserResponseDto {
     private String displayName;
     private String bio;
     private AuthProvider authProvider;
+    private boolean hasPassword;
     private UniversityResponseDto university;
     private DegreeResponseDto degree;
     private FileInfoResponseDto profilePicture;
