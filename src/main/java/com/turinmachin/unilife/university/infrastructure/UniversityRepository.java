@@ -42,7 +42,7 @@ public interface UniversityRepository extends JpaRepository<University, UUID> {
                 similarity(short_name, :query) DESC,
                 name
             """)
-    Page<University> omnisearch(String query, Pageable pageable);
+    Page<University> search(String query, Pageable pageable);
 
     Optional<University> findByIdAndActiveTrue(UUID id);
 

@@ -53,7 +53,7 @@ public interface DegreeRepository extends JpaRepository<Degree, UUID> {
                 similarity(D.short_name, :query) DESC,
                 D.name
             """)
-    Page<Degree> omnisearch(String query, UUID universityId, Pageable pageable);
+    Page<Degree> search(String query, UUID universityId, Pageable pageable);
 
     @NativeQuery("""
             SELECT

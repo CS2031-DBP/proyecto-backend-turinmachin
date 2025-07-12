@@ -37,7 +37,7 @@ public class DegreeService {
     }
 
     public Page<Degree> searchDegrees(final String query, final UUID universityId, final Pageable pageable) {
-        return degreeRepository.omnisearch(query, universityId, pageable);
+        return degreeRepository.search(query, universityId, pageable);
     }
 
     public Page<Degree> getDegreesByUniversityId(final UUID universityId, final Pageable pageable) {

@@ -44,7 +44,7 @@ public class UniversityService {
     }
 
     public Page<University> searchUniversities(final String query, final Pageable pageable) {
-        return universityRepository.omnisearch(query, pageable);
+        return universityRepository.search(query, pageable);
     }
 
     public Optional<University> getUniversityById(final UUID id) {

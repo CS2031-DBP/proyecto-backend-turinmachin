@@ -74,7 +74,7 @@ public class PostController {
                     .and(PostSpecifications.isActive());
             posts = postService.getPostsWithSpec(spec, pageable);
         } else {
-            posts = postService.omnisearch(query, authorId, universityId, degreeId, tags, pageable);
+            posts = postService.search(query, authorId, universityId, degreeId, tags, pageable);
         }
 
         return posts.map(post -> {

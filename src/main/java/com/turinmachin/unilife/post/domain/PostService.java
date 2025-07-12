@@ -55,10 +55,10 @@ public class PostService {
         return postRepository.findByIdAndActiveTrue(id);
     }
 
-    public Page<Post> omnisearch(final String query, final UUID authorId, final UUID universityId, final UUID degreeId,
+    public Page<Post> search(final String query, final UUID authorId, final UUID universityId, final UUID degreeId,
             final List<String> tags,
             final Pageable pageable) {
-        return postRepository.omnisearch(query, authorId, universityId, degreeId, tags, pageable);
+        return postRepository.search(query, authorId, universityId, degreeId, tags, pageable);
     }
 
     public Post createPost(final CreatePostDto dto, final User author) throws IOException {

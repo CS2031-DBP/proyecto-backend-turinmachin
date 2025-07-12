@@ -40,7 +40,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
                 similarity(content, :query) DESC,
                 created_at DESC;
             """)
-    Page<Post> omnisearch(String query, UUID authorId, UUID universityId, UUID degreeId, List<String> tags,
+    Page<Post> search(String query, UUID authorId, UUID universityId, UUID degreeId, List<String> tags,
             Pageable pageable);
 
     @NativeQuery("""
