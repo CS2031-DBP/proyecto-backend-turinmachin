@@ -26,6 +26,7 @@ import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.SelfUserResponseDto;
 import com.turinmachin.unilife.user.event.SendWelcomeEmailEvent;
+import com.turinmachin.unilife.user.exception.EmailConflictException;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
 import com.turinmachin.unilife.user.exception.UserNotFoundException;
 
@@ -63,21 +64,29 @@ public class AuthenticationService {
         return new LoginResponseDto(token, modelMapper.map(createdUser, SelfUserResponseDto.class));
     }
 
-    public LoginResponseDto googleAuth(final String idTokenValue) throws IOException, GeneralSecurityException {
+    public LoginResponseDto googleLogin(final String idTokenValue) throws IOException, GeneralSecurityException {
         final GoogleIdToken idToken = googleAuthenticationService.verifyIdToken(idTokenValue);
         final Payload payload = idToken.getPayload();
 
         final String email = payload.get("email").toString();
-
-        final User user = userService.getUserByEmail(email).orElseGet(() -> {
-            final User createdUser = userService.createGoogleUser(email, payload);
-            eventPublisher.publishEvent(new SendWelcomeEmailEvent(createdUser));
-            return createdUser;
-        });
+        final User user = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
 
         if (user.getAuthProvider() != AuthProvider.GOOGLE) {
             throw new AuthProviderNotGoogleException();
         }
+
+        final String token = jwtService.generateToken(user);
+        return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));
+    }
+
+    public LoginResponseDto googleRegister(final String idTokenValue) throws IOException, GeneralSecurityException {
+        final GoogleIdToken idToken = googleAuthenticationService.verifyIdToken(idTokenValue);
+        final Payload payload = idToken.getPayload();
+
+        final String email = payload.get("email").toString();
+        final User user = userService.createGoogleUser(email, payload);
+
+        eventPublisher.publishEvent(new SendWelcomeEmailEvent(user));
 
         final String token = jwtService.generateToken(user);
         return new LoginResponseDto(token, modelMapper.map(user, SelfUserResponseDto.class));

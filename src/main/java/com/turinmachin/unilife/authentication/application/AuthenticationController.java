@@ -92,10 +92,16 @@ public class AuthenticationController {
         authenticationService.resetUserPassword(dto.getToken(), dto.getNewPassword());
     }
 
-    @PostMapping("/oauth/google")
+    @PostMapping("/oauth/google/login")
     public LoginResponseDto googleLogin(@Valid @RequestBody final GoogleLoginRequestDto dto)
             throws IOException, GeneralSecurityException {
-        return authenticationService.googleAuth(dto.getIdToken());
+        return authenticationService.googleLogin(dto.getIdToken());
+    }
+
+    @PostMapping("/oauth/google/register")
+    public LoginResponseDto googleRegister(@Valid @RequestBody final GoogleLoginRequestDto dto)
+            throws IOException, GeneralSecurityException {
+        return authenticationService.googleRegister(dto.getIdToken());
     }
 
     @PostMapping("/oauth/google/upgrade")
