@@ -34,7 +34,7 @@ public class BootstrapConfiguration {
                 return;
             }
 
-            logger.info("No admin users found. Creating default admin user");
+            logger.warn("No admin users found. Creating default admin user. ¡Remember to set up the account!");
 
             RegisterUserDto dto = new RegisterUserDto();
             dto.setEmail(adminEmail);

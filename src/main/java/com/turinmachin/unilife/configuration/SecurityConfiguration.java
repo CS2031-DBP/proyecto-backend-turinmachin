@@ -2,8 +2,12 @@ package com.turinmachin.unilife.configuration;
 
 import com.turinmachin.unilife.jwt.application.JwtAuthenticatorFilter;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,6 +33,11 @@ public class SecurityConfiguration {
 
     private final JwtAuthenticatorFilter jwtAuthenticatorFilter;
 
+    @PostConstruct
+    public void setupBouncyCastle() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         return http
@@ -39,6 +48,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/chat/notify").permitAll()
                         .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/universities/**").permitAll()

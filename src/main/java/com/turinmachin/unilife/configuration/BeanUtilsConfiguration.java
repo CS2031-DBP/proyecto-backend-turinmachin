@@ -24,6 +24,8 @@ import com.turinmachin.unilife.university.domain.University;
 import com.turinmachin.unilife.university.dto.CreateUniversityDto;
 import com.turinmachin.unilife.user.domain.User;
 
+import nl.martijndwars.webpush.PushAsyncService;
+
 @Configuration
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
 public class BeanUtilsConfiguration {
@@ -73,6 +75,11 @@ public class BeanUtilsConfiguration {
     @Bean
     public Base64.Encoder base64Encoder() {
         return Base64.getUrlEncoder().withoutPadding();
+    }
+
+    @Bean
+    public PushAsyncService pushAsyncService() {
+        return new PushAsyncService();
     }
 
 }
