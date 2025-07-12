@@ -156,7 +156,7 @@ public class PostController {
             throw new ForbiddenException();
         }
 
-        postService.deactivatePost(post);
+        postService.deletePost(post);
     }
 
     @DeleteMapping("/{id}/votes")

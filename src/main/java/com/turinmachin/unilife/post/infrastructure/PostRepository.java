@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.NativeQuery;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,5 +54,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
             ORDER BY created_at DESC
             """)
     Page<Post> findUpvotedBy(UUID userId, Pageable pageable);
+
+    boolean existsByActiveTrueAndAuthorIdAndCreatedAtBetween(UUID authorId, Instant start, Instant end);
 
 }

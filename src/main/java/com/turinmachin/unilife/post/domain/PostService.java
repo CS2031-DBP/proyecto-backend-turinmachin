@@ -10,7 +10,11 @@ import com.turinmachin.unilife.post.dto.UpdatePostDto;
 import com.turinmachin.unilife.post.infrastructure.PostRepository;
 import com.turinmachin.unilife.post.infrastructure.PostVoteRepository;
 import com.turinmachin.unilife.user.domain.User;
+import com.turinmachin.unilife.user.domain.UserService;
+import com.turinmachin.unilife.user.domain.UserStreakService;
 import com.turinmachin.unilife.user.exception.UserWithoutUniversityException;
+
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,14 +35,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PostService {
 
+    private final UserStreakService userStreakService;
+    private final EntityManager entityManager;
     private final PostRepository postRepository;
-
     private final PostVoteRepository postVoteRepository;
-
     private final FileInfoService fileInfoService;
-
     private final ModelMapper modelMapper;
-
     private final PerspectiveService perspectiveService;
 
     public Page<Post> getPostsWithSpec(final Specification<Post> spec, Pageable pageable) {
@@ -70,7 +72,7 @@ public class PostService {
             throw new ToxicContentException();
         }
 
-        final Post post = modelMapper.map(dto, Post.class);
+        Post post = modelMapper.map(dto, Post.class);
         post.setAuthor(author);
         post.setUniversity(author.getUniversity());
         post.setDegree(author.getDegree());
@@ -79,7 +81,9 @@ public class PostService {
         final List<FileInfo> files = fileInfoService.createFileBatch(dto.getFiles());
         post.setFiles(files);
 
-        return postRepository.save(post);
+        post = postRepository.save(post);
+        userStreakService.handlePostCreated(post);
+        return post;
     }
 
     public Post updatePost(final Post post, final UpdatePostDto dto) {
@@ -92,11 +96,14 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public Post deactivatePost(final Post post) {
+    public Post deletePost(Post post) {
         fileInfoService.triggerFileBatchDeletion(post.getFiles());
 
         post.setActive(false);
-        return postRepository.save(post);
+        post = postRepository.save(post);
+
+        userStreakService.handlePostDeleted(post);
+        return post;
     }
 
     public Optional<PostVote> getPostVote(final UUID postId, final UUID userId) {
@@ -127,7 +134,7 @@ public class PostService {
         postVoteRepository.delete(vote);
     }
 
-    public Page<Post> getPostsUpvotedBy(UUID userId, Pageable pageable) {
+    public Page<Post> getPostsUpvotedBy(final UUID userId, final Pageable pageable) {
         return postRepository.findUpvotedBy(userId, pageable);
     }
 

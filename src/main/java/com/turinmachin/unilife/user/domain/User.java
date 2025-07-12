@@ -94,6 +94,12 @@ public class User implements UserDetails {
     @PrimaryKeyJoinColumn
     private UserToken passwordResetToken;
 
+    @Column(nullable = false)
+    public Integer streakValue = 0;
+
+    @Column(nullable = true)
+    public LocalDate lastStreakDate;
+
     @CreationTimestamp
     @Column(nullable = false)
     private Instant createdAt;
@@ -102,41 +108,21 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Instant updatedAt;
 
+    public int getStreak() {
+        final LocalDate today = LocalDate.now(ZoneOffset.UTC);
+
+        if (lastStreakDate == null || lastStreakDate.isBefore(today.minusDays(1)))
+            return 0;
+
+        return streakValue;
+    }
+
     public boolean getVerified() {
         return verificationId == null;
     }
 
     public boolean getHasPassword() {
         return password != null;
-    }
-
-    public Integer getStreak() {
-        LocalDate expectedDate = LocalDate.now(ZoneOffset.UTC);
-        int streak = 0;
-
-        for (final Post post : posts) {
-            final LocalDate postDate = post.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate();
-
-            if (postDate.isAfter(expectedDate)) {
-                continue;
-            }
-
-            if (postDate.equals(expectedDate)) {
-                streak++;
-                expectedDate = expectedDate.minusDays(1);
-            } else {
-                break;
-            }
-        }
-
-        return streak;
-    }
-
-    public LocalDate getLastStreakDate() {
-        return Optional.ofNullable(posts)
-                .flatMap(posts -> posts.stream().findFirst())
-                .map(post -> post.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate())
-                .orElse(null);
     }
 
     @PrePersist

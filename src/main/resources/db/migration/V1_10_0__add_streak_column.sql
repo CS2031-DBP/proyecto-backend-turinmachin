@@ -1,0 +1,5 @@
+ALTER TABLE users
+ADD COLUMN streak_value INT NOT NULL DEFAULT 0;
+
+ALTER TABLE users
+ADD COLUMN last_streak_date DATE;
