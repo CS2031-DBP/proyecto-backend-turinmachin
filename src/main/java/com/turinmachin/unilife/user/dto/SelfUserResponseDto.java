@@ -22,6 +22,7 @@ public class SelfUserResponseDto {
     private String username;
     private String displayName;
     private String bio;
+    private LocalDate birthday;
     private AuthProvider authProvider;
     private boolean hasPassword;
     private UniversityResponseDto university;

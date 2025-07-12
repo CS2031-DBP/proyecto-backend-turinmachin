@@ -1,5 +1,6 @@
 package com.turinmachin.unilife.user.dto;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import jakarta.validation.constraints.Email;
@@ -24,6 +25,8 @@ public class UpdateUserDto {
     private String displayName;
 
     private String bio;
+
+    private LocalDate birthday;
 
     private UUID degreeId;
 

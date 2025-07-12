@@ -67,6 +67,9 @@ public class User implements UserDetails {
     @Column(nullable = true)
     private String bio;
 
+    @Column(nullable = true)
+    private LocalDate birthday;
+
     @ManyToOne
     @JoinColumn(nullable = true)
     private University university;

@@ -21,6 +21,7 @@ public class UserResponseDto {
     private String username;
     private String displayName;
     private String bio;
+    private LocalDate birthday;
     private UniversityResponseDto university;
     private DegreeResponseDto degree;
     private FileInfoResponseDto profilePicture;

@@ -225,6 +225,7 @@ public class UserService implements UserDetailsService {
         user.setUsername(dto.getUsername());
         user.setDisplayName(dto.getDisplayName());
         user.setBio(dto.getBio());
+        user.setBirthday(dto.getBirthday());
 
         if (!user.getEmail().equalsIgnoreCase(dto.getEmail())) {
             if (user.getAuthProvider() != AuthProvider.CREDENTIALS)
