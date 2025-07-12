@@ -28,7 +28,8 @@ public class SelfUserResponseDto {
     private DegreeResponseDto degree;
     private FileInfoResponseDto profilePicture;
     private Role role;
-    private Integer streak;
+    private int streak;
+    private boolean streakSafe;
     private LocalDate lastStreakDate;
     private boolean verified;
     private Instant createdAt;

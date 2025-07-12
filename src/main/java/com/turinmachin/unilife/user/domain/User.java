@@ -117,6 +117,11 @@ public class User implements UserDetails {
         return streakValue;
     }
 
+    public boolean getStreakSafe() {
+        final LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        return streakValue == 0 || lastStreakDate.equals(today);
+    }
+
     public boolean getVerified() {
         return verificationId == null;
     }
