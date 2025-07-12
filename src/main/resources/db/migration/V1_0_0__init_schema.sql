@@ -1,12 +1,12 @@
-CREATE TABLE IF NOT EXISTS file_info (
+CREATE TABLE file_info (
   id UUID NOT NULL PRIMARY KEY,
   blur_data_url TEXT,
-  key VARCHAR(255) NOT NULL UNIQUE,
+  "key" VARCHAR(255) NOT NULL UNIQUE,
   media_type VARCHAR(255) NOT NULL,
   url VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS university (
+CREATE TABLE university (
   id UUID NOT NULL PRIMARY KEY,
   active BOOLEAN NOT NULL DEFAULT TRUE,
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -15,25 +15,25 @@ CREATE TABLE IF NOT EXISTS university (
   picture_id UUID REFERENCES file_info (id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS university_email_domains (
+CREATE TABLE university_email_domains (
   university_id UUID NOT NULL REFERENCES university (id) ON DELETE CASCADE,
   email_domains VARCHAR(255) UNIQUE,
   PRIMARY KEY (university_id, email_domains)
 );
 
-CREATE TABLE IF NOT EXISTS degree (
+CREATE TABLE degree (
   id UUID NOT NULL PRIMARY KEY,
   name VARCHAR(255) NOT NULL UNIQUE,
   short_name VARCHAR(255) UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS university_degrees (
+CREATE TABLE university_degrees (
   universities_id UUID NOT NULL REFERENCES university (id) ON DELETE CASCADE,
   degrees_id UUID NOT NULL REFERENCES degree (id) ON DELETE CASCADE,
   PRIMARY KEY (universities_id, degrees_id)
 );
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   id UUID NOT NULL PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   username VARCHAR(255) NOT NULL UNIQUE,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ
 );
 
-CREATE TABLE IF NOT EXISTS post (
+CREATE TABLE post (
   id UUID NOT NULL PRIMARY KEY,
   author_id UUID NOT NULL REFERENCES users (id),
   university_id UUID NOT NULL REFERENCES university (id),
@@ -60,27 +60,27 @@ CREATE TABLE IF NOT EXISTS post (
   updated_at TIMESTAMPTZ
 );
 
-CREATE TABLE IF NOT EXISTS post_tags (
+CREATE TABLE post_tags (
   post_id UUID NOT NULL REFERENCES post (id) ON DELETE CASCADE,
   tags VARCHAR(255),
   PRIMARY KEY (post_id, tags)
 );
 
-CREATE TABLE IF NOT EXISTS post_files (
+CREATE TABLE post_files (
   post_id UUID NOT NULL REFERENCES post (id) ON DELETE CASCADE,
   files_id UUID NOT NULL REFERENCES file_info (id) UNIQUE,
   files_order INTEGER NOT NULL,
   PRIMARY KEY (post_id, files_order)
 );
 
-CREATE TABLE IF NOT EXISTS post_vote (
+CREATE TABLE post_vote (
   post_id UUID NOT NULL REFERENCES post (id) ON DELETE CASCADE,
   author_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   value SMALLINT NOT NULL CHECK (value in (-1, 1)),
   PRIMARY KEY (post_id, author_id)
 );
 
-CREATE TABLE IF NOT EXISTS comment (
+CREATE TABLE comment (
   id UUID NOT NULL PRIMARY KEY,
   post_id UUID NOT NULL REFERENCES post (id) ON DELETE CASCADE,
   author_id UUID REFERENCES users (id) ON DELETE CASCADE,
