@@ -59,10 +59,13 @@ public class PostController {
             @RequestParam(required = false) final UUID degreeId,
             @RequestParam(required = false) final List<String> tags,
             @RequestParam(required = false) final UUID authorId,
+            @RequestParam(required = false) final UUID upvotedBy,
             final Pageable pageable) {
         Page<Post> posts;
 
-        if (query == null) {
+        if (upvotedBy != null) {
+            posts = postService.getPostsUpvotedBy(upvotedBy, pageable);
+        } else if (query == null) {
             final Specification<Post> spec = Specification
                     .where(PostSpecifications.hasUniversityId(universityId))
                     .and(PostSpecifications.hasDegreeId(degreeId))

@@ -127,4 +127,8 @@ public class PostService {
         postVoteRepository.delete(vote);
     }
 
+    public Page<Post> getPostsUpvotedBy(UUID userId, Pageable pageable) {
+        return postRepository.findUpvotedBy(userId, pageable);
+    }
+
 }

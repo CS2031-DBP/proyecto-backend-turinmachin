@@ -28,6 +28,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
                     OR EXISTS (
                         SELECT 1 FROM post_tags pt
                         WHERE pt.post_id = post.id AND pt.tags IN (:tags)
+                        LIMIT 1
                     )
                 )
                 AND (
@@ -36,9 +37,21 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
                 )
             ORDER BY
                 ts_rank(content_tsv, plainto_tsquery('spanish', :query)) DESC,
-                similarity(content, :query) DESC;
+                similarity(content, :query) DESC,
+                created_at DESC;
             """)
     Page<Post> omnisearch(String query, UUID authorId, UUID universityId, UUID degreeId, List<String> tags,
             Pageable pageable);
+
+    @NativeQuery("""
+            SELECT P.* FROM post P
+            WHERE EXISTS (
+                SELECT 1 FROM post_vote PV
+                WHERE PV.post_id = P.id AND PV.author_id = :userId AND PV.value = 1
+                LIMIT 1
+            )
+            ORDER BY created_at DESC
+            """)
+    Page<Post> findUpvotedBy(UUID userId, Pageable pageable);
 
 }
