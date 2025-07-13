@@ -163,9 +163,9 @@ public class PostService {
 
     @Cacheable("AiTags")
     public List<String> generateTags(final String content) {
-
         final List<ChatRequestMessage> messages = new ArrayList<>();
-        messages.add(new ChatRequestSystemMessage("Extrae " + tagLimit + " etiquetas claras, concisas y relevantes en minúsculas para la siguiente publicación. Devuélvelas como una lista separada por comas. No incluyas hashtags ni texto adicional. Envíalas en orden de relevancia. Si el contenido es ofensivo, inapropiado u tóxico, responde con una cadena vacía."));
+        messages.add(new ChatRequestSystemMessage("Extrae " + tagLimit
+                + " etiquetas claras, concisas y relevantes en minúsculas para la siguiente publicación. Devuélvelas como una lista separada por comas. No incluyas hashtags ni texto adicional. Envíalas en orden de relevancia. Si el contenido es ofensivo, inapropiado u tóxico, responde con una cadena vacía."));
         messages.add(new ChatRequestUserMessage(content));
 
         final ChatCompletionsOptions options = new ChatCompletionsOptions(messages);
@@ -189,6 +189,7 @@ public class PostService {
                 .filter(s -> !s.isBlank())
                 .distinct()
                 .limit(tagLimit)
+                .sorted()
                 .toList();
     }
 
