@@ -31,7 +31,6 @@ public class SelfUserResponseDto {
     private Role role;
     private int streak;
     private boolean streakSafe;
-    private LocalDate lastStreakDate;
     private boolean verified;
     private Instant createdAt;
 

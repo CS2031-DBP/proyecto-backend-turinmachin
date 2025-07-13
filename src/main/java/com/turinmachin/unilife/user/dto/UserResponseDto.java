@@ -27,7 +27,6 @@ public class UserResponseDto {
     private FileInfoResponseDto profilePicture;
     private Role role;
     private Integer streak;
-    private LocalDate lastStreakDate;
     private boolean verified;
     private Instant createdAt;
 
