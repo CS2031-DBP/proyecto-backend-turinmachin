@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import com.azure.ai.inference.ChatCompletionsAsyncClient;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -51,6 +52,8 @@ public class PostController {
     private final CommentService commentService;
     private final UserService userService;
     private final ModelMapper modelMapper;
+    private final ChatCompletionsAsyncClient client;
+    private final String defaultModel;
 
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
@@ -171,6 +174,12 @@ public class PostController {
                 .orElseThrow(() -> new NotFoundException("Post or vote not found"));
 
         postService.removePostVote(vote);
+    }
+
+    @GetMapping("/tag-completion")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public List<String> suggestTags(@RequestParam final String content) {
+        return  postService.generateTags(content);
     }
 
 }
