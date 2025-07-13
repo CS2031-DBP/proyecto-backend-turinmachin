@@ -51,7 +51,7 @@ public class PostService {
     private final ModelMapper modelMapper;
     private final PerspectiveService perspectiveService;
     private final ChatCompletionsAsyncClient client;
-    private final String defaultModel;
+    private final String tagDefaultModel;
 
     @Value("${ai.tag.limit}")
     private int tagLimit;
@@ -169,7 +169,7 @@ public class PostService {
         messages.add(new ChatRequestUserMessage(content));
 
         final ChatCompletionsOptions options = new ChatCompletionsOptions(messages);
-        options.setModel(defaultModel);
+        options.setModel(tagDefaultModel);
 
         final ChatCompletions completions = client.complete(options).block();
 

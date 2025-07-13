@@ -30,7 +30,7 @@ public class AIConversationService {
 
     private final ChatCompletionsAsyncClient client;
 
-    private final String defaultModel;
+    private final String chatDefaultModel;
 
     private final ModelMapper modelMapper;
 
@@ -59,7 +59,7 @@ public class AIConversationService {
                 .toList());
 
         final ChatCompletionsOptions options = new ChatCompletionsOptions(chatMessages);
-        options.setModel(defaultModel);
+        options.setModel(chatDefaultModel);
 
         final ChatCompletions completions = client.complete(options).block();
         final String response = Optional.ofNullable(completions)

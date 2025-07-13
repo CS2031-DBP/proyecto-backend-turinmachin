@@ -17,7 +17,10 @@ public class AIClientConfig {
     private String apiKey;
 
     @Value("${ai.chat.default-model}")
-    private String defaultModel;
+    private String chatDefaultModel;
+
+    @Value("${ai.tag.default-model}")
+    private String tagDefaultModel;
 
     @Bean
     public ChatCompletionsAsyncClient chatCompletionsClient() {
@@ -28,7 +31,12 @@ public class AIClientConfig {
     }
 
     @Bean
-    public String defaultModel() {
-        return defaultModel;
+    public String chatDefaultModel() {
+        return chatDefaultModel;
+    }
+
+    @Bean
+    public String tagDefaultModel() {
+        return tagDefaultModel;
     }
 }

@@ -52,8 +52,6 @@ public class PostController {
     private final CommentService commentService;
     private final UserService userService;
     private final ModelMapper modelMapper;
-    private final ChatCompletionsAsyncClient client;
-    private final String defaultModel;
 
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
