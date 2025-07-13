@@ -67,6 +67,9 @@ public class Post {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(nullable = false)
+    private Integer score = 0;
+
     @CreationTimestamp
     @Column(nullable = false)
     private Instant createdAt;
@@ -74,14 +77,6 @@ public class Post {
     @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
-
-    public int getScore() {
-        return votes.stream()
-                .map(PostVote::getValue)
-                .map(VoteType::getValue)
-                .map(s -> (int) s)
-                .reduce(0, Integer::sum);
-    }
 
     @Override
     public boolean equals(final Object o) {

@@ -26,6 +26,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.lang.StackWalker.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -126,11 +127,21 @@ public class PostService {
             throw new ConflictException("Vote already present");
         }
 
+        final short originalVoteValue = Optional.ofNullable(vote.getValue())
+                .map(pv -> pv.getValue())
+                .orElse((short) 0);
+
         vote.setValue(voteType);
+        post.setScore(post.getScore() - originalVoteValue + voteType.getValue());
+        postRepository.save(post);
         return postVoteRepository.save(vote);
     }
 
     public void removePostVote(final PostVote vote) {
+        final Post post = vote.getPost();
+
+        post.setScore(post.getScore() - vote.getValue().getValue());
+        postRepository.save(post);
         postVoteRepository.delete(vote);
     }
 
