@@ -179,7 +179,7 @@ public class PostController {
     @GetMapping("/tag-completion")
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<String> suggestTags(@RequestParam final String content) {
-        return  postService.generateTags(content);
+        return postService.generateTags(content);
     }
 
 }
