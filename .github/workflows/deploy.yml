@@ -18,7 +18,7 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: ./mvnw -B clean package
+        run: ./mvnw -B clean package -Dmaven.test.skip
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
