@@ -122,7 +122,7 @@ public class User implements UserDetails {
 
     public boolean getStreakSafe() {
         final LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        return streakValue == 0 || lastStreakDate.equals(today);
+        return streakValue == 0 || today.equals(lastStreakDate);
     }
 
     public boolean getVerified() {
