@@ -46,14 +46,24 @@ public class SecurityConfiguration {
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticatorFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/chat/notify").permitAll()
-                        .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/universities/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/degrees/**").permitAll()
+                        .requestMatchers(
+                                "/error",
+                                "/auth/**",
+                                "/chat/notify",
+                                "/actuator/health",
+                                "/auth/**",
+                                "/api-docs/**",
+                                "/api-docs.yaml/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/error")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/posts/**",
+                                "/users/**",
+                                "/universities/**",
+                                "/degrees/**")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .build();
     }
