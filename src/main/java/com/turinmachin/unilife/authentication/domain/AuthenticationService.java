@@ -26,7 +26,6 @@ import com.turinmachin.unilife.user.domain.UserService;
 import com.turinmachin.unilife.user.dto.RegisterUserDto;
 import com.turinmachin.unilife.user.dto.SelfUserResponseDto;
 import com.turinmachin.unilife.user.event.SendWelcomeEmailEvent;
-import com.turinmachin.unilife.user.exception.EmailConflictException;
 import com.turinmachin.unilife.user.exception.UserAlreadyVerifiedException;
 import com.turinmachin.unilife.user.exception.UserNotFoundException;
 
@@ -48,6 +47,10 @@ public class AuthenticationService {
     public LoginResponseDto jwtLogin(final JwtAuthLoginDto dto) {
         final User user = userService.getUserByUsernameOrEmail(dto.getUsername())
                 .orElseThrow(InvalidCredentialsException::new);
+
+        if (user.getPassword() == null) {
+            throw new AuthProviderNotCredentialsException();
+        }
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword()))
             throw new InvalidCredentialsException();
