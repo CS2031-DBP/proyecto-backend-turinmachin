@@ -1,4 +1,4 @@
-# UniLife [![Tests](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/actions/workflows/tests.yml/badge.svg)](https://github.com/CS2031-DBP/proyecto-backend-turinmachin/actions/workflows/tests.yml)
+# UniLife
 
 **CS2031: Desarrollo Basado en Plataformas**
 

@@ -46,7 +46,9 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
 
     @NativeQuery("""
             SELECT P.* FROM post P
-            WHERE EXISTS (
+            WHERE
+                active = TRUE
+                AND EXISTS (
                 SELECT 1 FROM post_vote PV
                 WHERE PV.post_id = P.id AND PV.author_id = :userId AND PV.value = 1
                 LIMIT 1
