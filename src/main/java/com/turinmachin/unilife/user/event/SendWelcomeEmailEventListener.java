@@ -1,0 +1,22 @@
+package com.turinmachin.unilife.user.event;
+
+import com.turinmachin.unilife.email.domain.EmailService;
+import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class SendWelcomeEmailEventListener {
+
+    private final EmailService emailService;
+
+    @Async
+    @EventListener
+    public void handleSendWelcomeEmailEvent(final SendWelcomeEmailEvent event) throws MessagingException {
+        emailService.sendWelcomeEmail(event.getUser());
+    }
+
+}

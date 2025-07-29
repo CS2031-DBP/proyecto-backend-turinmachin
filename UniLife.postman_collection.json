@@ -1,0 +1,1443 @@
+{
+	"info": {
+		"_postman_id": "06bf461f-719c-47e3-8f0b-3b03fdff83f6",
+		"name": "UniLife",
+		"description": "La URL base del servidor se puede configurar con la variable `baseUrl`. El **backend deployeado en ECS se encuentra en** [http://52.55.26.159:8080](http://52.55.26.159:8080).\n\n## **Algunos ejemplos de uso**\n\n### Crear una universidad y una carrera\n\nSolo los administradores pueden manejar estos recursos. La colección, por defecto, tiene cargadas en variables las credenciales del admin creado por defecto usando el `.env` que se enviará en la tarea.\n\n1. Auth -> Log in as admin\n    \n2. Universities -> Create university\n    \n3. Degrees -> Create degree\n    \n4. Universities -> Add degree to university\n    \n\n### Registrar y verificar un usuario\n\nLos usuarios tienen que verificarse por correo para poder crear posts.\n\n1. Auth -> Register user\n    \n    1. En este punto, **se enviará un correo al correo del usuario.** Este correo incluirá una **ID de verificación** que se deberá copiar a la variable `verificationId` de la colección.\n        \n2. Auth -> Verify User\n    \n\n### Unirse a una universidad y/o carrera\n\n(Para que un usuario se una a una universidad en la app, su correo debe ser de alguno de los dominios registrados de la universidad.)\n\n1. Auth -> Log in via username/email\n    \n2. Users -> Self -> Update self\n    \n    1. Por defecto, este request incluye la ID de la última universidad creada.\n        \n    2. Si se quiere hacer que el usuario se una a la última carrera creada, se debe poner la variable `degreeId` en el field `degreeId`.\n        \n\n### Crear un post\n\n1. Auth -> Log in via username/email\n    \n2. Posts -> Create post\n    \n    1. El request incluye un field donde se pueden añadir imágenes al post.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43480626",
+		"_collection_link": "https://planetary-escape-1391844.postman.co/workspace/c4bc84d3-04dd-4b1c-8d8a-76d19da3f965/collection/43480626-06bf461f-719c-47e3-8f0b-3b03fdff83f6?action=share&source=collection_link&creator=43480626"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Log in as admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code >= 200 && pm.response.code < 300) {",
+									"    const data = pm.response.json();",
+									"    pm.collectionVariables.set('jwtToken', data.token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{adminUsername}}\",\n    \"password\": \"{{adminPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code >= 200 && pm.response.code < 300) {",
+									"    const data = pm.response.json();",
+									"    pm.collectionVariables.set('userId', data.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"username\": \"{{userUsername}}\",\n    \"displayName\": \"Diego Figueroa\",\n    \"password\": \"{{userPassword}}\"\n}   ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend verification email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{userUsername}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/verify-resend",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"verify-resend"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"verificationId\": \"{{verificationId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log in via username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code >= 200 && pm.response.code < 300) {",
+									"    const data = pm.response.json();",
+									"    pm.collectionVariables.set('jwtToken', data.token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{userUsername}}\",\n    \"password\": \"{{userPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log in via email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code >= 200 && pm.response.code < 300) {",
+									"    const data = pm.response.json();",
+									"    pm.collectionVariables.set('jwtToken', data.token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{userEmail}}\",\n    \"password\": \"{{userPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Universities",
+			"item": [
+				{
+					"name": "Get all universities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/universities",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"universities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create university",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code >= 200 && pm.response.code < 300) {",
+									"    const data = pm.response.json();",
+									"    pm.collectionVariables.set('universityId', data.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"UTEC\",\n    \"emailDomains\": [\"utec.edu.pe\"],\n    \"degreeIds\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/universities",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"universities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get university",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/universities/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"universities",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{universityId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add degree to university",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"degreeId\": \"{{degreeId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/universities/:id/degrees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"universities",
+								":id",
+								"degrees"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{universityId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove degree from university",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/universities/:id/degrees/:degreeId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"universities",
+								":id",
+								"degrees",
+								":degreeId"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{universityId}}"
+								},
+								{
+									"key": "degreeId",
+									"value": "{{degreeId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Degrees",
+			"item": [
+				{
+					"name": "Get all degrees",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/degrees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"degrees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create degree",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code >= 200 && pm.response.code < 300) {",
+									"    const data = pm.response.json();",
+									"    pm.collectionVariables.set('degreeId', data.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Computer Science\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/degrees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"degrees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get degree",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/degrees/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"degrees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{degreeId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update degree",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Computer Science (v2)\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/degrees/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"degrees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{degreeId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete degree",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/degrees/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"degrees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{degreeId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Self",
+					"item": [
+						{
+							"name": "Get self",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/@self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"@self"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update self",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"{{userUsername}}\",\n    \"displayName\": null, // Borrar el nombre de display\n    \"universityId\": \"{{universityId}}\", // Unirse a una universidad\n    \"degreeId\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/@self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"@self"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update self profile picture",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "picture",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/@self/picture",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"@self",
+										"picture"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete self profile picture",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/@self/picture",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"@self",
+										"picture"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update self email",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"josedanielgrayson@proton.me\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/@self/email",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"@self",
+										"email"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update self password",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"currentPassword\": \"1234\",\n    \"newPassword\": \"1234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/@self/password",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"@self",
+										"password"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete self",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/@self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"@self"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Get all users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{userId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user role",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\": \"USER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:id/role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id",
+								"role"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{userId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{userId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Posts",
+			"item": [
+				{
+					"name": "Comments",
+					"item": [
+						{
+							"name": "Get all post comments",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/comments",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"comments"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create post comment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const data = pm.response.json();",
+											"pm.collectionVariables.set('commentId', data.id);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"content\": \"Nice post yo\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/comments",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"comments"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create post comment reply",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"content\": \"That's a nice comment over there\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/comments/:commentId/replies",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"comments",
+										":commentId",
+										"replies"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										},
+										{
+											"key": "commentId",
+											"value": "{{commentId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get post comment",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/comments/:commentId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"comments",
+										":commentId"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										},
+										{
+											"key": "commentId",
+											"value": "{{commentId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update post comment",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"content\": \"This is some new content for a comment\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/comments/:commentId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"comments",
+										":commentId"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										},
+										{
+											"key": "commentId",
+											"value": "{{commentId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete post comment",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/comments/:commentId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"comments",
+										":commentId"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										},
+										{
+											"key": "commentId",
+											"value": "{{commentId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Votes",
+					"item": [
+						{
+							"name": "Add upvote",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/upvotes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"upvotes"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add downvote",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/downvotes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"downvotes"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove vote",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/posts/:id/votes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"posts",
+										":id",
+										"votes"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{postId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Get all posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all posts with filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts?tags=foo&authorId={{userId}}&universityId={{universityId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							],
+							"query": [
+								{
+									"key": "tags",
+									"value": "foo"
+								},
+								{
+									"key": "tags",
+									"value": "bar",
+									"disabled": true
+								},
+								{
+									"key": "tags",
+									"value": "baz",
+									"disabled": true
+								},
+								{
+									"key": "authorId",
+									"value": "{{userId}}"
+								},
+								{
+									"key": "universityId",
+									"value": "{{universityId}}"
+								},
+								{
+									"key": "degreeId",
+									"value": "{{degreeId}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code >= 200 && pm.response.code < 300) {",
+									"    const data = pm.response.json();",
+									"    pm.collectionVariables.set('postId', data.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "content",
+									"value": "Hello, world!",
+									"type": "text"
+								},
+								{
+									"key": "files",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "tags",
+									"value": "foo",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "bar",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "baz",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get post",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{postId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update post",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"This is some new content\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{postId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete post",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{postId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwtToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwtToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "postId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "commentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminEmail",
+			"value": ""
+		},
+		{
+			"key": "adminUsername",
+			"value": ""
+		},
+		{
+			"key": "adminPassword",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "verificationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "degreeId",
+			"value": ""
+		},
+		{
+			"key": "userUsername",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userEmail",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userPassword",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "universityId",
+			"value": ""
+		}
+	]
+}

@@ -1,0 +1,2 @@
+ALTER TABLE university
+ADD COLUMN color VARCHAR(10);
