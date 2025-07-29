@@ -22,9 +22,6 @@ public class AmazonS3Configuration {
     @Value("${amazon-s3.secret-key}")
     private String secretKey;
 
-    @Value("${amazon-s3.session-token}")
-    private String sessionToken;
-
     @Value("${amazon-s3.region}")
     private String region;
 
@@ -34,7 +31,7 @@ public class AmazonS3Configuration {
 
         return AmazonS3ClientBuilder
                 .standard()
-                .withRegion(region)
+                .enablePathStyleAccess()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
                 .build();
